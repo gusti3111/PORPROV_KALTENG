@@ -14,6 +14,72 @@ type ScheduleEvent = {
   title: string;
 };
 
+const scheduleEvents: ScheduleEvent[] = [
+  {
+    date: "2026-11-28",
+    time: "08:00",
+    sport: "Atletik",
+    venue: "Stadion Atletik & Sport Center",
+    title: "Simulasi — Babak penyisihan",
+  },
+  {
+    date: "2026-11-28",
+    time: "10:00",
+    sport: "Bulutangkis",
+    venue: "GOR KONI",
+    title: "Simulasi — Babak penyisihan",
+  },
+  {
+    date: "2026-11-28",
+    time: "14:00",
+    sport: "Aquatik",
+    venue: "Kolam Renang",
+    title: "Simulasi — Sesi pertandingan",
+  },
+  {
+    date: "2026-11-29",
+    time: "08:30",
+    sport: "Panahan",
+    venue: "Stadion Atletik & Sport Center",
+    title: "Simulasi — Babak kualifikasi",
+  },
+  {
+    date: "2026-11-29",
+    time: "11:00",
+    sport: "Pencak Silat",
+    venue: "GOR KONI",
+    title: "Simulasi — Babak penyisihan",
+  },
+  {
+    date: "2026-11-29",
+    time: "15:00",
+    sport: "Basket",
+    venue: "Sport Center",
+    title: "Simulasi — Pertandingan penyisihan",
+  },
+  {
+    date: "2026-11-30",
+    time: "09:00",
+    sport: "Bulutangkis",
+    venue: "GOR KONI",
+    title: "Simulasi — Babak perempat final",
+  },
+  {
+    date: "2026-11-30",
+    time: "13:00",
+    sport: "Atletik",
+    venue: "Stadion Atletik & Sport Center",
+    title: "Simulasi — Final nomor lintasan",
+  },
+  {
+    date: "2026-11-30",
+    time: "16:00",
+    sport: "Aquatik",
+    venue: "Kolam Renang",
+    title: "Simulasi — Final nomor renang",
+  },
+];
+
 const firstScheduleDate = "2026-11-28";
 const lastScheduleDate = "2026-12-09";
 const modes: { id: ScheduleMode; label: string }[] = [
@@ -45,8 +111,6 @@ function getScheduleDates() {
 
 const scheduleDates = getScheduleDates();
 
-const scheduleEvents: ScheduleEvent[] = [];
-
 function formatDate(date: string, options: Intl.DateTimeFormatOptions) {
   return new Intl.DateTimeFormat("id-ID", {
     ...options,
@@ -72,9 +136,11 @@ export default function ScheduleView() {
   const selectedVenue = searchParams.get("venue") ?? "";
 
   const visibleEvents = useMemo(() => {
+    if (mode === "live") return [];
+
     const normalizedQuery = query.trim().toLocaleLowerCase("id");
     return scheduleEvents.filter((event) => {
-      const matchesDate = mode !== "harian" || event.date === selectedDate;
+      const matchesDate = mode === "kalender" || event.date === selectedDate;
       const matchesSport = !selectedSport || event.sport === selectedSport;
       const matchesVenue = !selectedVenue || event.venue === selectedVenue;
       const matchesQuery =
@@ -127,10 +193,10 @@ export default function ScheduleView() {
             tempat pertandingan.
           </p>
           <div className="schedule-source-note" role="note">
-            <strong>Jadwal sementara</strong>
+            <strong>Data simulasi — bukan jadwal resmi</strong>
             <span>
-              Rentang jadwal diperbarui menjadi 28 November–9 Desember 2026.
-              Rincian waktu dan sesi pertandingan belum tersedia.
+              Jam, cabang, dan venue berikut hanya contoh untuk pratinjau
+              tampilan. Konfirmasi jadwal resmi kepada panitia.
             </span>
           </div>
         </section>
@@ -306,7 +372,26 @@ export default function ScheduleView() {
                     : `${visibleEvents.length} sesi`}
                 </span>
               </div>
-              <ScheduleEmptyState mode={mode} />
+              {mode !== "live" && visibleEvents.length > 0 ? (
+                <div className="schedule-event-list">
+                  {visibleEvents.map((event) => (
+                    <article
+                      className="schedule-event-card"
+                      key={`${event.date}-${event.time}-${event.sport}`}
+                    >
+                      <time>{event.time}</time>
+                      <div>
+                        <strong>{event.sport}</strong>
+                        <span>{event.title}</span>
+                        <small>{event.venue}</small>
+                      </div>
+                      <span className="schedule-event-badge">SIMULASI</span>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <ScheduleEmptyState mode={mode} />
+              )}
             </section>
           )}
         </section>
@@ -329,9 +414,9 @@ function ScheduleEmptyState({ mode }: { mode: ScheduleMode }) {
           : "Rincian jadwal belum tersedia"}
       </h3>
       <p>
-        Sumber yang tersedia baru mencantumkan rentang tanggal dan tempat.
-        Jadwal sesi, jam mulai, serta pasangan atau nomor pertandingan perlu
-        diperbarui setelah dikonfirmasi panitia.
+        {mode === "live"
+          ? "Data simulasi tidak menampilkan pertandingan live. Informasi live akan tersedia setelah data resmi terhubung."
+          : "Tidak ada sesi simulasi yang cocok. Coba pilih tanggal atau filter yang lain."}
       </p>
     </div>
   );

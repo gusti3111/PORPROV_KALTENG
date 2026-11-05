@@ -82,6 +82,20 @@ npm run build
 | `GET` | `/api/v1/venues` | Daftar venue, koordinat GPS, & fasilitas |
 | `GET` | `/api/v1/contingents` | Daftar 14 Kabupaten/Kota peserta di Kalteng |
 | `GET` | `/api/v1/medals/standings` | Klasemen perolehan medali (Emas, Perak, Perunggu) |
+| `GET` | `/api/v1/medals/by-sport` | Klasemen perolehan medali per cabang olahraga |
+| `GET` | `/api/v1/matches` | Jadwal dan hasil pertandingan dengan filter opsional |
+
+Filter endpoint pertandingan: `date=YYYY-MM-DD`, `sport_id`, `venue_id`, dan
+`status` (`SCHEDULED`, `ONGOING`, `FINISHED`, `POSTPONED`, atau `CANCELLED`).
+Contoh: `/api/v1/matches?date=2026-11-28&status=FINISHED`.
+
+Halaman `/jadwal` saat ini menampilkan sesi simulasi untuk pratinjau tampilan.
+Jam, cabang, dan venue pada data tersebut bukan jadwal resmi dan harus
+dikonfirmasi panitia sebelum digunakan sebagai informasi pertandingan.
+Halaman `/hasil` memiliki tab hasil pertandingan, perolehan medali per
+kontingen, dan perolehan medali per cabang olahraga dengan data simulasi untuk
+pratinjau. Data tersebut bukan hasil resmi dan belum mengambil data dari API
+atau database.
 
 ## CI/CD ke VPS
 

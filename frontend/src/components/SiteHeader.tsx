@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import ArrowIcon from "./ArrowIcon";
 import SiteNavigation from "./SiteNavigation";
 
 export default function SiteHeader() {
@@ -21,10 +20,6 @@ export default function SiteHeader() {
       </Link>
 
       <SiteNavigation />
-
-      <Link className="header-link" to="/#informasi">
-        Pusat informasi <ArrowIcon diagonal />
-      </Link>
     </header>
   );
 }

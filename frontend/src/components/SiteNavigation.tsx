@@ -6,7 +6,7 @@ const links = [
   { label: "CABOR", to: "/cabor", active: "/cabor" },
   { label: "VENUE", to: "/venue", active: "/venue" },
   { label: "JADWAL PERTANDINGAN", to: "/jadwal", active: "/jadwal" },
-  { label: "HASIL PERTANDINGAN", to: "/#hasil" },
+  { label: "HASIL PERTANDINGAN", to: "/hasil", active: "/hasil" },
   { label: "BERITA", to: "/#informasi" },
 ];
 

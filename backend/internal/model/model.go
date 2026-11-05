@@ -43,6 +43,7 @@ const (
 	MatchStatusOngoing   MatchStatus = "ONGOING"
 	MatchStatusFinished  MatchStatus = "FINISHED"
 	MatchStatusPostponed MatchStatus = "POSTPONED"
+	MatchStatusCancelled MatchStatus = "CANCELLED"
 )
 
 type MatchParticipant struct {
@@ -78,4 +79,14 @@ type MedalStanding struct {
 	Bronze         int    `json:"bronze"`
 	Total          int    `json:"total"`
 	Rank           int    `json:"rank"`
+}
+
+type SportMedalStanding struct {
+	SportID int    `json:"sport_id"`
+	Sport   string `json:"sport"`
+	Gold    int    `json:"gold"`
+	Silver  int    `json:"silver"`
+	Bronze  int    `json:"bronze"`
+	Total   int    `json:"total"`
+	Rank    int    `json:"rank"`
 }
