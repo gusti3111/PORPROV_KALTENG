@@ -16,9 +16,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate:
-    name: Lint and build
+  validate-frontend:
+    name: Lint and build frontend
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,6 +31,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -38,10 +42,35 @@ jobs:
       - name: Type-check and build production app
         run: npm run build
 
+  validate-backend:
+    name: Test and build backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache-dependency-path: backend/go.sum
+
+      - name: Run vet
+        run: go vet ./...
+
+      - name: Run unit tests
+        run: go test -v ./...
+
+      - name: Build binary
+        run: go build -o bin/api ./cmd/api
+
   deploy:
     name: Deploy to VPS
     runs-on: ubuntu-latest
-    needs: validate
+    needs: [validate-frontend, validate-backend]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
       - name: Checkout repository
@@ -64,8 +93,10 @@ jobs:
           printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
 
-      - name: Build Docker image
-        run: docker build --tag porprov-kalteng:latest .
+      - name: Build Docker images
+        run: |
+          docker build --tag porprov-kalteng-frontend:latest ./frontend
+          docker build --tag porprov-backend:latest ./backend
 
       - name: Prepare VPS directory
         env:
@@ -76,9 +107,9 @@ jobs:
             -o BatchMode=yes \
             -o StrictHostKeyChecking=yes \
             "$VPS_USER@$VPS_HOST" \
-            'mkdir -p /opt/porprov-kalteng'
+            'mkdir -p /opt/porprov-kalteng /opt/porprov-kalteng/backend/migrations'
 
-      - name: Transfer Compose configuration
+      - name: Transfer Compose configuration & migrations
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
@@ -87,14 +118,18 @@ jobs:
             -o BatchMode=yes \
             -o StrictHostKeyChecking=yes \
             compose.yaml "$VPS_USER@$VPS_HOST:/opt/porprov-kalteng/compose.yaml"
+          scp -i ~/.ssh/id_ed25519 \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -r backend/migrations "$VPS_USER@$VPS_HOST:/opt/porprov-kalteng/backend/"
 
-      - name: Transfer Docker image
+      - name: Transfer Docker images
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
         run: |
           set -o pipefail
-          docker save porprov-kalteng:latest | gzip | ssh \
+          docker save porprov-kalteng-frontend:latest porprov-backend:latest | gzip | ssh \
             -i ~/.ssh/id_ed25519 \
             -o BatchMode=yes \
             -o StrictHostKeyChecking=yes \

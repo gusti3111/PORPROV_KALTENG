@@ -1,0 +1,3 @@
+DELETE FROM venues WHERE id IN (1, 2, 3, 4, 5);
+DELETE FROM sports WHERE id BETWEEN 1 AND 30;
+DELETE FROM contingents WHERE id BETWEEN 1 AND 14;

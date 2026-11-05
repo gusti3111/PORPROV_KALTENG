@@ -1,73 +1,91 @@
-# PORPROV XIII Kalimantan Tengah 2026
+# PORPROV XIII Kalimantan Tengah 2026 (Monorepo)
 
-Landing page portal informasi Pekan Olahraga Provinsi XIII Kalimantan Tengah
-2026, dibangun dengan React, TypeScript, Vite, dan React Router.
+Monorepo portal informasi dan sistem API Pekan Olahraga Provinsi XIII Kalimantan Tengah 2026.
 
-## Menjalankan secara lokal
+## Struktur Direktori
 
-```bash
-npm install
-npm run dev
+```text
+PORPROV_KALTENG/
+├── frontend/             # Aplikasi Web React 19 + TypeScript + Vite + React Router
+│   ├── src/              # Komponen, views, assets, dan data
+│   ├── public/           # Static icons & manifest
+│   ├── Dockerfile        # Multi-stage build Nginx
+│   └── nginx.conf        # Nginx config dengan reverse-proxy /api ke backend
+├── backend/              # RESTful API Go (Chi) + PostgreSQL (pgx/v5)
+│   ├── cmd/api/          # Entrypoint server Go
+│   ├── internal/         # Config, Database, Model, Repository, Handlers
+│   ├── migrations/       # SQL Migrations schema & seed data
+│   ├── Dockerfile        # Go multi-stage build Alpine
+│   └── .env.example      # Template konfigurasi environment
+├── compose.yaml          # Orchestration Docker (PostgreSQL, Backend API, Frontend)
+├── package.json          # Root scripts monorepo
+└── .github/workflows/    # CI/CD pipeline
 ```
 
-Buka [http://localhost:3000](http://localhost:3000) di browser.
+## Menjalankan Secara Lokal
 
-## Pemeriksaan
+### 1. Menjalankan Semua Layanan via Docker Compose (Rekomendasi)
+
+Jalankan database PostgreSQL, backend Go, dan frontend sekaligus:
 
 ```bash
+docker compose up --build
+```
+
+- **Frontend**: [http://localhost:3001](http://localhost:3001)
+- **Backend API**: [http://localhost:8081/api/v1](http://localhost:8081/api/v1)
+- **API Health Check**: [http://localhost:8081/healthz](http://localhost:8081/healthz)
+- **PostgreSQL**: `localhost:5432` (db: `porprov_kalteng`, user: `postgres`, pass: `postgres`)
+
+### 2. Menjalankan Per Service Manual
+
+#### Frontend
+```bash
+npm run dev:frontend
+# atau
+cd frontend && npm install && npm run dev
+```
+
+Buka [http://localhost:3000](http://localhost:3000). Request ke `/api` akan otomatis di-*proxy* ke `http://localhost:8080`.
+
+#### Backend (Go)
+Pastikan Go 1.24+ terpasang:
+```bash
+npm run dev:backend
+# atau
+cd backend
+go run ./cmd/api
+```
+
+## Pemeriksaan & Pengujian
+
+Jalankan pengujian dan build dari root:
+
+```bash
+# Linting frontend (ESLint) & backend (go vet)
 npm run lint
+
+# Unit test backend
+npm run test
+
+# Production build kedua service
 npm run build
 ```
 
-GitHub Actions menjalankan lint, type-check, dan production build pada setiap
-pull request ke `master` serta setiap push ke `master`.
+## Endpoint API Backend (`/api/v1`)
 
-## CD ke VPS dengan Docker
+| Method | Endpoint | Deskripsi |
+| :--- | :--- | :--- |
+| `GET` | `/healthz` | Status server & koneksi database |
+| `GET` | `/api/v1/sports` | Daftar seluruh Cabang Olahraga (Utama & Eksebisi) |
+| `GET` | `/api/v1/sports/{id}` | Detail Cabor berdasarkan ID |
+| `GET` | `/api/v1/venues` | Daftar venue, koordinat GPS, & fasilitas |
+| `GET` | `/api/v1/contingents` | Daftar 14 Kabupaten/Kota peserta di Kalteng |
+| `GET` | `/api/v1/medals/standings` | Klasemen perolehan medali (Emas, Perak, Perunggu) |
 
-Setelah job CI berhasil pada push ke `master`, GitHub Actions membangun image
-Docker, mengirimnya ke VPS melalui SSH, lalu menjalankan ulang container Nginx
-yang menyajikan aplikasi React statis.
-Pull request hanya menjalankan CI dan tidak melakukan deployment.
+## CI/CD ke VPS
 
-Siapkan VPS dengan Docker Engine dan Docker Compose plugin. Buat GitHub Actions
-repository secrets berikut:
-
-- `VPS_HOST`: alamat IP atau hostname VPS.
-- `VPS_USER`: user SSH yang boleh menjalankan Docker.
-- `VPS_SSH_KEY`: private SSH key untuk user tersebut.
-- `VPS_KNOWN_HOSTS`: baris host key VPS yang sudah diverifikasi.
-
-Siapkan direktori deployment dan akses Docker untuk user SSH di VPS:
-
-```bash
-sudo mkdir -p /opt/porprov-kalteng
-sudo chown "$USER":"$USER" /opt/porprov-kalteng
-```
-
-Pastikan user SSH dapat menjalankan `docker compose` tanpa prompt `sudo`.
-Deployment berjalan otomatis setelah CI berhasil pada push ke `master`.
-
-Container akan mendengarkan pada port `3000`. Untuk akses publik, arahkan domain
-dan HTTPS melalui reverse proxy seperti Caddy atau Nginx. Jangan menyimpan
-private key atau host key yang belum diverifikasi di repository.
-
-Daftar venue pada halaman `/venue` disalin dari revisi jadwal sementara yang
-diberikan. Peta Leaflet memakai OpenStreetMap; pin adalah perkiraan area
-Pangkalan Bun karena sumber tidak menyertakan alamat atau koordinat resmi.
-Peta memerlukan koneksi internet untuk memuat ubin OpenStreetMap. Konfirmasi
-lokasi venue kepada panitia sebelum berkunjung.
-Halaman `/jadwal` memakai rentang 28 November–9 Desember 2026 sesuai pembaruan
-terbaru. Jam dan sesi pertandingan belum tersedia dan tidak ditampilkan
-sebagai jadwal resmi. Hasil pertandingan dan informasi resmi lain akan
-diperbarui saat data penyelenggara tersedia.
-
-## Mengatur tanggal countdown
-
-Countdown memakai `VITE_EVENT_START_AT` dalam format ISO 8601 dan zona
-waktu WIB. Secara default tanggalnya 28 November 2026 pukul 00.00 WIB sebagai
-tanggal sementara. Atur nilai berikut di `.env.local` setelah jadwal resmi
-diumumkan:
-
-```env
-VITE_EVENT_START_AT=2026-11-28T00:00:00+07:00
-```
+Pipeline GitHub Actions (`.github/workflows/ci.yml`):
+1. **validate-frontend**: Menjalankan lint, type-check, dan production build React di `frontend/`.
+2. **validate-backend**: Menjalankan `go vet`, unit tests, dan `go build` di `backend/`.
+3. **deploy**: Membangun image Docker frontend & backend, mentransfer image dan migrasi ke VPS via SSH, lalu me-restart `docker compose`.

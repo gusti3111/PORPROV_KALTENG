@@ -1,7 +1,52 @@
 services:
-  web:
-    image: porprov-kalteng:latest
-    container_name: porprov-kalteng
+  postgres:
+    image: postgres:16-alpine
+    container_name: porprov-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: porprov_kalteng
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d porprov_kalteng"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: porprov-backend:latest
+    container_name: porprov-backend
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "8081:8080"
+    environment:
+      PORT: 8080
+      APP_ENV: production
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/porprov_kalteng?sslmode=disable
+      ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: porprov-kalteng-frontend:latest
+    container_name: porprov-kalteng-frontend
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
