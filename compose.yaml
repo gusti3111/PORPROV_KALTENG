@@ -1,0 +1,7 @@
+services:
+  web:
+    image: porprov-kalteng:latest
+    container_name: porprov-kalteng
+    restart: unless-stopped
+    ports:
+      - "3000:80"

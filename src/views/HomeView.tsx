@@ -1,65 +1,39 @@
-import Countdown from "./countdown";
-import { EVENT_START_LABEL } from "./event-config";
-import SiteNavigation from "./site-navigation";
+import { Link } from "react-router-dom";
+import ArrowIcon from "../components/ArrowIcon";
+import EventCountdown from "../components/EventCountdown";
+import SiteFooter from "../components/SiteFooter";
+import SiteHeader from "../components/SiteHeader";
+import { EVENT_START_LABEL } from "../event-config";
 
-const sports = [
+const homeSports = [
   "Atletik",
   "Bola voli",
   "Bulu tangkis",
-  /*"Sepak bola",*/
   "Renang",
   "Pencak Silat",
   "Tenis Meja",
   "Skateboard",
-  /* "Roller Sport", */
   "Kick Boxing",
   "Teqball",
   "Muaythai",
 ];
 
-function ArrowIcon({ diagonal = false }: { diagonal?: boolean }) {
-  return (
-    <svg
-      aria-hidden="true"
-      className="arrow-icon"
-      viewBox="0 0 20 20"
-      fill="none"
-    >
-      {diagonal ? (
-        <path d="M5 15 15 5M6 5h9v9" />
-      ) : (
-        <path d="M3.5 10h13m-5-5 5 5-5 5" />
-      )}
-    </svg>
-  );
-}
-
-export default function Home() {
+export default function HomeView() {
   return (
     <>
-      <header className="site-header">
-        <a className="brand" href="#beranda" aria-label="PORPROV XIII Kalteng">
-          <span className="brand-mark" aria-hidden="true">
-            P<span>13</span>
-          </span>
-          <span className="brand-copy">
-            <strong>PORPROV</strong>
-            <small>KALIMANTAN TENGAH</small>
-          </span>
-        </a>
-
-        <SiteNavigation />
-
-        <a className="header-link" href="#informasi">
-          Pusat informasi <ArrowIcon diagonal />
-        </a>
-      </header>
+      <SiteHeader />
 
       <main>
-        <section className="hero" id="beranda">
+        <section id="beranda" className="hero">
           <div className="hero-grid" aria-hidden="true" />
-          <div className="hero-orbit hero-orbit-one" aria-hidden="true" />
-          <div className="hero-orbit hero-orbit-two" aria-hidden="true" />
+          <div
+            className="hero-orbit hero-orbit-one"
+            aria-hidden="true"
+          />
+          <div
+            className="hero-orbit hero-orbit-two"
+            aria-hidden="true"
+          />
 
           <div className="hero-content">
             <p className="eyebrow hero-eyebrow">
@@ -80,9 +54,9 @@ export default function Home() {
               <a className="button button-light" href="#tentang">
                 Jelajahi PORPROV <ArrowIcon />
               </a>
-              <a className="text-link" href="/cabor">
+              <Link className="text-link" to="/cabor">
                 Kenali cabang olahraga
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -103,7 +77,9 @@ export default function Home() {
               <span className="art-label-line" />
               Pekan Olahraga Provinsi
             </div>
-            <span className="art-index">13<span>/XV</span></span>
+            <span className="art-index">
+              13<span>/XV</span>
+            </span>
           </div>
 
           <div className="hero-bottom">
@@ -112,7 +88,9 @@ export default function Home() {
             <span>PERSAUDARAAN</span>
             <span className="hero-bottom-star">✳</span>
             <span>PRESTASI</span>
-            <span className="hero-bottom-location">KALIMANTAN TENGAH, INDONESIA</span>
+            <span className="hero-bottom-location">
+              KALIMANTAN TENGAH, INDONESIA
+            </span>
           </div>
         </section>
 
@@ -125,13 +103,13 @@ export default function Home() {
             <h2 id="countdown-title">Menuju pembukaan</h2>
             <p className="countdown-date">{EVENT_START_LABEL}</p>
           </div>
-          <Countdown />
+          <EventCountdown />
           <p className="countdown-note">
             Tanggal sementara, sesuaikan dengan jadwal resmi PORPROV XIII.
           </p>
         </section>
 
-        <section className="intro section-wrap" id="tentang">
+        <section id="tentang" className="intro section-wrap">
           <div className="section-kicker">
             <span>01</span>
             <span>TENTANG PORPROV</span>
@@ -156,7 +134,9 @@ export default function Home() {
           </div>
           <div className="intro-stats" aria-label="Informasi acara">
             <div>
-              <strong>13<span>th</span></strong>
+              <strong>
+                13<span>th</span>
+              </strong>
               <small>EDISI PORPROV</small>
             </div>
             <div>
@@ -170,43 +150,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* <section className="information" id="informasi">
-          <div className="section-wrap information-inner">
-            <div className="section-kicker section-kicker-light">
-              <span>02</span>
-              <span>JELAJAHI PORPROV</span>
-            </div>
-            <div className="information-heading">
-              <h2>
-                Semua yang perlu
-                <br />
-                <span>kamu ketahui.</span>
-              </h2>
-              <p>
-                Satu tempat untuk mengikuti pertandingan dan kabar terbaru
-                PORPROV XIII Kalimantan Tengah 2026.
-              </p>
-            </div>
 
-            <div className="highlight-grid">
-              {highlights.map((item) => (
-                <a className="highlight-card" href={item.href} key={item.number}>
-                  <div className="card-topline">
-                    <span>{item.number} / 03</span>
-                    <ArrowIcon diagonal />
-                  </div>
-                  <div>
-                    <span className="card-label">{item.label}</span>
-                    <h3>{item.title}</h3>
-                    <p>{item.description}</p>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
-        </section> */}
-
-        <section className="sports section-wrap" id="cabang-olahraga">
+        <section id="cabang-olahraga" className="sports section-wrap">
           <div className="section-kicker">
             <span>03</span>
             <span>ARENA PARA JUARA</span>
@@ -223,13 +168,16 @@ export default function Home() {
                 dari seluruh Kalimantan Tengah. Daftar cabang dan detail
                 pertandingan akan diumumkan melalui kanal resmi.
               </p>
-              <a className="inline-link" href="#informasi">
-                Lihat pembaruan <ArrowIcon diagonal />
-              </a>
+              <Link className="inline-link" to="/cabor">
+                Lihat cabang olahraga <ArrowIcon diagonal />
+              </Link>
+              <Link className="inline-link" to="/venue">
+                Lihat venue pertandingan <ArrowIcon diagonal />
+              </Link>
             </div>
             <div className="sports-list" aria-label="Contoh cabang olahraga">
-              {sports.map((sport, index) => (
-                <div className="sport-item" key={sport}>
+              {homeSports.map((sport, index) => (
+                <div key={sport} className="sport-item">
                   <span className="sport-number">
                     {String(index + 1).padStart(2, "0")}
                   </span>
@@ -267,24 +215,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="site-footer">
-        <a className="brand footer-brand" href="#beranda">
-          <span className="brand-mark" aria-hidden="true">
-            P<span>13</span>
-          </span>
-          <span className="brand-copy">
-            <strong>PORPROV</strong>
-            <small>KALIMANTAN TENGAH</small>
-          </span>
-        </a>
-        <p>PORPROV XIII Kalimantan Tengah 2026</p>
-        <a className="footer-top" href="#beranda">
-          KEMBALI KE ATAS <ArrowIcon diagonal />
-        </a>
-        <span className="footer-note">
-          Informasi resmi akan diperbarui oleh penyelenggara.
-        </span>
-      </footer>
+      <SiteFooter />
     </>
   );
 }

@@ -1,5 +1,5 @@
 export const EVENT_START_AT =
-  process.env.NEXT_PUBLIC_EVENT_START_AT ?? "2026-11-28T00:00:00+07:00";
+  import.meta.env.VITE_EVENT_START_AT || "2026-11-28T00:00:00+07:00";
 
 export const EVENT_START_DATE = new Date(EVENT_START_AT);
 
