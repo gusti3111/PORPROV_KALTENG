@@ -1,8 +1,25 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
-import { sports } from "../data/sports";
+import { useCompetitionStore } from "../stores/competitionStore";
 
 type ResultsTab = "matches" | "medals" | "sports";
 
@@ -12,119 +29,37 @@ type MatchResult = {
   event: string;
   venue: string;
   home: string;
-  homeScore: number;
+  homeScore: string;
+  homeWinner: boolean;
   away: string;
-  awayScore: number;
+  awayScore: string;
+  awayWinner: boolean;
 };
 
-type MedalStanding = {
-  contingent: string;
-  gold: number;
-  silver: number;
-  bronze: number;
+type MedalType = "gold" | "silver" | "bronze";
+
+const medalLabels: Record<MedalType, string> = {
+  gold: "emas",
+  silver: "perak",
+  bronze: "perunggu",
 };
 
-type SportMedalStanding = {
-  sport: string;
-  gold: number;
-  silver: number;
-  bronze: number;
-};
-
-const results: MatchResult[] = [
-  {
-    date: "2026-11-28",
-    sport: "Bulutangkis",
-    event: "Tunggal putra · Babak penyisihan",
-    venue: "GOR KONI",
-    home: "Kotawaringin Barat",
-    homeScore: 2,
-    away: "Kapuas",
-    awayScore: 0,
-  },
-  {
-    date: "2026-11-28",
-    sport: "Basket",
-    event: "Putra · Babak penyisihan",
-    venue: "Sport Center",
-    home: "Kota Palangka Raya",
-    homeScore: 68,
-    away: "Kotawaringin Timur",
-    awayScore: 61,
-  },
-  {
-    date: "2026-11-29",
-    sport: "Pencak Silat",
-    event: "Kelas tanding · Babak penyisihan",
-    venue: "GOR KONI",
-    home: "Kapuas",
-    homeScore: 3,
-    away: "Barito Selatan",
-    awayScore: 1,
-  },
-  {
-    date: "2026-11-29",
-    sport: "Sepak Bola Mini",
-    event: "Putra · Babak penyisihan",
-    venue: "Stadion Sampuraga",
-    home: "Lamandau",
-    homeScore: 2,
-    away: "Sukamara",
-    awayScore: 2,
-  },
-  {
-    date: "2026-11-30",
-    sport: "Atletik",
-    event: "Final · 100 meter putra",
-    venue: "Stadion Atletik & Sport Center",
-    home: "Kotawaringin Timur",
-    homeScore: 1,
-    away: "Kota Palangka Raya",
-    awayScore: 2,
-  },
-  {
-    date: "2026-11-30",
-    sport: "Tenis Meja",
-    event: "Beregu putri · Semifinal",
-    venue: "Aula Dispora Kobar",
-    home: "Barito Utara",
-    homeScore: 3,
-    away: "Seruyan",
-    awayScore: 1,
-  },
-];
-
-const medalStandings: MedalStanding[] = [
-  { contingent: "Kota Palangka Raya", gold: 5, silver: 3, bronze: 4 },
-  { contingent: "Kotawaringin Barat", gold: 4, silver: 5, bronze: 2 },
-  { contingent: "Kotawaringin Timur", gold: 3, silver: 2, bronze: 5 },
-  { contingent: "Kapuas", gold: 2, silver: 3, bronze: 3 },
-  { contingent: "Barito Utara", gold: 2, silver: 1, bronze: 2 },
-  { contingent: "Lamandau", gold: 1, silver: 2, bronze: 1 },
-  { contingent: "Seruyan", gold: 1, silver: 1, bronze: 2 },
-  { contingent: "Sukamara", gold: 0, silver: 2, bronze: 1 },
-];
-
-const sportMedalStandings: SportMedalStanding[] = [
-  { sport: "Atletik", gold: 4, silver: 3, bronze: 2 },
-  { sport: "Bulutangkis", gold: 3, silver: 4, bronze: 2 },
-  { sport: "Aquatik", gold: 3, silver: 3, bronze: 5 },
-  { sport: "Basket", gold: 2, silver: 2, bronze: 3 },
-  { sport: "Pencak Silat", gold: 2, silver: 3, bronze: 3 },
-  { sport: "Sepak Bola Mini", gold: 2, silver: 2, bronze: 2 },
-  { sport: "Tenis Meja", gold: 2, silver: 2, bronze: 3 },
-];
-
-const resultDates = ["2026-11-28", "2026-11-29", "2026-11-30"];
-const medalTotals = medalStandings.reduce(
-  (totals, standing) => ({
-    gold: totals.gold + standing.gold,
-    silver: totals.silver + standing.silver,
-    bronze: totals.bronze + standing.bronze,
-  }),
-  { gold: 0, silver: 0, bronze: 0 },
-);
-const totalMedals = medalTotals.gold + medalTotals.silver + medalTotals.bronze;
+function MedalCircle({
+  count,
+  type,
+}: {
+  count: number;
+  type: MedalType;
+}) {
+  return (
+    <span
+      className={`medal-circle medal-circle-${type}`}
+      aria-label={`${count} medali ${medalLabels[type]}`}
+    >
+      {count}
+    </span>
+  );
+}
 
 function formatDate(date: string, options: Intl.DateTimeFormatOptions = {}) {
   return new Intl.DateTimeFormat("id-ID", {
@@ -137,10 +72,93 @@ function formatDate(date: string, options: Intl.DateTimeFormatOptions = {}) {
 }
 
 export default function ResultsView() {
+  const matches = useCompetitionStore((state) => state.matches);
+  const sports = useCompetitionStore((state) => state.sports);
+  const medalStandings = useCompetitionStore((state) => state.medalStandings);
+  const sportMedalStandings = useCompetitionStore(
+    (state) => state.sportMedalStandings,
+  );
+  const loadingMatches = useCompetitionStore(
+    (state) => state.loading.matches,
+  );
+  const loadingMedals = useCompetitionStore((state) => state.loading.medals);
+  const loadingSportMedals = useCompetitionStore(
+    (state) => state.loading.sportMedals,
+  );
+  const matchesError = useCompetitionStore((state) => state.errors.matches);
+  const sportsError = useCompetitionStore((state) => state.errors.sports);
+  const medalsError = useCompetitionStore((state) => state.errors.medals);
+  const sportMedalsError = useCompetitionStore(
+    (state) => state.errors.sportMedals,
+  );
+  const fetchMatches = useCompetitionStore((state) => state.fetchMatches);
+  const fetchSports = useCompetitionStore((state) => state.fetchSports);
+  const fetchMedalStandings = useCompetitionStore(
+    (state) => state.fetchMedalStandings,
+  );
+  const fetchSportMedalStandings = useCompetitionStore(
+    (state) => state.fetchSportMedalStandings,
+  );
   const [activeTab, setActiveTab] = useState<ResultsTab>("matches");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSport, setSelectedSport] = useState("");
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    void fetchMatches();
+    void fetchSports();
+    void fetchMedalStandings();
+    void fetchSportMedalStandings();
+  }, [
+    fetchMatches,
+    fetchMedalStandings,
+    fetchSportMedalStandings,
+    fetchSports,
+  ]);
+
+  const results = useMemo<MatchResult[]>(
+    () =>
+      matches
+        .filter(
+          (match) =>
+            match.status === "FINISHED" && match.participants.length > 0,
+        )
+        .map((match) => {
+          const home = match.participants[0];
+          const away = match.participants[1];
+          return {
+            date: match.date,
+            sport: match.sport_name,
+            event: match.event_name,
+            venue: match.venue_name,
+            home: home.contingent_name,
+            homeScore: home.score,
+            homeWinner: home.is_winner,
+            away: away?.contingent_name ?? "Belum ditentukan",
+            awayScore: away?.score ?? "—",
+            awayWinner: away?.is_winner ?? false,
+          };
+        }),
+    [matches],
+  );
+  const resultDates = useMemo(
+    () => [...new Set(results.map((result) => result.date))].sort(),
+    [results],
+  );
+  const medalTotals = useMemo(
+    () =>
+      medalStandings.reduce(
+        (totals, standing) => ({
+          gold: totals.gold + standing.gold,
+          silver: totals.silver + standing.silver,
+          bronze: totals.bronze + standing.bronze,
+        }),
+        { gold: 0, silver: 0, bronze: 0 },
+      ),
+    [medalStandings],
+  );
+  const totalMedals =
+    medalTotals.gold + medalTotals.silver + medalTotals.bronze;
 
   const visibleResults = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("id");
@@ -154,7 +172,7 @@ export default function ResultsView() {
           .includes(normalizedQuery);
       return matchesDate && matchesSport && matchesQuery;
     });
-  }, [query, selectedDate, selectedSport]);
+  }, [query, results, selectedDate, selectedSport]);
 
   return (
     <>
@@ -177,7 +195,7 @@ export default function ResultsView() {
             Rekap hasil pertandingan dan perolehan medali PORPROV XIII
             Kalimantan Tengah.
           </p>
-          <div className="results-total" aria-label={`${totalMedals} medali simulasi`}>
+          <Card className="results-total flex-row" aria-label={`${totalMedals} medali`}>
             <div className="results-total-icon" aria-hidden="true">
               XIII
             </div>
@@ -185,91 +203,143 @@ export default function ResultsView() {
               <strong>{totalMedals}</strong>
               <span>medali tercatat</span>
             </div>
-            <span className="results-simulation-badge">DATA SIMULASI</span>
-          </div>
+            <Badge variant="secondary" className="results-simulation-badge">
+              DARI BACKEND
+            </Badge>
+          </Card>
         </section>
 
         <section className="results-content section-wrap" aria-label="Rekap hasil">
-          <div className="results-tabs" role="tablist" aria-label="Kategori hasil">
-            <button
+          <Tabs
+            value={activeTab}
+            className="w-full"
+            onValueChange={(value) => {
+              if (value === "matches" || value === "medals" || value === "sports") {
+                setActiveTab(value);
+              }
+            }}
+          >
+          <TabsList
+            variant="line"
+            className="results-tabs"
+            aria-label="Kategori hasil"
+          >
+            <TabsTrigger
               id="results-tab-matches"
-              type="button"
-              role="tab"
-              aria-selected={activeTab === "matches"}
               aria-controls="results-panel-matches"
-              className={activeTab === "matches" ? "is-active" : ""}
-              onClick={() => setActiveTab("matches")}
+              value="matches"
             >
               Hasil pertandingan
-              <span>{results.length}</span>
-            </button>
-            <button
+              <Badge variant="secondary">{results.length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger
               id="results-tab-medals"
-              type="button"
-              role="tab"
-              aria-selected={activeTab === "medals"}
               aria-controls="results-panel-medals"
-              className={activeTab === "medals" ? "is-active" : ""}
-              onClick={() => setActiveTab("medals")}
+              value="medals"
             >
               Perolehan medali per kontingen
-            </button>
-            <button
+            </TabsTrigger>
+            <TabsTrigger
               id="results-tab-sports"
-              type="button"
-              role="tab"
-              aria-selected={activeTab === "sports"}
               aria-controls="results-panel-sports"
-              className={activeTab === "sports" ? "is-active" : ""}
-              onClick={() => setActiveTab("sports")}
+              value="sports"
             >
               Perolehan medali per cabor
-            </button>
-          </div>
+            </TabsTrigger>
+          </TabsList>
 
           <div className="results-demo-note" role="note">
-            Contoh tampilan dengan data simulasi. Skor dan medali bukan hasil
-            resmi penyelenggara.
+            Data diambil dari backend. Seed yang tersedia saat ini adalah data
+            simulasi dan bukan hasil resmi penyelenggara.
           </div>
 
+          {(matchesError || sportsError || medalsError || sportMedalsError) && (
+            <div className="results-demo-note" role="alert">
+              Gagal memuat sebagian data:{" "}
+              {[matchesError, sportsError, medalsError, sportMedalsError]
+                .filter(Boolean)
+                .join("; ")}
+              {matchesError && (
+                <Button type="button" variant="outline" size="sm" onClick={() => void fetchMatches()}>
+                  Muat ulang pertandingan
+                </Button>
+              )}
+              {medalsError && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void fetchMedalStandings()}
+                >
+                  Muat ulang medali kontingen
+                </Button>
+              )}
+              {sportsError && (
+                <Button type="button" variant="outline" size="sm" onClick={() => void fetchSports()}>
+                  Muat ulang cabang olahraga
+                </Button>
+              )}
+              {sportMedalsError && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void fetchSportMedalStandings()}
+                >
+                  Muat ulang medali cabor
+                </Button>
+              )}
+            </div>
+          )}
+
           {activeTab === "matches" ? (
-            <div
-              id="results-panel-matches"
-              role="tabpanel"
-              aria-labelledby="results-tab-matches"
-            >
+            <TabsContent value="matches" id="results-panel-matches">
               <div className="results-filters">
                 <label>
                   <span>Tanggal pertandingan</span>
-                  <select
-                    value={selectedDate}
-                    onChange={(event) => setSelectedDate(event.target.value)}
+                  <Select
+                    value={selectedDate || "all"}
+                    onValueChange={(value) =>
+                      setSelectedDate(value && value !== "all" ? value : "")
+                    }
                   >
-                    <option value="">Semua tanggal</option>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Pilih tanggal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua tanggal</SelectItem>
                     {resultDates.map((date) => (
-                      <option key={date} value={date}>
+                      <SelectItem key={date} value={date}>
                         {formatDate(date, { weekday: "long" })}
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
+                    </SelectContent>
+                  </Select>
                 </label>
                 <label>
                   <span>Cabang olahraga</span>
-                  <select
-                    value={selectedSport}
-                    onChange={(event) => setSelectedSport(event.target.value)}
+                  <Select
+                    value={selectedSport || "all"}
+                    onValueChange={(value) =>
+                      setSelectedSport(value && value !== "all" ? value : "")
+                    }
                   >
-                    <option value="">Semua cabang olahraga</option>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Pilih cabang olahraga" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua cabang olahraga</SelectItem>
                     {sports.map((sport) => (
-                      <option key={sport.name} value={sport.name}>
+                      <SelectItem key={sport.name} value={sport.name}>
                         {sport.name}
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
+                    </SelectContent>
+                  </Select>
                 </label>
                 <label>
                   <span>Cari pertandingan atau kontingen</span>
-                  <input
+                  <Input
                     type="search"
                     placeholder="Ketik nama pertandingan..."
                     value={query}
@@ -278,15 +348,18 @@ export default function ResultsView() {
                 </label>
               </div>
 
-              <div className="results-list" aria-live="polite">
-                {visibleResults.length > 0 ? (
+              <Card className="results-list gap-0 p-0" aria-live="polite">
+                {loadingMatches ? (
+                  <p role="status">Memuat hasil pertandingan...</p>
+                ) : visibleResults.length > 0 ? (
                   visibleResults.map((result) => {
-                    const homeWon = result.homeScore > result.awayScore;
-                    const awayWon = result.awayScore > result.homeScore;
+                    const homeWon = result.homeWinner;
+                    const awayWon = result.awayWinner;
                     return (
-                      <article
+                      <Card
                         className="result-card"
                         key={`${result.date}-${result.sport}-${result.event}`}
+                        role="article"
                       >
                         <div className="result-card-heading">
                           <div>
@@ -320,11 +393,11 @@ export default function ResultsView() {
                         </div>
                         <div className="result-card-footer">
                           <span>{result.venue}</span>
-                          <span className="result-simulation-badge">
-                            SIMULASI
-                          </span>
+                          <Badge variant="secondary" className="result-simulation-badge">
+                            DATA SIMULASI
+                          </Badge>
                         </div>
-                      </article>
+                      </Card>
                     );
                   })
                 ) : (
@@ -332,127 +405,167 @@ export default function ResultsView() {
                     Belum ada hasil yang sesuai dengan filter.
                   </div>
                 )}
-              </div>
-            </div>
+              </Card>
+            </TabsContent>
           ) : activeTab === "medals" ? (
-            <div
+            <TabsContent
+              value="medals"
               id="results-panel-medals"
-              role="tabpanel"
-              aria-labelledby="results-tab-medals"
               className="medals-panel"
             >
-              <div className="medal-totals" aria-label="Jumlah medali simulasi">
-                <span>
-                  <strong>{medalTotals.gold}</strong> Emas
-                </span>
-                <span>
-                  <strong>{medalTotals.silver}</strong> Perak
-                </span>
-                <span>
-                  <strong>{medalTotals.bronze}</strong> Perunggu
-                </span>
-              </div>
-              <div className="medal-table-wrap">
-                <table className="medal-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Peringkat</th>
-                      <th scope="col">Kontingen</th>
-                      <th scope="col">Emas</th>
-                      <th scope="col">Perak</th>
-                      <th scope="col">Perunggu</th>
-                      <th scope="col">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {medalStandings.map((standing, index) => (
-                      <tr key={standing.contingent}>
-                        <td>{String(index + 1).padStart(2, "0")}</td>
-                        <th scope="row">{standing.contingent}</th>
-                        <td>{standing.gold}</td>
-                        <td>{standing.silver}</td>
-                        <td>{standing.bronze}</td>
-                        <td>
-                          {standing.gold + standing.silver + standing.bronze}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+              {loadingMedals ? (
+                <p role="status">Memuat klasemen medali...</p>
+              ) : (
+                <>
+                  <div className="medal-totals" aria-label="Jumlah medali">
+                    <div className="medal-total-item">
+                      <MedalCircle count={medalTotals.gold} type="gold" />
+                      <span>Emas</span>
+                    </div>
+                    <div className="medal-total-item">
+                      <MedalCircle count={medalTotals.silver} type="silver" />
+                      <span>Perak</span>
+                    </div>
+                    <div className="medal-total-item">
+                      <MedalCircle count={medalTotals.bronze} type="bronze" />
+                      <span>Perunggu</span>
+                    </div>
+                  </div>
+                  <div className="medal-table-wrap">
+                    <table className="medal-table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Peringkat</th>
+                          <th scope="col">Kontingen</th>
+                          <th scope="col">Emas</th>
+                          <th scope="col">Perak</th>
+                          <th scope="col">Perunggu</th>
+                          <th scope="col">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {medalStandings.map((standing) => (
+                          <tr key={standing.contingent_id}>
+                            <td>{String(standing.rank).padStart(2, "0")}</td>
+                            <th scope="row">{standing.contingent_name}</th>
+                            <td>
+                              <MedalCircle
+                                count={standing.gold}
+                                type="gold"
+                              />
+                            </td>
+                            <td>
+                              <MedalCircle
+                                count={standing.silver}
+                                type="silver"
+                              />
+                            </td>
+                            <td>
+                              <MedalCircle
+                                count={standing.bronze}
+                                type="bronze"
+                              />
+                            </td>
+                            <td>{standing.total}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </TabsContent>
           ) : (
-            <div
+            <TabsContent
+              value="sports"
               id="results-panel-sports"
-              role="tabpanel"
-              aria-labelledby="results-tab-sports"
               className="medals-panel"
             >
               <div className="medal-sport-summary">
                 <strong>{sportMedalStandings.length} cabang olahraga</strong>
-                <span>Perolehan medali simulasi per cabang</span>
+                <span>Perolehan medali dari backend per cabang</span>
               </div>
-              <div className="medal-table-wrap">
-                <table className="medal-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Cabang olahraga</th>
-                      <th scope="col">Emas</th>
-                      <th scope="col">Perak</th>
-                      <th scope="col">Perunggu</th>
-                      <th scope="col">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sportMedalStandings.map((standing) => (
-                      <tr key={standing.sport}>
-                        <th scope="row">{standing.sport}</th>
-                        <td>{standing.gold}</td>
-                        <td>{standing.silver}</td>
-                        <td>{standing.bronze}</td>
+              {loadingSportMedals ? (
+                <p role="status">Memuat medali per cabang olahraga...</p>
+              ) : (
+                <div className="medal-table-wrap">
+                  <table className="medal-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Cabang olahraga</th>
+                        <th scope="col">Emas</th>
+                        <th scope="col">Perak</th>
+                        <th scope="col">Perunggu</th>
+                        <th scope="col">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sportMedalStandings.map((standing) => (
+                        <tr key={standing.sport_id}>
+                          <th scope="row">{standing.sport}</th>
+                          <td>
+                            <MedalCircle count={standing.gold} type="gold" />
+                          </td>
+                          <td>
+                            <MedalCircle
+                              count={standing.silver}
+                              type="silver"
+                            />
+                          </td>
+                          <td>
+                            <MedalCircle
+                              count={standing.bronze}
+                              type="bronze"
+                            />
+                          </td>
+                          <td>{standing.total}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th scope="row">Total</th>
                         <td>
-                          {standing.gold + standing.silver + standing.bronze}
+                          <MedalCircle
+                            count={sportMedalStandings.reduce(
+                              (total, standing) => total + standing.gold,
+                              0,
+                            )}
+                            type="gold"
+                          />
+                        </td>
+                        <td>
+                          <MedalCircle
+                            count={sportMedalStandings.reduce(
+                              (total, standing) => total + standing.silver,
+                              0,
+                            )}
+                            type="silver"
+                          />
+                        </td>
+                        <td>
+                          <MedalCircle
+                            count={sportMedalStandings.reduce(
+                              (total, standing) => total + standing.bronze,
+                              0,
+                            )}
+                            type="bronze"
+                          />
+                        </td>
+                        <td>
+                          {sportMedalStandings.reduce(
+                            (total, standing) => total + standing.total,
+                            0,
+                          )}
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <th scope="row">Total</th>
-                      <td>
-                        {sportMedalStandings.reduce(
-                          (total, standing) => total + standing.gold,
-                          0,
-                        )}
-                      </td>
-                      <td>
-                        {sportMedalStandings.reduce(
-                          (total, standing) => total + standing.silver,
-                          0,
-                        )}
-                      </td>
-                      <td>
-                        {sportMedalStandings.reduce(
-                          (total, standing) => total + standing.bronze,
-                          0,
-                        )}
-                      </td>
-                      <td>
-                        {sportMedalStandings.reduce(
-                          (total, standing) =>
-                            total +
-                            standing.gold +
-                            standing.silver +
-                            standing.bronze,
-                          0,
-                        )}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
+                    </tfoot>
+                  </table>
+                </div>
+              )}
+            </TabsContent>
           )}
+          </Tabs>
         </section>
       </main>
 

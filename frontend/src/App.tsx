@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import CaborView from "./views/CaborView";
 import HomeView from "./views/HomeView";
+import Newsview from "./views/Newsview";
 import ResultsView from "./views/ResultsView";
 import ScheduleView from "./views/ScheduleView";
 import VenueView from "./views/VenueView";
@@ -20,6 +21,7 @@ function RouteEffects() {
     const isVenue = pathname === "/venue";
     const isSchedule = pathname === "/jadwal";
     const isResults = pathname === "/hasil";
+    const isNews = pathname === "/berita";
     document.title = isCabor
       ? "Cabang Olahraga | PORPROV XIII Kalimantan Tengah 2026"
       : isVenue
@@ -28,6 +30,8 @@ function RouteEffects() {
           ? "Jadwal Pertandingan | PORPROV XIII Kalimantan Tengah 2026"
           : isResults
             ? "Hasil Pertandingan | PORPROV XIII Kalimantan Tengah 2026"
+            : isNews
+              ? "Berita | PORPROV XIII Kalimantan Tengah 2026"
         : "PORPROV XIII Kalimantan Tengah 2026";
     document
       .querySelector('meta[name="description"]')
@@ -41,6 +45,8 @@ function RouteEffects() {
               ? "Jadwal harian PORPROV XIII Kalimantan Tengah 2026."
               : isResults
                 ? "Rekap hasil pertandingan PORPROV XIII Kalimantan Tengah 2026."
+                : isNews
+                  ? "Berita dan informasi PORPROV XIII Kalimantan Tengah 2026."
             : "Portal informasi Pekan Olahraga Provinsi XIII Kalimantan Tengah 2026.",
       );
 
@@ -68,6 +74,7 @@ export default function App() {
         <Route path="/venue" element={<VenueView />} />
         <Route path="/jadwal" element={<ScheduleView />} />
         <Route path="/hasil" element={<ResultsView />} />
+        <Route path="/berita" element={<Newsview />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

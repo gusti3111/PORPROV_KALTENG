@@ -1,9 +1,21 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
-import { sports } from "../data/sports";
-import { venues } from "../data/venues";
+import { useCompetitionStore } from "../stores/competitionStore";
+import { SlidersHorizontal } from "lucide-react";
 
 type ScheduleMode = "harian" | "kalender" | "live";
 type ScheduleEvent = {
@@ -12,88 +24,23 @@ type ScheduleEvent = {
   sport: string;
   venue: string;
   title: string;
+  status: string;
 };
 
-const scheduleEvents: ScheduleEvent[] = [
-  {
-    date: "2026-11-28",
-    time: "08:00",
-    sport: "Atletik",
-    venue: "Stadion Atletik & Sport Center",
-    title: "Simulasi — Babak penyisihan",
-  },
-  {
-    date: "2026-11-28",
-    time: "10:00",
-    sport: "Bulutangkis",
-    venue: "GOR KONI",
-    title: "Simulasi — Babak penyisihan",
-  },
-  {
-    date: "2026-11-28",
-    time: "14:00",
-    sport: "Aquatik",
-    venue: "Kolam Renang",
-    title: "Simulasi — Sesi pertandingan",
-  },
-  {
-    date: "2026-11-29",
-    time: "08:30",
-    sport: "Panahan",
-    venue: "Stadion Atletik & Sport Center",
-    title: "Simulasi — Babak kualifikasi",
-  },
-  {
-    date: "2026-11-29",
-    time: "11:00",
-    sport: "Pencak Silat",
-    venue: "GOR KONI",
-    title: "Simulasi — Babak penyisihan",
-  },
-  {
-    date: "2026-11-29",
-    time: "15:00",
-    sport: "Basket",
-    venue: "Sport Center",
-    title: "Simulasi — Pertandingan penyisihan",
-  },
-  {
-    date: "2026-11-30",
-    time: "09:00",
-    sport: "Bulutangkis",
-    venue: "GOR KONI",
-    title: "Simulasi — Babak perempat final",
-  },
-  {
-    date: "2026-11-30",
-    time: "13:00",
-    sport: "Atletik",
-    venue: "Stadion Atletik & Sport Center",
-    title: "Simulasi — Final nomor lintasan",
-  },
-  {
-    date: "2026-11-30",
-    time: "16:00",
-    sport: "Aquatik",
-    venue: "Kolam Renang",
-    title: "Simulasi — Final nomor renang",
-  },
-];
-
-const firstScheduleDate = "2026-11-28";
-const lastScheduleDate = "2026-12-09";
 const modes: { id: ScheduleMode; label: string }[] = [
   { id: "harian", label: "Harian" },
   { id: "kalender", label: "Kalender" },
   { id: "live", label: "Live" },
 ];
 
-function getScheduleDates() {
+function getScheduleDates(events: ScheduleEvent[]) {
+  if (events.length === 0) return [];
+  const sortedDates = events.map((event) => event.date).sort();
   const dates: string[] = [];
-  const [startYear, startMonth, startDay] = firstScheduleDate
+  const [startYear, startMonth, startDay] = sortedDates[0]
     .split("-")
     .map(Number);
-  const [lastYear, lastMonth, lastDay] = lastScheduleDate
+  const [lastYear, lastMonth, lastDay] = sortedDates[sortedDates.length - 1]
     .split("-")
     .map(Number);
   const current = new Date(Date.UTC(startYear, startMonth - 1, startDay));
@@ -109,8 +56,6 @@ function getScheduleDates() {
   return dates;
 }
 
-const scheduleDates = getScheduleDates();
-
 function formatDate(date: string, options: Intl.DateTimeFormatOptions) {
   return new Intl.DateTimeFormat("id-ID", {
     ...options,
@@ -123,24 +68,59 @@ function isScheduleMode(value: string | null): value is ScheduleMode {
 }
 
 export default function ScheduleView() {
+  const matches = useCompetitionStore((state) => state.matches);
+  const sports = useCompetitionStore((state) => state.sports);
+  const venues = useCompetitionStore((state) => state.venues);
+  const loading = useCompetitionStore((state) => state.loading.matches);
+  const error = useCompetitionStore((state) => state.errors.matches);
+  const sportsError = useCompetitionStore((state) => state.errors.sports);
+  const venuesError = useCompetitionStore((state) => state.errors.venues);
+  const fetchMatches = useCompetitionStore((state) => state.fetchMatches);
+  const fetchSports = useCompetitionStore((state) => state.fetchSports);
+  const fetchVenues = useCompetitionStore((state) => state.fetchVenues);
   const [searchParams, setSearchParams] = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    void fetchMatches();
+    void fetchSports();
+    void fetchVenues();
+  }, [fetchMatches, fetchSports, fetchVenues]);
+
+  const scheduleEvents = useMemo(
+    () =>
+      matches.map((match) => ({
+        date: match.date,
+        time: match.time,
+        sport: match.sport_name,
+        venue: match.venue_name,
+        title: match.title,
+        status: match.status,
+      })),
+    [matches],
+  );
+  const scheduleDates = useMemo(
+    () => getScheduleDates(scheduleEvents),
+    [scheduleEvents],
+  );
+  const firstScheduleDate = scheduleDates[0] ?? "";
+  const lastScheduleDate = scheduleDates[scheduleDates.length - 1] ?? "";
   const modeParam = searchParams.get("tampilan");
   const mode: ScheduleMode = isScheduleMode(modeParam) ? modeParam : "harian";
   const requestedDate = searchParams.get("tanggal");
   const selectedDate = scheduleDates.includes(requestedDate ?? "")
     ? requestedDate!
-    : firstScheduleDate;
+    : firstScheduleDate || new Date().toISOString().slice(0, 10);
   const selectedSport = searchParams.get("cabor") ?? "";
   const selectedVenue = searchParams.get("venue") ?? "";
 
   const visibleEvents = useMemo(() => {
-    if (mode === "live") return [];
-
     const normalizedQuery = query.trim().toLocaleLowerCase("id");
     return scheduleEvents.filter((event) => {
-      const matchesDate = mode === "kalender" || event.date === selectedDate;
+      const matchesDate =
+        mode !== "harian" || event.date === selectedDate;
+      const matchesMode = mode !== "live" || event.status === "ONGOING";
       const matchesSport = !selectedSport || event.sport === selectedSport;
       const matchesVenue = !selectedVenue || event.venue === selectedVenue;
       const matchesQuery =
@@ -148,9 +128,15 @@ export default function ScheduleView() {
         `${event.sport} ${event.venue} ${event.title}`
           .toLocaleLowerCase("id")
           .includes(normalizedQuery);
-      return matchesDate && matchesSport && matchesVenue && matchesQuery;
+      return (
+        matchesDate &&
+        matchesMode &&
+        matchesSport &&
+        matchesVenue &&
+        matchesQuery
+      );
     });
-  }, [mode, query, selectedDate, selectedSport, selectedVenue]);
+  }, [mode, query, scheduleEvents, selectedDate, selectedSport, selectedVenue]);
 
   function updateParams(updates: Record<string, string | null>) {
     const next = new URLSearchParams(searchParams);
@@ -169,7 +155,9 @@ export default function ScheduleView() {
   }
 
   const firstWeekday =
-    (new Date(`${firstScheduleDate}T12:00:00Z`).getUTCDay() + 6) % 7;
+    (new Date(`${firstScheduleDate || selectedDate}T00:00:00Z`).getUTCDay() +
+      6) %
+    7;
 
   return (
     <>
@@ -193,42 +181,45 @@ export default function ScheduleView() {
             tempat pertandingan.
           </p>
           <div className="schedule-source-note" role="note">
-            <strong>Data simulasi — bukan jadwal resmi</strong>
+            <strong>Jadwal dari backend</strong>
             <span>
-              Jam, cabang, dan venue berikut hanya contoh untuk pratinjau
-              tampilan. Konfirmasi jadwal resmi kepada panitia.
+              Data seed yang digunakan saat ini adalah simulasi dan bukan
+              jadwal resmi. Konfirmasi jadwal kepada panitia.
             </span>
           </div>
         </section>
 
         <section className="schedule-content section-wrap" aria-label="Jadwal">
-          <nav className="schedule-mode-tabs" aria-label="Tampilan jadwal">
-            {modes.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={mode === item.id ? "is-active" : ""}
-                aria-pressed={mode === item.id}
-                onClick={() => updateParams({ tampilan: item.id })}
-              >
-                {item.label}
-              </button>
-            ))}
-          </nav>
+          <Tabs
+            value={mode}
+            className="w-full"
+            onValueChange={(value) => {
+              if (isScheduleMode(value)) updateParams({ tampilan: value });
+            }}
+          >
+            <TabsList aria-label="Tampilan jadwal" className="w-fit max-w-full">
+              {modes.map((item) => (
+                <TabsTrigger key={item.id} value={item.id} className="px-4">
+                  {item.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
 
           <div className="schedule-toolbar">
-            <button
-              className="schedule-filter-toggle"
+            <Button
+              variant="outline"
+              size="lg"
               type="button"
               aria-expanded={filtersOpen}
               onClick={() => setFiltersOpen((open) => !open)}
             >
-              <span aria-hidden="true">☷</span>
+              <SlidersHorizontal aria-hidden="true" />
               {filtersOpen ? "Sembunyikan filter" : "Tampilkan filter"}
-            </button>
+            </Button>
             <label className="schedule-date-input">
               <span>Pilih tanggal</span>
-              <input
+              <Input
                 type="date"
                 min={firstScheduleDate}
                 max={lastScheduleDate}
@@ -238,15 +229,17 @@ export default function ScheduleView() {
                     selectDate(event.target.value);
                   }
                 }}
+                className="w-auto"
               />
             </label>
           </div>
 
           <div className="schedule-day-strip" aria-label="Pilih hari pertandingan">
             {scheduleDates.map((date) => (
-              <button
+              <Button
                 key={date}
-                className={selectedDate === date ? "is-active" : ""}
+                variant={selectedDate === date ? "default" : "outline"}
+                className="h-auto min-h-20 min-w-16 flex-col gap-1 py-2"
                 type="button"
                 aria-pressed={selectedDate === date}
                 onClick={() => selectDate(date)}
@@ -254,15 +247,42 @@ export default function ScheduleView() {
                 <span>{formatDate(date, { weekday: "short" })}</span>
                 <strong>{formatDate(date, { day: "2-digit" })}</strong>
                 <small>{formatDate(date, { month: "short" })}</small>
-              </button>
+              </Button>
             ))}
           </div>
+
+          {loading && <p role="status">Memuat jadwal pertandingan...</p>}
+          {error && (
+            <p role="alert">
+              Gagal memuat jadwal: {error}{" "}
+              <Button type="button" variant="outline" size="sm" onClick={() => void fetchMatches()}>
+                Coba lagi
+              </Button>
+            </p>
+          )}
+          {(sportsError || venuesError) && (
+            <p role="alert">
+              Gagal memuat opsi filter: {[sportsError, venuesError]
+                .filter(Boolean)
+                .join("; ")}
+              {sportsError && (
+                <Button type="button" variant="outline" size="sm" onClick={() => void fetchSports()}>
+                  Muat ulang cabang olahraga
+                </Button>
+              )}
+              {venuesError && (
+                <Button type="button" variant="outline" size="sm" onClick={() => void fetchVenues()}>
+                  Muat ulang venue
+                </Button>
+              )}
+            </p>
+          )}
 
           {filtersOpen && (
             <div className="schedule-filters">
               <label>
                 <span>Cari pertandingan atau lokasi</span>
-                <input
+                <Input
                   type="search"
                   placeholder="Ketik nama cabang atau venue..."
                   value={query}
@@ -271,49 +291,61 @@ export default function ScheduleView() {
               </label>
               <label>
                 <span>Cabang olahraga</span>
-                <select
-                  value={selectedSport}
-                  onChange={(event) =>
-                    updateParams({ cabor: event.target.value || null })
+                <Select
+                  value={selectedSport || "all"}
+                  onValueChange={(value) =>
+                    updateParams({ cabor: value === "all" ? null : value })
                   }
                 >
-                  <option value="">Semua cabang olahraga</option>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Pilih cabang olahraga" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua cabang olahraga</SelectItem>
                   {sports.map((sport) => (
-                    <option key={sport.name} value={sport.name}>
+                    <SelectItem key={sport.name} value={sport.name}>
                       {sport.name}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
+                  </SelectContent>
+                </Select>
               </label>
               <label>
                 <span>Tempat</span>
-                <select
-                  value={selectedVenue}
-                  onChange={(event) =>
-                    updateParams({ venue: event.target.value || null })
+                <Select
+                  value={selectedVenue || "all"}
+                  onValueChange={(value) =>
+                    updateParams({ venue: value === "all" ? null : value })
                   }
                 >
-                  <option value="">Semua tempat</option>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Pilih tempat" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua tempat</SelectItem>
                   {venues.map((venue) => (
-                    <option key={venue.name} value={venue.name}>
+                    <SelectItem key={venue.name} value={venue.name}>
                       {venue.name}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
+                  </SelectContent>
+                </Select>
               </label>
             </div>
           )}
 
           {mode === "kalender" ? (
-            <div className="schedule-calendar">
+            <Card className="schedule-calendar gap-0 p-0">
               <div className="schedule-calendar-heading">
                 <h2>
-                  {formatDate(firstScheduleDate, { month: "long" })} –{" "}
-                  {formatDate(lastScheduleDate, { month: "long", year: "numeric" })}
+                  {firstScheduleDate
+                    ? `${formatDate(firstScheduleDate, { month: "long" })} – ${formatDate(lastScheduleDate, { month: "long", year: "numeric" })}`
+                    : "Belum ada jadwal"}
                 </h2>
                 <span>
-                  {formatDate(firstScheduleDate, { day: "numeric", month: "short" })}{" "}
-                  – {formatDate(lastScheduleDate, { day: "numeric", month: "short" })}
+                  {firstScheduleDate
+                    ? `${formatDate(firstScheduleDate, { day: "numeric", month: "short" })} – ${formatDate(lastScheduleDate, { day: "numeric", month: "short" })}`
+                    : "Jadwal belum tersedia"}
                 </span>
               </div>
               <div className="schedule-calendar-grid">
@@ -332,10 +364,11 @@ export default function ScheduleView() {
                   />
                 ))}
                 {scheduleDates.map((date) => (
-                  <button
+                  <Button
                     key={date}
                     type="button"
-                    className={selectedDate === date ? "is-active" : ""}
+                    variant={selectedDate === date ? "default" : "outline"}
+                    className="h-auto min-h-14 w-full flex-col gap-1"
                     aria-label={formatDate(date, {
                       weekday: "long",
                       day: "numeric",
@@ -346,12 +379,12 @@ export default function ScheduleView() {
                   >
                     <strong>{formatDate(date, { day: "numeric" })}</strong>
                     <small>{formatDate(date, { month: "short" })}</small>
-                  </button>
+                  </Button>
                 ))}
               </div>
-            </div>
+            </Card>
           ) : (
-            <section className="schedule-results" aria-live="polite">
+            <Card className="schedule-results gap-0 p-0" aria-live="polite">
               <div className="schedule-results-heading">
                 <div>
                   <p>{mode === "live" ? "PERTANDINGAN LANGSUNG" : "JADWAL HARIAN"}</p>
@@ -382,17 +415,19 @@ export default function ScheduleView() {
                       <time>{event.time}</time>
                       <div>
                         <strong>{event.sport}</strong>
-                        <span>{event.title}</span>
+                        <span className="schedule-event-title">{event.title}</span>
                         <small>{event.venue}</small>
                       </div>
-                      <span className="schedule-event-badge">SIMULASI</span>
+                      <Badge variant="secondary" className="schedule-event-badge">
+                        {event.status}
+                      </Badge>
                     </article>
                   ))}
                 </div>
               ) : (
                 <ScheduleEmptyState mode={mode} />
               )}
-            </section>
+            </Card>
           )}
         </section>
       </main>

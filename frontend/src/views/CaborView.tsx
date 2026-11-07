@@ -1,15 +1,40 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import SportSearch from "../components/SportSearch";
-import { sports } from "../data/sports";
+import type { Sport as BackendSport } from "../api/types";
+import { useCompetitionStore } from "../stores/competitionStore";
+import type { Sport as SportCard } from "../types/sport";
 
-const mainSportsCount = sports.filter((sport) => sport.group === "Utama").length;
-const exhibitionSportsCount = sports.filter(
-  (sport) => sport.group === "Eksebisi",
-).length;
+function toSportCards(sports: BackendSport[]): SportCard[] {
+  return sports.map((sport) => ({
+    name: sport.name,
+    group: sport.category,
+    icon: sport.icon,
+    description: sport.description,
+  }));
+}
 
 export default function CaborView() {
+  const sports = useCompetitionStore((state) => state.sports);
+  const loading = useCompetitionStore((state) => state.loading.sports);
+  const error = useCompetitionStore((state) => state.errors.sports);
+  const fetchSports = useCompetitionStore((state) => state.fetchSports);
+
+  useEffect(() => {
+    void fetchSports();
+  }, [fetchSports]);
+
+  const sportCards = toSportCards(sports);
+  const mainSportsCount = sportCards.filter(
+    (sport) => sport.group === "Utama",
+  ).length;
+  const exhibitionSportsCount = sportCards.filter(
+    (sport) => sport.group === "Eksebisi",
+  ).length;
+
   return (
     <>
       <SiteHeader />
@@ -61,17 +86,31 @@ export default function CaborView() {
             </p>
           </div>
 
-          <SportSearch
-            sports={sports}
-            mainSportsCount={mainSportsCount}
-            exhibitionSportsCount={exhibitionSportsCount}
-          />
+          {loading && <p role="status">Memuat daftar cabang olahraga...</p>}
+          {error && (
+            <p role="alert">
+              Gagal memuat cabang olahraga: {error}{" "}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => void fetchSports()}
+              >
+                Coba lagi
+              </Button>
+            </p>
+          )}
+          {!loading && !error && sportCards.length > 0 && (
+            <SportSearch
+              sports={sportCards}
+              mainSportsCount={mainSportsCount}
+              exhibitionSportsCount={exhibitionSportsCount}
+            />
+          )}
 
           <p className="cabor-disclaimer">
-            Berdasarkan revisi jadwal sementara penyelenggaraan PORPROV XIII
-            Kalimantan Tengah 2026. Tabel mencantumkan {mainSportsCount} cabang
-            utama dan {exhibitionSportsCount} cabang eksebisi. Ejaan nama cabang
-            mengikuti dokumen yang diberikan.
+            Daftar cabang dimuat dari backend dan masih dapat berubah. Informasi
+            resmi perlu dikonfirmasi kepada panitia.
           </p>
         </section>
 

@@ -1,17 +1,18 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import VenueMap from "../components/VenueMap";
-import { venues } from "../data/venues";
-import type { VenueCategory } from "../data/venues";
-
-const categories: VenueCategory[] = [
-  "Stadion & fasilitas olahraga",
-  "Gedung & aula",
-  "Lapangan & rekreasi",
-  "Area umum",
-];
+import { useCompetitionStore } from "../stores/competitionStore";
 
 function normalizeText(value: string) {
   return value
@@ -21,21 +22,34 @@ function normalizeText(value: string) {
 }
 
 export default function VenueView() {
+  const venues = useCompetitionStore((state) => state.venues);
+  const loading = useCompetitionStore((state) => state.loading.venues);
+  const error = useCompetitionStore((state) => state.errors.venues);
+  const fetchVenues = useCompetitionStore((state) => state.fetchVenues);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [selectedName, setSelectedName] = useState<string | null>(null);
+
+  useEffect(() => {
+    void fetchVenues();
+  }, [fetchVenues]);
+
+  const categories = useMemo(
+    () => [...new Set(venues.map((venue) => venue.category))].sort(),
+    [venues],
+  );
 
   const filteredVenues = useMemo(() => {
     const normalizedQuery = normalizeText(query.trim());
     return venues.filter((venue) => {
       const matchesQuery =
         !normalizedQuery ||
-        normalizeText(`${venue.name} ${venue.category} ${venue.note ?? ""}`).includes(
-          normalizedQuery,
-        );
+        normalizeText(
+          `${venue.name} ${venue.category} ${venue.address} ${venue.note}`,
+        ).includes(normalizedQuery);
       return matchesQuery && (!category || venue.category === category);
     });
-  }, [category, query]);
+  }, [category, query, venues]);
 
   const selectedVenue =
     filteredVenues.find((venue) => venue.name === selectedName) ?? null;
@@ -110,43 +124,70 @@ export default function VenueView() {
                   <circle cx="10.8" cy="10.8" r="6.8" />
                   <path d="m16 16 4.5 4.5" />
                 </svg>
-                <input
+                <Input
                   id="venue-search-input"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   autoComplete="off"
                   placeholder="Cari venue atau lokasi..."
                   type="search"
+                  className="h-10 border-0 px-0 shadow-none focus-visible:ring-0"
                 />
                 {query && (
-                  <button
+                  <Button
                     className="cabor-search-clear"
+                    variant="ghost"
+                    size="sm"
                     type="button"
                     aria-label="Hapus pencarian"
                     onClick={() => setQuery("")}
                   >
                     Hapus
-                  </button>
+                  </Button>
                 )}
               </form>
 
               <label className="venue-filter-label" htmlFor="venue-category">
                 Filter kategori venue
               </label>
-              <select
-                id="venue-category"
-                className="venue-filter"
-                value={category}
-                onChange={(event) => setCategory(event.target.value)}
+              <Select
+                value={category || "__all"}
+                onValueChange={(value) =>
+                  setCategory(value && value !== "__all" ? value : "")
+                }
               >
-                <option value="">Semua kategori</option>
-                {categories.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger
+                  id="venue-category"
+                  className="mx-4 mb-3 h-10 w-[calc(100%-2rem)]"
+                >
+                  <SelectValue placeholder="Pilih kategori" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all">Semua kategori</SelectItem>
+                  {categories.map((item) => (
+                    <SelectItem key={item} value={item}>
+                      {item}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
+              {loading && (
+                <p role="status">Memuat daftar venue dari backend...</p>
+              )}
+              {error && (
+                <p role="alert">
+                  Gagal memuat venue: {error}{" "}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void fetchVenues()}
+                  >
+                    Coba lagi
+                  </Button>
+                </p>
+              )}
               <div className="venue-list-heading" aria-live="polite">
                 <span>DAFTAR VENUE</span>
                 <span>
@@ -158,9 +199,11 @@ export default function VenueView() {
                 {filteredVenues.map((venue, index) => {
                   const isSelected = selectedName === venue.name;
                   return (
-                    <button
+                    <Button
                       key={venue.name}
                       className={`venue-list-item${isSelected ? " is-selected" : ""}`}
+                      variant="ghost"
+                      size="lg"
                       type="button"
                       aria-pressed={isSelected}
                       onClick={() => setSelectedName(venue.name)}
@@ -175,10 +218,10 @@ export default function VenueView() {
                       <span className="venue-list-arrow" aria-hidden="true">
                         ↗
                       </span>
-                    </button>
+                    </Button>
                   );
                 })}
-                {filteredVenues.length === 0 && (
+                {!loading && !error && filteredVenues.length === 0 && (
                   <p className="cabor-empty" role="status">
                     Venue tidak ditemukan. Coba kata kunci lain.
                   </p>
@@ -194,11 +237,8 @@ export default function VenueView() {
           </div>
 
           <p className="cabor-disclaimer">
-            Sumber nama venue: revisi jadwal sementara penyelenggaraan PORPROV
-            XIII Kalimantan Tengah di Kotawaringin Barat, 2–12 Oktober 2026.
-            Koordinat pada peta adalah perkiraan di sekitar Pangkalan Bun karena
-            tabel tidak mencantumkan alamat atau titik koordinat. Konfirmasi
-            lokasi resmi kepada panitia sebelum berkunjung.
+            Data venue dimuat dari backend. Konfirmasi alamat dan koordinat
+            resmi kepada panitia sebelum berkunjung.
           </p>
           <p className="venue-map-attribution">
             Peta ©{" "}

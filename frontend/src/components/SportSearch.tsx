@@ -1,4 +1,7 @@
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import type { Sport } from "../types/sport";
 import ArrowIcon from "./ArrowIcon";
 
@@ -62,23 +65,26 @@ export default function SportSearch({
           <circle cx="10.8" cy="10.8" r="6.8" />
           <path d="m16 16 4.5 4.5" />
         </svg>
-        <input
+        <Input
           id="cabor-search-input"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           autoComplete="off"
           placeholder="Cari nama cabang olahraga..."
           type="search"
+          className="h-10 border-0 px-0 shadow-none focus-visible:ring-0"
         />
         {query && (
-          <button
+          <Button
             className="cabor-search-clear"
+            variant="ghost"
+            size="sm"
             type="button"
             aria-label="Hapus pencarian"
             onClick={() => setQuery("")}
           >
             Hapus
-          </button>
+          </Button>
         )}
       </form>
 
@@ -97,7 +103,12 @@ export default function SportSearch({
       {filteredSports.length > 0 ? (
         <div className="cabor-grid">
           {filteredSports.map((sport) => (
-            <article key={sport.name} className="cabor-card">
+            <Card
+              key={sport.name}
+              className="cabor-card"
+              role="article"
+              aria-label={sport.name}
+            >
               <div className="cabor-card-top">
                 <span className="cabor-card-index">
                   {sport.group === "Utama"
@@ -121,7 +132,7 @@ export default function SportSearch({
                 </span>
                 <ArrowIcon />
               </div>
-            </article>
+            </Card>
           ))}
         </div>
       ) : (

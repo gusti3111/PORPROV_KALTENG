@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Menu, X } from "lucide-react";
 
 const links = [
   { label: "Tentang", to: "/#tentang" },
@@ -7,7 +9,7 @@ const links = [
   { label: "VENUE", to: "/venue", active: "/venue" },
   { label: "JADWAL PERTANDINGAN", to: "/jadwal", active: "/jadwal" },
   { label: "HASIL PERTANDINGAN", to: "/hasil", active: "/hasil" },
-  { label: "BERITA", to: "/#informasi" },
+  { label: "BERITA", to: "/berita", active: "/berita" },
 ];
 
 export default function SiteNavigation() {
@@ -29,18 +31,18 @@ export default function SiteNavigation() {
 
   return (
     <>
-      <button
+      <Button
         className={`nav-toggle${isOpen ? " is-open" : ""}`}
+        variant="outline"
+        size="icon"
         type="button"
         aria-label={isOpen ? "Tutup navigasi" : "Buka navigasi"}
         aria-expanded={isOpen}
         aria-controls="primary-navigation"
         onClick={() => setIsOpen((open) => !open)}
       >
-        <span />
-        <span />
-        <span />
-      </button>
+        {isOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
+      </Button>
       <nav
         id="primary-navigation"
         className={`main-nav${isOpen ? " is-open" : ""}`}

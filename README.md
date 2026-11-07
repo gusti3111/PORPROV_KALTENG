@@ -18,6 +18,8 @@ PORPROV_KALTENG/
 │   ├── Dockerfile        # Go multi-stage build Alpine
 │   └── .env.example      # Template konfigurasi environment
 ├── compose.yaml          # Orchestration Docker (PostgreSQL, Backend API, Frontend)
+├── compose.https.yaml    # Optional HTTPS reverse proxy for local/IP testing
+├── deploy/               # Reverse proxy configuration and generated TLS files
 ├── package.json          # Root scripts monorepo
 └── .github/workflows/    # CI/CD pipeline
 ```
@@ -37,6 +39,29 @@ docker compose up --build
 - **API Health Check**: [http://localhost:8081/healthz](http://localhost:8081/healthz)
 - **PostgreSQL**: `localhost:5432` (db: `porprov_kalteng`, user: `postgres`, pass: `postgres`)
 
+### HTTPS Tanpa Domain (Testing)
+
+Untuk menguji HTTPS sebelum memiliki domain, buat sertifikat self-signed untuk
+localhost:
+
+```bash
+bash scripts/generate-self-signed-cert.sh localhost
+docker compose -f compose.yaml -f compose.https.yaml up --build
+```
+
+Buka [https://localhost](https://localhost). Browser akan menampilkan
+peringatan karena sertifikat self-signed belum dipercaya. Untuk mengakses
+server melalui IPv4, ganti `localhost` dengan IP server saat membuat
+sertifikat, lalu buka `https://<IP-server>`. Sertifikat ini berlaku satu tahun
+dan hanya untuk pengujian; jangan gunakan sebagai sertifikat produksi.
+
+Reverse proxy HTTPS menerima port 80 dan 443, mengalihkan HTTP ke HTTPS, dan
+meneruskan API ke backend. Pastikan port 80/443 tersedia. Untuk deployment,
+batasi akses langsung ke port frontend, backend, dan PostgreSQL dari firewall;
+akses publik sebaiknya hanya melalui reverse proxy. Setelah memiliki domain,
+ganti sertifikat self-signed dengan sertifikat tepercaya (misalnya Let's
+Encrypt) dan sesuaikan konfigurasi proxy.
+
 ### 2. Menjalankan Per Service Manual
 
 #### Frontend
@@ -47,6 +72,19 @@ cd frontend && npm install && npm run dev
 ```
 
 Buka [http://localhost:3000](http://localhost:3000). Request ke `/api` akan otomatis di-*proxy* ke `http://localhost:8080`.
+Frontend menggunakan Axios untuk request HTTP dan Zustand untuk menyimpan
+data API beserta status loading/error. Secara default, request memakai
+`/api/v1` agar dapat melalui Vite proxy saat development atau reverse proxy
+saat deployment. Salin `frontend/.env.example` ke `frontend/.env.local` jika
+perlu mengatur `VITE_API_BASE_URL` secara eksplisit.
+
+UI menggunakan Tailwind CSS v4 dan komponen shadcn/ui berbasis Base UI.
+Komponen tersedia di `frontend/src/components/ui/`. Untuk menambahkan komponen
+lain dari root repo, jalankan:
+
+```bash
+npx shadcn@latest add <component> -c frontend
+```
 
 #### Backend (Go)
 Pastikan Go 1.24+ terpasang:
@@ -89,13 +127,11 @@ Filter endpoint pertandingan: `date=YYYY-MM-DD`, `sport_id`, `venue_id`, dan
 `status` (`SCHEDULED`, `ONGOING`, `FINISHED`, `POSTPONED`, atau `CANCELLED`).
 Contoh: `/api/v1/matches?date=2026-11-28&status=FINISHED`.
 
-Halaman `/jadwal` saat ini menampilkan sesi simulasi untuk pratinjau tampilan.
-Jam, cabang, dan venue pada data tersebut bukan jadwal resmi dan harus
-dikonfirmasi panitia sebelum digunakan sebagai informasi pertandingan.
-Halaman `/hasil` memiliki tab hasil pertandingan, perolehan medali per
-kontingen, dan perolehan medali per cabang olahraga dengan data simulasi untuk
-pratinjau. Data tersebut bukan hasil resmi dan belum mengambil data dari API
-atau database.
+Beranda dan halaman `/cabor` mengambil cabang olahraga dari API; halaman
+`/venue` mengambil venue dan koordinat; `/jadwal` mengambil jadwal pertandingan;
+dan `/hasil` mengambil hasil serta klasemen medali dari API. Data seed yang
+tersedia untuk development adalah data simulasi, bukan informasi resmi, dan
+harus dikonfirmasi panitia sebelum dipublikasikan.
 
 ## CI/CD ke VPS
 

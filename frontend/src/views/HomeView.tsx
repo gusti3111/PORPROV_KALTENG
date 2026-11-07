@@ -1,24 +1,23 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import ArrowIcon from "../components/ArrowIcon";
 import EventCountdown from "../components/EventCountdown";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { EVENT_START_LABEL } from "../event-config";
-
-const homeSports = [
-  "Atletik",
-  "Bola voli",
-  "Bulu tangkis",
-  "Renang",
-  "Pencak Silat",
-  "Tenis Meja",
-  "Skateboard",
-  "Kick Boxing",
-  "Teqball",
-  "Muaythai",
-];
+import { useCompetitionStore } from "../stores/competitionStore";
 
 export default function HomeView() {
+  const sports = useCompetitionStore((state) => state.sports);
+  const loadingSports = useCompetitionStore((state) => state.loading.sports);
+  const sportsError = useCompetitionStore((state) => state.errors.sports);
+  const fetchSports = useCompetitionStore((state) => state.fetchSports);
+
+  useEffect(() => {
+    void fetchSports();
+  }, [fetchSports]);
+
   return (
     <>
       <SiteHeader />
@@ -176,19 +175,39 @@ export default function HomeView() {
               </Link>
             </div>
             <div className="sports-list" aria-label="Contoh cabang olahraga">
-              {homeSports.map((sport, index) => (
-                <div key={sport} className="sport-item">
+              {sports.slice(0, 10).map((sport, index) => (
+                <div key={sport.id} className="sport-item">
                   <span className="sport-number">
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  <span>{sport}</span>
+                  <span>{sport.name}</span>
                   <ArrowIcon diagonal />
                 </div>
               ))}
-              <p className="sports-note">
-                Daftar ini merupakan gambaran cabang olahraga. Informasi resmi
-                akan diperbarui kemudian.
-              </p>
+              {loadingSports && (
+                <p className="sports-note" role="status">
+                  Memuat cabang olahraga...
+                </p>
+              )}
+              {sportsError && (
+                <p className="sports-note" role="alert">
+                  Gagal memuat cabang olahraga: {sportsError}{" "}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void fetchSports()}
+                  >
+                    Coba lagi
+                  </Button>
+                </p>
+              )}
+              {!loadingSports && !sportsError && (
+                <p className="sports-note">
+                  Daftar cabang dimuat dari backend dan dapat berubah setelah
+                  data resmi diperbarui.
+                </p>
+              )}
             </div>
           </div>
         </section>

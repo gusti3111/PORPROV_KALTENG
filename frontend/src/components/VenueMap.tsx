@@ -7,7 +7,7 @@ import {
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
-import type { Venue } from "../data/venues";
+import type { Venue } from "../api/types";
 
 type VenueMapProps = {
   venues: Venue[];
