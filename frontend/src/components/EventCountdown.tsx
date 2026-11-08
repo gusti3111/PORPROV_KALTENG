@@ -18,11 +18,19 @@ export default function EventCountdown() {
   }, [eventStartTimestamp]);
 
   if (!Number.isFinite(eventStartTimestamp)) {
-    return <p className="countdown-message">Tanggal pembukaan belum dikonfigurasi.</p>;
+    return (
+      <p className="m-0 text-[13px] font-extrabold text-[var(--green)]">
+        Tanggal pembukaan belum dikonfigurasi.
+      </p>
+    );
   }
 
   if (remaining === 0) {
-    return <p className="countdown-message">PORPROV XIII telah dimulai!</p>;
+    return (
+      <p className="m-0 text-[13px] font-extrabold text-[var(--green)]">
+        PORPROV XIII telah dimulai!
+      </p>
+    );
   }
 
   const totalSeconds = Math.floor((remaining ?? 0) / 1_000);
@@ -35,13 +43,18 @@ export default function EventCountdown() {
 
   return (
     <div
-      className="countdown-units"
+      className="flex items-center gap-[9px] max-[620px]:gap-[7px]"
       aria-label="Hitung mundur menuju pembukaan PORPROV XIII Kalimantan Tengah 2026"
     >
       {units.map((unit) => (
-        <div key={unit.label} className="countdown-unit">
-          <strong>{String(unit.value).padStart(2, "0")}</strong>
-          <span>{unit.label}</span>
+        <div
+          key={unit.label}
+          className="grid min-w-[62px] justify-items-center gap-1 rounded-[var(--ui-radius)] bg-[var(--ui-subtle)] px-2 pt-[10px] pb-2 text-white max-[620px]:min-w-0 max-[620px]:flex-1 max-[620px]:px-[5px]"
+        >
+          <strong className="text-[23px] tabular-nums leading-none tracking-[-0.05em] max-[620px]:text-[21px]">
+            {String(unit.value).padStart(2, "0")}
+          </strong>
+          <span className="text-[8px] font-bold text-[var(--lime)]">{unit.label}</span>
         </div>
       ))}
     </div>

@@ -23,7 +23,10 @@ export default function HomeView() {
       <SiteHeader />
 
       <main>
-        <section id="beranda" className="hero">
+        <section
+          id="beranda"
+          className="relative flex min-h-[610px] items-center overflow-hidden bg-[var(--green)] text-white max-[900px]:min-h-[570px] max-[620px]:min-h-[710px] max-[620px]:items-start"
+        >
           <div className="hero-grid" aria-hidden="true" />
           <div
             className="hero-orbit hero-orbit-one"
@@ -34,26 +37,29 @@ export default function HomeView() {
             aria-hidden="true"
           />
 
-          <div className="hero-content">
-            <p className="eyebrow hero-eyebrow">
-              <span className="eyebrow-dot" />
+          <div className="relative z-[2] w-[54%] pt-[76px] pb-[105px] pl-[10%] min-[1500px]:pl-[max(10%,calc((100vw-1200px)/2))] max-[900px]:w-[60%] max-[900px]:pl-[7%] max-[620px]:w-full max-[620px]:px-[6%] max-[620px]:pt-[65px] max-[620px]:pb-[170px]">
+            <p className="mb-6 flex items-center gap-[10px] text-[10px] font-extrabold uppercase tracking-[0.15em] text-[var(--lime)]">
+              <span className="size-[7px] rounded-full bg-[var(--lime)] shadow-[0_0_14px_rgba(211,237,113,0.75)]" />
               Panggung prestasi Kalimantan Tengah
             </p>
-            <h1>
+            <h1 className="m-0 text-[clamp(72px,9.5vw,142px)] font-black leading-[0.84] tracking-[-0.105em] max-[900px]:text-[clamp(67px,11vw,100px)] max-[620px]:text-[clamp(76px,20vw,114px)]">
               PORPROV
-              <span className="hero-edition">
-                XIII <i>2026</i>
+              <span className="mt-[21px] ml-[6px] flex items-center gap-[18px] text-[clamp(33px,4vw,55px)] tracking-[-0.055em] max-[620px]:mt-[17px] max-[620px]:text-[39px]">
+                XIII{" "}
+                <i className="text-[0.62em] font-semibold not-italic tracking-normal text-[var(--lime)]">
+                  2026
+                </i>
               </span>
             </h1>
-            <p className="hero-description">
+            <p className="mt-7 ml-[5px] max-w-[390px] text-[14px] leading-[1.85] text-white/75 max-[620px]:max-w-[340px] max-[620px]:text-[12px]">
               Pekan Olahraga Provinsi Kalimantan Tengah. Satu semangat untuk
               berkompetisi, berprestasi, dan tumbuh bersama.
             </p>
-            <div className="hero-actions">
-              <a className="button button-light" href="#tentang">
+            <div className="mt-[29px] ml-[5px] flex items-center gap-[25px] max-[620px]:flex-wrap max-[620px]:gap-x-5 max-[620px]:gap-y-[14px]">
+              <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[11px] font-extrabold text-[var(--ink)] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#e1f59c] max-[620px]:min-h-[45px] max-[620px]:px-[15px]" href="#tentang">
                 Jelajahi PORPROV <ArrowIcon />
               </a>
-              <Link className="text-link" to="/cabor">
+              <Link className="rounded-md text-[11px] font-bold text-white/80 hover:text-[var(--lime)]" to="/cabor">
                 Kenali cabang olahraga
               </Link>
             </div>
@@ -81,103 +87,106 @@ export default function HomeView() {
             </span>
           </div>
 
-          <div className="hero-bottom">
+          <div className="absolute right-[7.2%] bottom-0 left-[7.2%] flex h-14 items-center gap-4 border-t border-white/20 text-[8px] font-extrabold tracking-[0.15em] text-white/75 max-[620px]:right-[5%] max-[620px]:left-[5%] max-[620px]:gap-2 max-[620px]:text-[7px]">
             <span>SPORTIVITAS</span>
-            <span className="hero-bottom-star">✳</span>
+            <span className="text-xs text-[var(--lime)]">✳</span>
             <span>PERSAUDARAAN</span>
-            <span className="hero-bottom-star">✳</span>
+            <span className="text-xs text-[var(--lime)]">✳</span>
             <span>PRESTASI</span>
-            <span className="hero-bottom-location">
+            <span className="ml-auto text-[7px] text-white/50 max-[620px]:hidden">
               KALIMANTAN TENGAH, INDONESIA
             </span>
           </div>
         </section>
 
         <section
-          className="countdown-wrap section-wrap"
+          className="relative mx-auto mt-10 grid w-[min(85.6%,1120px)] grid-cols-[1fr_auto] items-center gap-x-[30px] gap-y-3 rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-6 shadow-[var(--ui-shadow)] max-[900px]:w-[90%] max-[620px]:mt-[25px] max-[620px]:w-[88%] max-[620px]:grid-cols-1 max-[620px]:gap-4 max-[620px]:p-5 max-[620px]:rounded-[10px]"
           aria-labelledby="countdown-title"
         >
-          <div className="countdown-heading">
-            <p className="countdown-kicker">HITUNG MUNDUR</p>
-            <h2 id="countdown-title">Menuju pembukaan</h2>
-            <p className="countdown-date">{EVENT_START_LABEL}</p>
+          <div>
+            <p className="mb-[5px] text-[8px] font-extrabold tracking-[0.15em] text-[var(--green)]">HITUNG MUNDUR</p>
+            <h2 id="countdown-title" className="m-0 text-[19px] font-extrabold tracking-[-0.04em]">Menuju pembukaan</h2>
+            <p className="mt-[6px] mb-0 text-[10px] text-[var(--muted)]">{EVENT_START_LABEL}</p>
           </div>
           <EventCountdown />
-          <p className="countdown-note">
+          <p className="col-span-full m-0 text-[8px] text-[var(--muted)] max-[620px]:col-span-1">
             Tanggal sementara, sesuaikan dengan jadwal resmi PORPROV XIII.
           </p>
         </section>
 
-        <section id="tentang" className="intro section-wrap">
-          <div className="section-kicker">
+        <section id="tentang" className="mx-auto w-[min(85.6%,1120px)] pt-[108px] pb-[94px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:pt-[73px] max-[620px]:pb-[70px]">
+          <div className="flex items-center gap-[13px] text-[9px] font-extrabold tracking-[0.16em] text-[#596156] [&>span:first-child]:text-[var(--orange)]">
             <span>01</span>
             <span>TENTANG PORPROV</span>
           </div>
-          <div className="intro-copy">
-            <h2>
+          <div className="mt-[34px] grid grid-cols-[1.15fr_0.85fr] gap-[10%] max-[900px]:gap-[6%] max-[620px]:grid-cols-1 max-[620px]:gap-[27px]">
+            <h2 className="m-0 text-[clamp(34px,4.5vw,60px)] font-extrabold leading-[1.08] tracking-[-0.075em] max-[620px]:text-[clamp(37px,10vw,52px)] [&>span]:text-[var(--green)]">
               Lebih dari pertandingan.
               <br />
               <span>Ini tentang kebanggaan.</span>
             </h2>
-            <div className="intro-aside">
-              <p>
+            <div className="pt-[5px]">
+              <p className="m-0 text-[13px] leading-[1.9] text-[var(--muted)]">
                 PORPROV XIII Kalimantan Tengah 2026 menjadi ruang bertemunya
                 atlet, daerah, dan masyarakat dalam semangat sportivitas.
                 Bersama, kita merayakan kerja keras dan potensi olahraga
                 Kalimantan Tengah.
               </p>
-              <a className="inline-link" href="#informasi">
+              <a className="mt-5 inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" href="#informasi">
                 Ikuti informasinya <ArrowIcon diagonal />
               </a>
             </div>
           </div>
-          <div className="intro-stats" aria-label="Informasi acara">
-            <div>
-              <strong>
-                13<span>th</span>
+          <div
+            className="mt-[66px] grid grid-cols-3 border-y border-[#dcded4] max-[620px]:mt-10"
+            aria-label="Informasi acara"
+          >
+            <div className="grid gap-2 pt-[23px] pr-5 pb-6 max-[620px]:pt-[18px] max-[620px]:pb-[18px]">
+              <strong className="text-[29px] font-black tracking-[-0.06em] text-[var(--green)] max-[620px]:text-[23px]">
+                13<span className="ml-[3px] text-xs tracking-normal text-[var(--orange)]">th</span>
               </strong>
-              <small>EDISI PORPROV</small>
+              <small className="text-[8px] font-extrabold tracking-[0.12em] text-[var(--muted)] max-[620px]:text-[6px] max-[620px]:leading-[1.5]">EDISI PORPROV</small>
             </div>
-            <div>
-              <strong>2026</strong>
-              <small>TAHUN PENYELENGGARAAN</small>
+            <div className="grid gap-2 border-l border-[#dcded4] pt-[23px] pr-5 pb-6 pl-[30px] max-[620px]:pt-[18px] max-[620px]:pb-[18px] max-[620px]:pl-3">
+              <strong className="text-[29px] font-black tracking-[-0.06em] text-[var(--green)] max-[620px]:text-[23px]">2026</strong>
+              <small className="text-[8px] font-extrabold tracking-[0.12em] text-[var(--muted)] max-[620px]:text-[6px] max-[620px]:leading-[1.5]">TAHUN PENYELENGGARAAN</small>
             </div>
-            <div>
-              <strong>KALTENG</strong>
-              <small>SEMANGAT SATU PROVINSI</small>
+            <div className="grid gap-2 border-l border-[#dcded4] pt-[23px] pr-5 pb-6 pl-[30px] max-[620px]:pt-[18px] max-[620px]:pb-[18px] max-[620px]:pl-3">
+              <strong className="text-[29px] font-black tracking-[-0.06em] text-[var(--green)] max-[620px]:text-[23px]">KALTENG</strong>
+              <small className="text-[8px] font-extrabold tracking-[0.12em] text-[var(--muted)] max-[620px]:text-[6px] max-[620px]:leading-[1.5]">SEMANGAT SATU PROVINSI</small>
             </div>
           </div>
         </section>
 
 
-        <section id="cabang-olahraga" className="sports section-wrap">
-          <div className="section-kicker">
+        <section id="cabang-olahraga" className="mx-auto w-[min(85.6%,1120px)] pt-[94px] pb-[108px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:py-[72px]">
+          <div className="flex items-center gap-[13px] text-[9px] font-extrabold tracking-[0.16em] text-[#596156] [&>span:first-child]:text-[var(--orange)]">
             <span>03</span>
             <span>ARENA PARA JUARA</span>
           </div>
-          <div className="sports-layout">
-            <div className="sports-copy">
-              <h2>
+          <div className="mt-[33px] grid grid-cols-[0.9fr_1.1fr] gap-[12%] max-[900px]:gap-[7%] max-[620px]:grid-cols-1 max-[620px]:gap-[27px]">
+            <div>
+              <h2 className="m-0 text-[clamp(34px,4.5vw,60px)] font-extrabold leading-[1.08] tracking-[-0.075em] max-[620px]:text-[clamp(37px,10vw,52px)] [&>span]:text-[var(--green)]">
                 Setiap cabang,
                 <br />
                 <span>satu kebanggaan.</span>
               </h2>
-              <p>
+              <p className="mt-[21px] mb-0 max-w-[390px] text-[13px] leading-[1.9] text-[var(--muted)]">
                 Berbagai cabang olahraga akan mempertemukan atlet-atlet terbaik
                 dari seluruh Kalimantan Tengah. Daftar cabang dan detail
                 pertandingan akan diumumkan melalui kanal resmi.
               </p>
-              <Link className="inline-link" to="/cabor">
+              <Link className="mt-5 inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/cabor">
                 Lihat cabang olahraga <ArrowIcon diagonal />
               </Link>
-              <Link className="inline-link" to="/venue">
+              <Link className="mt-5 inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/venue">
                 Lihat venue pertandingan <ArrowIcon diagonal />
               </Link>
             </div>
-            <div className="sports-list" aria-label="Contoh cabang olahraga">
+            <div className="border-t border-[#dcded4] max-[620px]:mt-[10px]" aria-label="Contoh cabang olahraga">
               {sports.slice(0, 10).map((sport, index) => (
-                <div key={sport.id} className="sport-item">
-                  <span className="sport-number">
+                <div key={sport.id} className="grid min-h-[54px] grid-cols-[40px_1fr_20px] items-center border-b border-[#dcded4] text-xs font-bold [&>.arrow-icon]:w-[14px] [&>.arrow-icon]:text-[#687365]">
+                  <span className="text-[9px] font-extrabold tracking-[0.08em] text-[var(--orange)]">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <span>{sport.name}</span>
@@ -185,12 +194,12 @@ export default function HomeView() {
                 </div>
               ))}
               {loadingSports && (
-                <p className="sports-note" role="status">
+                <p className="mt-[13px] mb-0 text-[9px] leading-[1.7] text-[var(--muted)]" role="status">
                   Memuat cabang olahraga...
                 </p>
               )}
               {sportsError && (
-                <p className="sports-note" role="alert">
+                <p className="mt-[13px] mb-0 text-[9px] leading-[1.7] text-[var(--muted)]" role="alert">
                   Gagal memuat cabang olahraga: {sportsError}{" "}
                   <Button
                     type="button"
@@ -203,7 +212,7 @@ export default function HomeView() {
                 </p>
               )}
               {!loadingSports && !sportsError && (
-                <p className="sports-note">
+                <p className="mt-[13px] mb-0 text-[9px] leading-[1.7] text-[var(--muted)]">
                   Daftar cabang dimuat dari backend dan dapat berubah setelah
                   data resmi diperbarui.
                 </p>
@@ -212,23 +221,23 @@ export default function HomeView() {
           </div>
         </section>
 
-        <section className="closing">
+        <section className="relative min-h-[355px] overflow-hidden bg-[var(--orange)] text-white max-[620px]:min-h-[330px]">
           <div className="closing-pattern" aria-hidden="true" />
-          <div className="closing-content">
-            <p className="eyebrow">
-              <span className="eyebrow-dot" />
+          <div className="relative z-[1] mx-auto w-[min(85.6%,1120px)] pt-[62px] pb-[65px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:pt-[55px] max-[620px]:pb-[55px]">
+            <p className="mb-6 flex items-center gap-[10px] text-[10px] font-extrabold uppercase tracking-[0.15em] text-white [&>span]:bg-[var(--lime)]">
+              <span className="size-[7px] rounded-full shadow-[0_0_14px_rgba(211,237,113,0.75)]" />
               Menuju PORPROV XIII 2026
             </p>
-            <h2>
+            <h2 className="mt-0 mb-[26px] text-[clamp(42px,6vw,76px)] font-black leading-[0.98] tracking-[-0.08em] [&>span]:text-[var(--lime)]">
               Bersama kita
               <br />
               <span>jadi juara.</span>
             </h2>
-            <a className="button button-light" href="#beranda">
+            <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[11px] font-extrabold text-[var(--ink)] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#e1f59c] max-[620px]:min-h-[45px] max-[620px]:px-[15px]" href="#beranda">
               Kembali ke atas <ArrowIcon diagonal />
             </a>
           </div>
-          <span className="closing-mark" aria-hidden="true">
+          <span className="absolute right-[8%] bottom-[-73px] text-[clamp(200px,35vw,420px)] font-black leading-none tracking-[-0.12em] text-white/10 max-[620px]:right-0 max-[620px]:bottom-[-32px] max-[620px]:text-[230px]" aria-hidden="true">
             XIII
           </span>
         </section>

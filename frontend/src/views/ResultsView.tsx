@@ -44,19 +44,13 @@ const medalLabels: Record<MedalType, string> = {
   bronze: "perunggu",
 };
 
-function MedalCircle({
-  count,
-  type,
-}: {
-  count: number;
-  type: MedalType;
-}) {
+function MedalIcon({ type }: { type: MedalType }) {
   return (
     <span
       className={`medal-circle medal-circle-${type}`}
-      aria-label={`${count} medali ${medalLabels[type]}`}
+      role="img"
+      aria-label={`Medali ${medalLabels[type]}`}
     >
-      {count}
     </span>
   );
 }
@@ -69,6 +63,10 @@ function formatDate(date: string, options: Intl.DateTimeFormatOptions = {}) {
     timeZone: "Asia/Jakarta",
     ...options,
   }).format(new Date(`${date}T12:00:00+07:00`));
+}
+
+function formatScore(score: string) {
+  return score.replace(/\s*(?:detik|poin|point|pts?)\s*$/i, "").trim();
 }
 
 export default function ResultsView() {
@@ -357,18 +355,23 @@ export default function ResultsView() {
                     const awayWon = result.awayWinner;
                     return (
                       <Card
-                        className="result-card"
+                        className="gap-3 rounded-none border-x-0 border-t-0 border-b border-[var(--ui-border)] bg-transparent p-4 shadow-none ring-0 last:border-b-0 sm:gap-4 sm:px-5 sm:py-4"
                         key={`${result.date}-${result.sport}-${result.event}`}
                         role="article"
                       >
-                        <div className="result-card-heading">
-                          <div>
-                            <span className="result-sport-tag">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="grid min-w-0 gap-1">
+                            <span className="text-[9px] font-extrabold uppercase tracking-[0.1em] text-[var(--green)]">
                               {result.sport}
                             </span>
-                            <h2>{result.event}</h2>
+                            <h2 className="m-0 text-sm font-bold leading-snug text-[var(--ink)]">
+                              {result.event}
+                            </h2>
                           </div>
-                          <time dateTime={result.date}>
+                          <time
+                            className="shrink-0 pt-0.5 text-right text-[10px] text-[var(--muted)]"
+                            dateTime={result.date}
+                          >
                             {formatDate(result.date, {
                               weekday: "short",
                               day: "numeric",
@@ -376,23 +379,39 @@ export default function ResultsView() {
                             })}
                           </time>
                         </div>
-                        <div className="result-scoreboard">
-                          <strong className={homeWon ? "is-winner" : ""}>
-                            {result.home}
-                          </strong>
-                          <span className={homeWon ? "is-winner" : ""}>
-                            {result.homeScore}
-                          </span>
-                          <small>VS</small>
-                          <span className={awayWon ? "is-winner" : ""}>
-                            {result.awayScore}
-                          </span>
-                          <strong className={awayWon ? "is-winner" : ""}>
-                            {result.away}
-                          </strong>
+                        <div
+                          className="grid w-full min-w-0 gap-1"
+                          aria-label="Skor pertandingan"
+                        >
+                          <div
+                            className={`flex min-w-0 items-center justify-between gap-3 rounded-md px-2.5 py-2 ${homeWon ? "bg-[var(--ui-subtle)]" : ""}`}
+                          >
+                            <strong className="min-w-0 [overflow-wrap:anywhere] text-left text-[10px] font-semibold leading-tight text-[var(--ink)] sm:text-sm">
+                              {result.home}
+                            </strong>
+                            <span
+                              className={`shrink-0 text-right text-sm font-bold tabular-nums sm:text-base ${homeWon ? "text-[var(--ink)]" : "text-[var(--muted)]"}`}
+                            >
+                              {formatScore(result.homeScore)}
+                            </span>
+                          </div>
+                          <div
+                            className={`flex min-w-0 items-center justify-between gap-3 rounded-md px-2.5 py-2 ${awayWon ? "bg-[var(--ui-subtle)]" : ""}`}
+                          >
+                            <strong className="min-w-0 [overflow-wrap:anywhere] text-left text-[10px] font-semibold leading-tight text-[var(--ink)] sm:text-sm">
+                              {result.away}
+                            </strong>
+                            <span
+                              className={`shrink-0 text-right text-sm font-bold tabular-nums sm:text-base ${awayWon ? "text-[var(--ink)]" : "text-[var(--muted)]"}`}
+                            >
+                              {formatScore(result.awayScore)}
+                            </span>
+                          </div>
                         </div>
-                        <div className="result-card-footer">
-                          <span>{result.venue}</span>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="min-w-0 text-[10px] leading-snug text-[var(--muted)]">
+                            {result.venue}
+                          </span>
                           <Badge variant="secondary" className="result-simulation-badge">
                             DATA SIMULASI
                           </Badge>
@@ -419,15 +438,15 @@ export default function ResultsView() {
                 <>
                   <div className="medal-totals" aria-label="Jumlah medali">
                     <div className="medal-total-item">
-                      <MedalCircle count={medalTotals.gold} type="gold" />
+                      <strong className="tabular-nums">{medalTotals.gold}</strong>
                       <span>Emas</span>
                     </div>
                     <div className="medal-total-item">
-                      <MedalCircle count={medalTotals.silver} type="silver" />
+                      <strong className="tabular-nums">{medalTotals.silver}</strong>
                       <span>Perak</span>
                     </div>
                     <div className="medal-total-item">
-                      <MedalCircle count={medalTotals.bronze} type="bronze" />
+                      <strong className="tabular-nums">{medalTotals.bronze}</strong>
                       <span>Perunggu</span>
                     </div>
                   </div>
@@ -437,9 +456,15 @@ export default function ResultsView() {
                         <tr>
                           <th scope="col">Peringkat</th>
                           <th scope="col">Kontingen</th>
-                          <th scope="col">Emas</th>
-                          <th scope="col">Perak</th>
-                          <th scope="col">Perunggu</th>
+                          <th scope="col">
+                            <MedalIcon type="gold" />
+                          </th>
+                          <th scope="col">
+                            <MedalIcon type="silver" />
+                          </th>
+                          <th scope="col">
+                            <MedalIcon type="bronze" />
+                          </th>
                           <th scope="col">Total</th>
                         </tr>
                       </thead>
@@ -448,24 +473,9 @@ export default function ResultsView() {
                           <tr key={standing.contingent_id}>
                             <td>{String(standing.rank).padStart(2, "0")}</td>
                             <th scope="row">{standing.contingent_name}</th>
-                            <td>
-                              <MedalCircle
-                                count={standing.gold}
-                                type="gold"
-                              />
-                            </td>
-                            <td>
-                              <MedalCircle
-                                count={standing.silver}
-                                type="silver"
-                              />
-                            </td>
-                            <td>
-                              <MedalCircle
-                                count={standing.bronze}
-                                type="bronze"
-                              />
-                            </td>
+                            <td>{standing.gold}</td>
+                            <td>{standing.silver}</td>
+                            <td>{standing.bronze}</td>
                             <td>{standing.total}</td>
                           </tr>
                         ))}
@@ -493,9 +503,15 @@ export default function ResultsView() {
                     <thead>
                       <tr>
                         <th scope="col">Cabang olahraga</th>
-                        <th scope="col">Emas</th>
-                        <th scope="col">Perak</th>
-                        <th scope="col">Perunggu</th>
+                        <th scope="col">
+                          <MedalIcon type="gold" />
+                        </th>
+                        <th scope="col">
+                          <MedalIcon type="silver" />
+                        </th>
+                        <th scope="col">
+                          <MedalIcon type="bronze" />
+                        </th>
                         <th scope="col">Total</th>
                       </tr>
                     </thead>
@@ -503,21 +519,9 @@ export default function ResultsView() {
                       {sportMedalStandings.map((standing) => (
                         <tr key={standing.sport_id}>
                           <th scope="row">{standing.sport}</th>
-                          <td>
-                            <MedalCircle count={standing.gold} type="gold" />
-                          </td>
-                          <td>
-                            <MedalCircle
-                              count={standing.silver}
-                              type="silver"
-                            />
-                          </td>
-                          <td>
-                            <MedalCircle
-                              count={standing.bronze}
-                              type="bronze"
-                            />
-                          </td>
+                          <td>{standing.gold}</td>
+                          <td>{standing.silver}</td>
+                          <td>{standing.bronze}</td>
                           <td>{standing.total}</td>
                         </tr>
                       ))}
@@ -526,31 +530,22 @@ export default function ResultsView() {
                       <tr>
                         <th scope="row">Total</th>
                         <td>
-                          <MedalCircle
-                            count={sportMedalStandings.reduce(
-                              (total, standing) => total + standing.gold,
-                              0,
-                            )}
-                            type="gold"
-                          />
+                          {sportMedalStandings.reduce(
+                            (total, standing) => total + standing.gold,
+                            0,
+                          )}
                         </td>
                         <td>
-                          <MedalCircle
-                            count={sportMedalStandings.reduce(
-                              (total, standing) => total + standing.silver,
-                              0,
-                            )}
-                            type="silver"
-                          />
+                          {sportMedalStandings.reduce(
+                            (total, standing) => total + standing.silver,
+                            0,
+                          )}
                         </td>
                         <td>
-                          <MedalCircle
-                            count={sportMedalStandings.reduce(
-                              (total, standing) => total + standing.bronze,
-                              0,
-                            )}
-                            type="bronze"
-                          />
+                          {sportMedalStandings.reduce(
+                            (total, standing) => total + standing.bronze,
+                            0,
+                          )}
                         </td>
                         <td>
                           {sportMedalStandings.reduce(
