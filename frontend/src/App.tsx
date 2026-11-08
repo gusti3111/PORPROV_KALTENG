@@ -7,23 +7,28 @@ import {
   useLocation,
 } from "react-router-dom";
 import CaborView from "./views/CaborView";
+import BaganView from "./views/BaganView";
 import HomeView from "./views/HomeView";
 import Newsview from "./views/Newsview";
 import ResultsView from "./views/ResultsView";
 import ScheduleView from "./views/ScheduleView";
+import SportDetailView from "./views/SportDetailView";
 import VenueView from "./views/VenueView";
 
 function RouteEffects() {
   const { pathname, hash } = useLocation();
 
   useEffect(() => {
-    const isCabor = pathname === "/cabor";
+    const isCabor = pathname.startsWith("/cabor");
+    const isBracket = pathname === "/bagan";
     const isVenue = pathname === "/venue";
     const isSchedule = pathname === "/jadwal";
     const isResults = pathname === "/hasil";
     const isNews = pathname === "/berita";
     document.title = isCabor
       ? "Cabang Olahraga | PORPROV XIII Kalimantan Tengah 2026"
+      : isBracket
+        ? "Bagan Pertandingan | PORPROV XIII Kalimantan Tengah 2026"
       : isVenue
         ? "Venue | PORPROV XIII Kalimantan Tengah 2026"
         : isSchedule
@@ -39,6 +44,8 @@ function RouteEffects() {
         "content",
         isCabor
           ? "Daftar cabang olahraga PORPROV XIII Kalimantan Tengah 2026."
+          : isBracket
+            ? "Bagan dan alur pertandingan cabang olahraga PORPROV XIII Kalimantan Tengah 2026."
           : isVenue
             ? "Daftar venue pada jadwal sementara PORPROV XIII Kalimantan Tengah 2026."
             : isSchedule
@@ -71,6 +78,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomeView />} />
         <Route path="/cabor" element={<CaborView />} />
+        <Route path="/cabor/:sportId" element={<SportDetailView />} />
+        <Route path="/bagan" element={<BaganView />} />
         <Route path="/venue" element={<VenueView />} />
         <Route path="/jadwal" element={<ScheduleView />} />
         <Route path="/hasil" element={<ResultsView />} />

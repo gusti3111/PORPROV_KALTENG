@@ -71,7 +71,7 @@ npm run dev:frontend
 cd frontend && npm install && npm run dev
 ```
 
-Buka [http://localhost:3000](http://localhost:3000). Request ke `/api` akan otomatis di-*proxy* ke `http://localhost:8080`.
+Buka [http://localhost:3000](http://localhost:3000). Request ke `/api` akan otomatis di-*proxy* ke backend Compose di `http://localhost:8081`. Jika backend dijalankan manual pada port default `8080`, atur `VITE_BACKEND_PROXY_TARGET=http://localhost:8080` pada `frontend/.env.local`.
 Frontend menggunakan Axios untuk request HTTP dan Zustand untuk menyimpan
 data API beserta status loading/error. Secara default, request memakai
 `/api/v1` agar dapat melalui Vite proxy saat development atau reverse proxy

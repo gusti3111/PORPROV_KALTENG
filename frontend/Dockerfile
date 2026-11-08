@@ -2,6 +2,9 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
+# Keep application sources as an explicit cache input for frontend rebuilds.
+COPY src ./src
+COPY public ./public
 COPY . .
 RUN npm run build
 

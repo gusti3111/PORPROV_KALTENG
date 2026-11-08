@@ -54,7 +54,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO venues (id, name, category, latitude, longitude, note) VALUES
 (1, 'Stadion Sampuraga', 'Stadion & fasilitas olahraga', -2.6825645, 111.6306259, 'Tercantum untuk upacara pembukaan dan penutupan.'),
 (2, 'Stadion Atletik & Sport Center', 'Stadion & fasilitas olahraga', -2.6715645, 111.6286259, NULL),
-(3, 'GOR KONI', 'Stadion & fasilitas olahraga', -2.6785645, 111.6376259, NULL),
-(4, 'Sport Center', 'Stadion & fasilitas olahraga', -2.6745645, 111.6356259, NULL),
+(3, 'GOR KONI', 'Stadion & fasilitas olahraga', -2.687807488510188, 111.63072492325624, NULL),
+(4, 'Sport Center', 'Stadion & fasilitas olahraga', -2.7198037755266635, 111.63115888357069, NULL),
 (5, 'Kolam Renang', 'Stadion & fasilitas olahraga', -2.6835645, 111.6276259, NULL)
 ON CONFLICT (id) DO NOTHING;

@@ -56,17 +56,18 @@ type MatchParticipant struct {
 }
 
 type ScheduleMatch struct {
-	ID           string             `json:"id"`
-	SportName    string             `json:"sport_name"`
-	EventName    string             `json:"event_name"`
-	VenueName    string             `json:"venue_name"`
-	Title        string             `json:"title"`
-	RoundName    string             `json:"round_name"`
-	Date         string             `json:"date"`
-	Time         string             `json:"time"`
-	StartTime    time.Time          `json:"start_time"`
-	Status       MatchStatus        `json:"status"`
-	Participants []MatchParticipant `json:"participants"`
+	ID            string             `json:"id"`
+	SportName     string             `json:"sport_name"`
+	EventName     string             `json:"event_name"`
+	VenueName     string             `json:"venue_name"`
+	Title         string             `json:"title"`
+	RoundName     string             `json:"round_name"`
+	Date          string             `json:"date"`
+	Time          string             `json:"time"`
+	StartTime     time.Time          `json:"start_time"`
+	Status        MatchStatus        `json:"status"`
+	LiveStreamURL string             `json:"live_stream_url,omitempty"`
+	Participants  []MatchParticipant `json:"participants"`
 }
 
 type MedalStanding struct {
@@ -89,4 +90,38 @@ type SportMedalStanding struct {
 	Bronze  int    `json:"bronze"`
 	Total   int    `json:"total"`
 	Rank    int    `json:"rank"`
+}
+
+type SportTournament struct {
+	SportID    int                    `json:"sport_id"`
+	SportName  string                 `json:"sport_name"`
+	Groups     []SportTournamentGroup `json:"groups"`
+	Semifinals []SportTournamentMatch `json:"semifinals"`
+	Final      SportTournamentMatch   `json:"final"`
+	Bronze     SportTournamentMatch   `json:"bronze"`
+}
+
+type SportTournamentGroup struct {
+	Code      string                    `json:"code"`
+	Name      string                    `json:"name"`
+	Standings []SportTournamentStanding `json:"standings"`
+}
+
+type SportTournamentStanding struct {
+	Rank       int    `json:"rank"`
+	Contingent string `json:"contingent"`
+	Played     int    `json:"played"`
+	Won        int    `json:"won"`
+	Drawn      int    `json:"drawn"`
+	Lost       int    `json:"lost"`
+	Points     int    `json:"points"`
+}
+
+type SportTournamentMatch struct {
+	Label     string `json:"label"`
+	Home      string `json:"home"`
+	Away      string `json:"away"`
+	HomeScore *int   `json:"home_score"`
+	AwayScore *int   `json:"away_score"`
+	Status    string `json:"status"`
 }

@@ -118,6 +118,11 @@ export default function Newsview() {
             Ikuti kabar, informasi, dan cerita dari PORPROV XIII Kalimantan
             Tengah.
           </p>
+          <img
+            className="news-hero-illustration"
+            src="/burungBerita.png"
+            alt="Maskot PORPROV memegang kamera"
+          />
           <p className="news-demo-note" role="note">
             Contoh tampilan berita. Perbarui data dengan informasi resmi dari
             panitia.

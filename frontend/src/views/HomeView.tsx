@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ArrowIcon from "../components/ArrowIcon";
 import EventCountdown from "../components/EventCountdown";
@@ -8,7 +9,81 @@ import SiteHeader from "../components/SiteHeader";
 import { EVENT_START_LABEL } from "../event-config";
 import { useCompetitionStore } from "../stores/competitionStore";
 
+const featuredStadiums = [
+  {
+    club: "ARSENAL",
+    stadium: "Emirates Stadium",
+    city: "London, Inggris",
+    file: "Emirates Stadium 3.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Emirates_Stadium_3.jpg",
+    credit: "Photo: Photo2023 · CC0",
+  },
+  {
+    club: "CHELSEA",
+    stadium: "Stamford Bridge",
+    city: "London, Inggris",
+    file: "Stamford Bridge stadium.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Stamford_Bridge_stadium.jpg",
+    credit: "Photo: Andrew · CC BY-SA 3.0",
+  },
+  {
+    club: "LIVERPOOL",
+    stadium: "Anfield",
+    city: "Liverpool, Inggris",
+    file: "Liverpool anfield road stadium.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Liverpool_anfield_road_stadium.jpg",
+    credit: "Photo: Arne Müseler / arne-mueseler.com · CC BY-SA 3.0",
+    photographer: "https://arne-mueseler.com",
+  },
+  {
+    club: "MANCHESTER CITY",
+    stadium: "Etihad Stadium",
+    city: "Manchester, Inggris",
+    file: "Etihad Stadium.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Etihad_Stadium.jpg",
+    credit: "Photo: Cléria De Souza · CC BY 2.0",
+  },
+  {
+    club: "MANCHESTER UNITED",
+    stadium: "Old Trafford",
+    city: "Manchester, Inggris",
+    file: "Manchester United Old Trafford.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Manchester_United_Old_Trafford.jpg",
+    credit: "Photo: Arne Müseler / arne-mueseler.com · CC BY-SA 3.0",
+    photographer: "https://arne-mueseler.com",
+  },
+  {
+    club: "TOTTENHAM HOTSPUR",
+    stadium: "Tottenham Hotspur Stadium",
+    city: "London, Inggris",
+    file: "London Tottenham Hotspur Stadium.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:London_Tottenham_Hotspur_Stadium.jpg",
+    credit: "Photo: Arne Müseler / arne-mueseler.com · CC BY-SA 3.0",
+    photographer: "https://arne-mueseler.com",
+  },
+  {
+    club: "NEWCASTLE UNITED",
+    stadium: "St James’ Park",
+    city: "Newcastle, Inggris",
+    file: "Newcastle st-james-park stadium.jpg",
+    source: "https://commons.wikimedia.org/wiki/File:Newcastle_st-james-park_stadium.jpg",
+    credit: "Photo: Arne Müseler · CC BY-SA 3.0",
+    photographer: "https://arne-mueseler.com",
+  },
+];
+
+const stadiumImageUrl = (file: string) =>
+  `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=1000`;
+
+const licenseUrl = (credit: string) =>
+  credit.includes("CC BY-SA 3.0")
+    ? "https://creativecommons.org/licenses/by-sa/3.0/"
+    : credit.includes("CC BY 2.0")
+      ? "https://creativecommons.org/licenses/by/2.0/"
+      : "https://creativecommons.org/publicdomain/zero/1.0/";
+
 export default function HomeView() {
+  const stadiumTrackRef = useRef<HTMLDivElement>(null);
   const sports = useCompetitionStore((state) => state.sports);
   const loadingSports = useCompetitionStore((state) => state.loading.sports);
   const sportsError = useCompetitionStore((state) => state.errors.sports);
@@ -27,6 +102,13 @@ export default function HomeView() {
           id="beranda"
           className="relative flex min-h-[610px] items-center overflow-hidden bg-[var(--green)] text-white max-[900px]:min-h-[570px] max-[620px]:min-h-[710px] max-[620px]:items-start"
         >
+          <img
+            className="home-hero-photo"
+            src="/sportcenter.webp"
+            alt=""
+            aria-hidden="true"
+          />
+          <div className="home-hero-photo-overlay" aria-hidden="true" />
           <div className="hero-grid" aria-hidden="true" />
           <div
             className="hero-orbit hero-orbit-one"
@@ -39,7 +121,7 @@ export default function HomeView() {
 
           <div className="relative z-[2] w-[54%] pt-[76px] pb-[105px] pl-[10%] min-[1500px]:pl-[max(10%,calc((100vw-1200px)/2))] max-[900px]:w-[60%] max-[900px]:pl-[7%] max-[620px]:w-full max-[620px]:px-[6%] max-[620px]:pt-[65px] max-[620px]:pb-[170px]">
             <p className="mb-6 flex items-center gap-[10px] text-[10px] font-extrabold uppercase tracking-[0.15em] text-[var(--lime)]">
-              <span className="size-[7px] rounded-full bg-[var(--lime)] shadow-[0_0_14px_rgba(211,237,113,0.75)]" />
+              <span className="size-[7px] rounded-full bg-[var(--lime)] shadow-[0_0_14px_rgba(220,236,249,0.75)]" />
               Panggung prestasi Kalimantan Tengah
             </p>
             <h1 className="m-0 text-[clamp(72px,9.5vw,142px)] font-black leading-[0.84] tracking-[-0.105em] max-[900px]:text-[clamp(67px,11vw,100px)] max-[620px]:text-[clamp(76px,20vw,114px)]">
@@ -56,7 +138,7 @@ export default function HomeView() {
               berkompetisi, berprestasi, dan tumbuh bersama.
             </p>
             <div className="mt-[29px] ml-[5px] flex items-center gap-[25px] max-[620px]:flex-wrap max-[620px]:gap-x-5 max-[620px]:gap-y-[14px]">
-              <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[11px] font-extrabold text-[var(--ink)] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#e1f59c] max-[620px]:min-h-[45px] max-[620px]:px-[15px]" href="#tentang">
+              <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[11px] font-extrabold text-[#102b49] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#c6e2f5] max-[620px]:min-h-[45px] max-[620px]:px-[15px]" href="#tentang">
                 Jelajahi PORPROV <ArrowIcon />
               </a>
               <Link className="rounded-md text-[11px] font-bold text-white/80 hover:text-[var(--lime)]" to="/cabor">
@@ -64,6 +146,12 @@ export default function HomeView() {
               </Link>
             </div>
           </div>
+
+          <img
+            className="home-hero-mascot"
+            src="/maskot.png"
+            alt="Maskot PORPROV XIII Kalimantan Tengah membawa obor"
+          />
 
           <div className="hero-art" aria-label="Ilustrasi lintasan olahraga">
             <div className="art-sun" />
@@ -86,6 +174,8 @@ export default function HomeView() {
               13<span>/XV</span>
             </span>
           </div>
+
+
 
           <div className="absolute right-[7.2%] bottom-0 left-[7.2%] flex h-14 items-center gap-4 border-t border-white/20 text-[8px] font-extrabold tracking-[0.15em] text-white/75 max-[620px]:right-[5%] max-[620px]:left-[5%] max-[620px]:gap-2 max-[620px]:text-[7px]">
             <span>SPORTIVITAS</span>
@@ -155,6 +245,69 @@ export default function HomeView() {
               <strong className="text-[29px] font-black tracking-[-0.06em] text-[var(--green)] max-[620px]:text-[23px]">KALTENG</strong>
               <small className="text-[8px] font-extrabold tracking-[0.12em] text-[var(--muted)] max-[620px]:text-[6px] max-[620px]:leading-[1.5]">SEMANGAT SATU PROVINSI</small>
             </div>
+          </div>
+        </section>
+
+        <section className="home-stadium-section" aria-labelledby="home-stadium-title">
+          <div className="home-stadium-heading">
+            <div>
+              <p className="home-stadium-kicker"><span>02</span> GALERI STADION</p>
+              <h2 id="home-stadium-title">Venue yang tersedia</h2>
+              <p className="home-stadium-description">Berikut adalah Venue yang digunakan untuk pertandingan nanti.</p>
+            </div>
+            <div className="home-stadium-controls" aria-label="Kontrol carousel stadion">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Stadion sebelumnya"
+                onClick={() => stadiumTrackRef.current?.scrollBy({ left: -360, behavior: "smooth" })}
+              >
+                <ChevronLeft aria-hidden="true" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Stadion berikutnya"
+                onClick={() => stadiumTrackRef.current?.scrollBy({ left: 360, behavior: "smooth" })}
+              >
+                <ChevronRight aria-hidden="true" />
+              </Button>
+            </div>
+          </div>
+          <div className="home-stadium-track" ref={stadiumTrackRef}>
+            {featuredStadiums.map((item, index) => (
+              <article className="home-stadium-card" key={item.club}>
+                <a
+                  className="home-stadium-image-link"
+                  href={item.source}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Lihat sumber foto ${item.stadium} di Wikimedia Commons`}
+                >
+                  <img
+                    className="home-stadium-image"
+                    src={stadiumImageUrl(item.file)}
+                    alt={`${item.stadium}, stadion ${item.club}`}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span className="home-stadium-index">{String(index + 1).padStart(2, "0")}</span>
+                </a>
+                <div className="home-stadium-copy">
+                  <small>{item.club}</small>
+                  <h3>{item.stadium}</h3>
+                  <p>{item.city}</p>
+                  <a className="home-stadium-credit" href={item.photographer ?? item.source} target="_blank" rel="noreferrer">
+                    {item.credit}
+                  </a>
+                  <a className="home-stadium-license" href={licenseUrl(item.credit)} target="_blank" rel="noreferrer">
+                    Lisensi dan sumber foto
+                  </a>
+                </div>
+              </article>
+            ))}
           </div>
         </section>
 
@@ -233,7 +386,7 @@ export default function HomeView() {
               <br />
               <span>jadi juara.</span>
             </h2>
-            <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[11px] font-extrabold text-[var(--ink)] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#e1f59c] max-[620px]:min-h-[45px] max-[620px]:px-[15px]" href="#beranda">
+            <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[11px] font-extrabold text-[var(--ink)] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#c6e2f5] max-[620px]:min-h-[45px] max-[620px]:px-[15px]" href="#beranda">
               Kembali ke atas <ArrowIcon diagonal />
             </a>
           </div>

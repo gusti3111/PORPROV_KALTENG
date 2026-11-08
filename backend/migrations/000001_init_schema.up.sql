@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS venues (
     name VARCHAR(150) NOT NULL,
     category VARCHAR(100) NOT NULL,
     address TEXT,
-    latitude DECIMAL(10, 7) NOT NULL,
-    longitude DECIMAL(10, 7) NOT NULL,
+    latitude NUMERIC NOT NULL,
+    longitude NUMERIC NOT NULL,
     note TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

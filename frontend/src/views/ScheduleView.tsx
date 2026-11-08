@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,27 +11,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { useCompetitionStore } from "../stores/competitionStore";
 import { SlidersHorizontal } from "lucide-react";
 
-type ScheduleMode = "harian" | "kalender" | "live";
 type ScheduleEvent = {
+  id: string;
   date: string;
   time: string;
   sport: string;
   venue: string;
   title: string;
   status: string;
+  liveStreamUrl?: string;
 };
 
-const modes: { id: ScheduleMode; label: string }[] = [
-  { id: "harian", label: "Harian" },
-  { id: "kalender", label: "Kalender" },
-  { id: "live", label: "Live" },
-];
 
 function getScheduleDates(events: ScheduleEvent[]) {
   if (events.length === 0) return [];
@@ -63,10 +58,6 @@ function formatDate(date: string, options: Intl.DateTimeFormatOptions) {
   }).format(new Date(`${date}T12:00:00+07:00`));
 }
 
-function isScheduleMode(value: string | null): value is ScheduleMode {
-  return modes.some((mode) => mode.id === value);
-}
-
 export default function ScheduleView() {
   const matches = useCompetitionStore((state) => state.matches);
   const sports = useCompetitionStore((state) => state.sports);
@@ -91,12 +82,14 @@ export default function ScheduleView() {
   const scheduleEvents = useMemo(
     () =>
       matches.map((match) => ({
+        id: match.id,
         date: match.date,
         time: match.time,
         sport: match.sport_name,
         venue: match.venue_name,
         title: match.title,
         status: match.status,
+        liveStreamUrl: match.live_stream_url,
       })),
     [matches],
   );
@@ -106,21 +99,19 @@ export default function ScheduleView() {
   );
   const firstScheduleDate = scheduleDates[0] ?? "";
   const lastScheduleDate = scheduleDates[scheduleDates.length - 1] ?? "";
-  const modeParam = searchParams.get("tampilan");
-  const mode: ScheduleMode = isScheduleMode(modeParam) ? modeParam : "harian";
   const requestedDate = searchParams.get("tanggal");
   const selectedDate = scheduleDates.includes(requestedDate ?? "")
     ? requestedDate!
-    : firstScheduleDate || new Date().toISOString().slice(0, 10);
+    : scheduleDates.includes(new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date()))
+      ? new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date())
+      : firstScheduleDate || new Date().toISOString().slice(0, 10);
   const selectedSport = searchParams.get("cabor") ?? "";
   const selectedVenue = searchParams.get("venue") ?? "";
 
   const visibleEvents = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("id");
     return scheduleEvents.filter((event) => {
-      const matchesDate =
-        mode !== "harian" || event.date === selectedDate;
-      const matchesMode = mode !== "live" || event.status === "ONGOING";
+      const matchesDate = event.date === selectedDate;
       const matchesSport = !selectedSport || event.sport === selectedSport;
       const matchesVenue = !selectedVenue || event.venue === selectedVenue;
       const matchesQuery =
@@ -130,13 +121,12 @@ export default function ScheduleView() {
           .includes(normalizedQuery);
       return (
         matchesDate &&
-        matchesMode &&
         matchesSport &&
         matchesVenue &&
         matchesQuery
       );
     });
-  }, [mode, query, scheduleEvents, selectedDate, selectedSport, selectedVenue]);
+  }, [query, scheduleEvents, selectedDate, selectedSport, selectedVenue]);
 
   function updateParams(updates: Record<string, string | null>) {
     const next = new URLSearchParams(searchParams);
@@ -150,14 +140,8 @@ export default function ScheduleView() {
   function selectDate(date: string) {
     updateParams({
       tanggal: date,
-      tampilan: mode === "kalender" ? "harian" : mode,
     });
   }
-
-  const firstWeekday =
-    (new Date(`${firstScheduleDate || selectedDate}T00:00:00Z`).getUTCDay() +
-      6) %
-    7;
 
   return (
     <>
@@ -177,9 +161,13 @@ export default function ScheduleView() {
             Jadwal <span>pertandingan.</span>
           </h1>
           <p className="schedule-description">
-            Telusuri jadwal PORPROV XIII berdasarkan hari, cabang olahraga, dan
-            tempat pertandingan.
+            Lihat semua pertandingan pada tanggal pilihan, termasuk status live dan hasil yang sudah selesai.
           </p>
+          <img
+            className="schedule-hero-illustration"
+            src="/burungStopwatch.png"
+            alt="Maskot PORPROV memegang stopwatch"
+          />
           <div className="schedule-source-note" role="note">
             <strong>Jadwal dari backend</strong>
             <span>
@@ -190,23 +178,7 @@ export default function ScheduleView() {
         </section>
 
         <section className="schedule-content section-wrap" aria-label="Jadwal">
-          <Tabs
-            value={mode}
-            className="w-full"
-            onValueChange={(value) => {
-              if (isScheduleMode(value)) updateParams({ tampilan: value });
-            }}
-          >
-            <TabsList aria-label="Tampilan jadwal" className="w-fit max-w-full">
-              {modes.map((item) => (
-                <TabsTrigger key={item.id} value={item.id} className="px-4">
-                  {item.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-
-          <div className="schedule-toolbar">
+<div className="schedule-toolbar">
             <Button
               variant="outline"
               size="lg"
@@ -334,64 +306,12 @@ export default function ScheduleView() {
             </div>
           )}
 
-          {mode === "kalender" ? (
-            <Card className="schedule-calendar gap-0 p-0">
-              <div className="schedule-calendar-heading">
-                <h2>
-                  {firstScheduleDate
-                    ? `${formatDate(firstScheduleDate, { month: "long" })} – ${formatDate(lastScheduleDate, { month: "long", year: "numeric" })}`
-                    : "Belum ada jadwal"}
-                </h2>
-                <span>
-                  {firstScheduleDate
-                    ? `${formatDate(firstScheduleDate, { day: "numeric", month: "short" })} – ${formatDate(lastScheduleDate, { day: "numeric", month: "short" })}`
-                    : "Jadwal belum tersedia"}
-                </span>
-              </div>
-              <div className="schedule-calendar-grid">
-                {["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"].map(
-                  (day) => (
-                    <span key={day} className="schedule-calendar-weekday">
-                      {day}
-                    </span>
-                  ),
-                )}
-                {Array.from({ length: firstWeekday }, (_, index) => (
-                  <span
-                    key={`blank-${index}`}
-                    className="schedule-calendar-blank"
-                    aria-hidden="true"
-                  />
-                ))}
-                {scheduleDates.map((date) => (
-                  <Button
-                    key={date}
-                    type="button"
-                    variant={selectedDate === date ? "default" : "outline"}
-                    className="h-auto min-h-14 w-full flex-col gap-1"
-                    aria-label={formatDate(date, {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                    })}
-                    aria-pressed={selectedDate === date}
-                    onClick={() => selectDate(date)}
-                  >
-                    <strong>{formatDate(date, { day: "numeric" })}</strong>
-                    <small>{formatDate(date, { month: "short" })}</small>
-                  </Button>
-                ))}
-              </div>
-            </Card>
-          ) : (
-            <Card className="schedule-results gap-0 p-0" aria-live="polite">
+          <Card className="schedule-results gap-0 p-0" aria-live="polite">
               <div className="schedule-results-heading">
                 <div>
-                  <p>{mode === "live" ? "PERTANDINGAN LANGSUNG" : "JADWAL HARIAN"}</p>
+                  <p>SEMUA PERTANDINGAN</p>
                   <h2>
-                    {mode === "live"
-                      ? "Belum ada pertandingan live"
-                      : formatDate(selectedDate, {
+                    {formatDate(selectedDate, {
                           weekday: "long",
                           day: "numeric",
                           month: "long",
@@ -400,35 +320,37 @@ export default function ScheduleView() {
                   </h2>
                 </div>
                 <span>
-                  {mode === "live"
-                    ? `${visibleEvents.length} pertandingan`
-                    : `${visibleEvents.length} sesi`}
+                  {visibleEvents.length} pertandingan
                 </span>
               </div>
-              {mode !== "live" && visibleEvents.length > 0 ? (
+              {visibleEvents.length > 0 ? (
                 <div className="schedule-event-list">
                   {visibleEvents.map((event) => (
                     <article
                       className="schedule-event-card"
-                      key={`${event.date}-${event.time}-${event.sport}`}
+                      key={event.id}
                     >
                       <time>{event.time}</time>
                       <div>
                         <strong>{event.sport}</strong>
                         <span className="schedule-event-title">{event.title}</span>
                         <small>{event.venue}</small>
+                        {event.status === "ONGOING" && event.liveStreamUrl && (
+                          <a className="schedule-live-link" href={event.liveStreamUrl} target="_blank" rel="noreferrer">
+                            Tonton live di YouTube (demo)
+                          </a>
+                        )}
                       </div>
-                      <Badge variant="secondary" className="schedule-event-badge">
-                        {event.status}
+                      <Badge variant="secondary" className={`schedule-event-badge schedule-status-${event.status.toLowerCase()}`}>
+                        {statusLabel(event.status)}
                       </Badge>
                     </article>
                   ))}
                 </div>
               ) : (
-                <ScheduleEmptyState mode={mode} />
+                <ScheduleEmptyState />
               )}
             </Card>
-          )}
         </section>
       </main>
 
@@ -437,22 +359,21 @@ export default function ScheduleView() {
   );
 }
 
-function ScheduleEmptyState({ mode }: { mode: ScheduleMode }) {
+function statusLabel(status: string) {
+  if (status === "ONGOING") return "Live";
+  if (status === "FINISHED") return "Finished";
+  if (status === "SCHEDULED") return "Terjadwal";
+  if (status === "POSTPONED") return "Ditunda";
+  if (status === "CANCELLED") return "Dibatalkan";
+  return status;
+}
+
+function ScheduleEmptyState() {
   return (
     <div className="schedule-empty">
-      <span className="schedule-empty-icon" aria-hidden="true">
-        {mode === "live" ? "◷" : "▤"}
-      </span>
-      <h3>
-        {mode === "live"
-          ? "Belum ada pertandingan berlangsung"
-          : "Rincian jadwal belum tersedia"}
-      </h3>
-      <p>
-        {mode === "live"
-          ? "Data simulasi tidak menampilkan pertandingan live. Informasi live akan tersedia setelah data resmi terhubung."
-          : "Tidak ada sesi simulasi yang cocok. Coba pilih tanggal atau filter yang lain."}
-      </p>
+      <span className="schedule-empty-icon" aria-hidden="true">–</span>
+      <h3>Belum ada pertandingan pada tanggal ini</h3>
+      <p>Pilih tanggal lain atau ubah filter cabang olahraga dan venue.</p>
     </div>
   );
 }

@@ -33,10 +33,10 @@ func Connect(ctx context.Context, dsn string) (*DB, error) {
 	defer cancel()
 
 	if err := pool.Ping(pingCtx); err != nil {
-		log.Printf("[database] PostgreSQL not yet reachable (%v), proceeding with standby pool", err)
-	} else {
-		log.Printf("[database] PostgreSQL connection established successfully")
+		pool.Close()
+		return nil, fmt.Errorf("connect to PostgreSQL: %w", err)
 	}
+	log.Printf("[database] PostgreSQL connection established successfully")
 
 	return &DB{Pool: pool}, nil
 }

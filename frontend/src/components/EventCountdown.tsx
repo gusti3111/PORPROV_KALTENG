@@ -49,12 +49,12 @@ export default function EventCountdown() {
       {units.map((unit) => (
         <div
           key={unit.label}
-          className="grid min-w-[62px] justify-items-center gap-1 rounded-[var(--ui-radius)] bg-[var(--ui-subtle)] px-2 pt-[10px] pb-2 text-white max-[620px]:min-w-0 max-[620px]:flex-1 max-[620px]:px-[5px]"
+          className="countdown-unit grid min-w-[62px] justify-items-center gap-1 rounded-[var(--ui-radius)] bg-[var(--ui-subtle)] px-2 pt-[10px] pb-2 text-[var(--ui-foreground)] max-[620px]:min-w-0 max-[620px]:flex-1 max-[620px]:px-[5px]"
         >
           <strong className="text-[23px] tabular-nums leading-none tracking-[-0.05em] max-[620px]:text-[21px]">
             {String(unit.value).padStart(2, "0")}
           </strong>
-          <span className="text-[8px] font-bold text-[var(--lime)]">{unit.label}</span>
+          <span className="countdown-unit-label text-[8px] font-bold">{unit.label}</span>
         </div>
       ))}
     </div>

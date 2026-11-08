@@ -10,6 +10,7 @@ import type { Sport as SportCard } from "../types/sport";
 
 function toSportCards(sports: BackendSport[]): SportCard[] {
   return sports.map((sport) => ({
+    id: sport.id,
     name: sport.name,
     group: sport.category,
     icon: sport.icon,
@@ -28,10 +29,11 @@ export default function CaborView() {
   }, [fetchSports]);
 
   const sportCards = toSportCards(sports);
-  const mainSportsCount = sportCards.filter(
+  const demoSportCards = sportCards.slice(0, 10);
+  const mainSportsCount = demoSportCards.filter(
     (sport) => sport.group === "Utama",
   ).length;
-  const exhibitionSportsCount = sportCards.filter(
+  const exhibitionSportsCount = demoSportCards.filter(
     (sport) => sport.group === "Eksebisi",
   ).length;
 
@@ -59,6 +61,11 @@ export default function CaborView() {
               Jelajahi cabang olahraga <span aria-hidden="true">↓</span>
             </a>
           </div>
+          <img
+            className="cabor-page-hero-illustration"
+            src="/burungCabor.png"
+            alt="Maskot PORPROV membawa bola basket, sepak bola, tenis, dan voli"
+          />
           <div className="cabor-hero-number" aria-hidden="true">
             13
           </div>
@@ -102,15 +109,15 @@ export default function CaborView() {
           )}
           {!loading && !error && sportCards.length > 0 && (
             <SportSearch
-              sports={sportCards}
+              sports={demoSportCards}
               mainSportsCount={mainSportsCount}
               exhibitionSportsCount={exhibitionSportsCount}
             />
           )}
 
           <p className="cabor-disclaimer">
-            Daftar cabang dimuat dari backend dan masih dapat berubah. Informasi
-            resmi perlu dikonfirmasi kepada panitia.
+            Untuk gambaran, halaman ini menampilkan 10 cabang pertama. Klasemen,
+            skor, dan bagan penyisihan pada halaman detail masih berupa data dummy.
           </p>
         </section>
 

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import type { Sport } from "../types/sport";
 import ArrowIcon from "./ArrowIcon";
@@ -103,10 +103,10 @@ export default function SportSearch({
       {filteredSports.length > 0 ? (
         <div className="cabor-grid">
           {filteredSports.map((sport) => (
-            <Card
+            <Link
               key={sport.name}
               className="cabor-card"
-              role="article"
+              to={sport.id ? `/cabor/${sport.id}` : "/cabor"}
               aria-label={sport.name}
             >
               <div className="cabor-card-top">
@@ -132,7 +132,7 @@ export default function SportSearch({
                 </span>
                 <ArrowIcon />
               </div>
-            </Card>
+            </Link>
           ))}
         </div>
       ) : (

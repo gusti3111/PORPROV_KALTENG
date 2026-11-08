@@ -5,9 +5,11 @@ export default function SiteFooter() {
   return (
     <footer className="site-footer">
       <Link className="brand footer-brand" to="/">
-        <span className="brand-mark" aria-hidden="true">
-          P<span>13</span>
-        </span>
+        <img
+          className="brand-logo"
+          src="/iconporKalteng.jpeg"
+          alt="Logo PORPROV XIII Kalimantan Tengah"
+        />
         <span className="brand-copy">
           <strong>PORPROV</strong>
           <small>KALIMANTAN TENGAH</small>

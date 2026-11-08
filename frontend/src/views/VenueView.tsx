@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,17 @@ export default function VenueView() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [selectedName, setSelectedName] = useState<string | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  const scrollCarousel = (direction: -1 | 1) => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    carousel.scrollBy({
+      left: direction * carousel.clientWidth * 0.82,
+      behavior: "smooth",
+    });
+  };
 
   useEffect(() => {
     void fetchVenues();
@@ -54,6 +66,12 @@ export default function VenueView() {
   const selectedVenue =
     filteredVenues.find((venue) => venue.name === selectedName) ?? null;
 
+  useEffect(() => {
+    if (selectedName && !venues.some((venue) => venue.name === selectedName)) {
+      setSelectedName(null);
+    }
+  }, [selectedName, venues]);
+
   return (
     <>
       <SiteHeader />
@@ -78,6 +96,11 @@ export default function VenueView() {
               Jelajahi venue <span aria-hidden="true">↓</span>
             </a>
           </div>
+          <img
+            className="venue-hero-illustration"
+            src="/stadionBurung.png"
+            alt="Maskot PORPROV berdiri di atas ilustrasi stadion"
+          />
           <div className="cabor-hero-number" aria-hidden="true">
             XIII
           </div>
@@ -87,11 +110,59 @@ export default function VenueView() {
           </div>
         </section>
 
+        <section className="venue-carousel-section section-wrap" aria-label="Venue pertandingan">
+          <div className="venue-carousel-heading">
+            <div>
+              <p className="cabor-section-kicker"><span>01</span> JELAJAHI LOKASI</p>
+              <h2>Venue <span>pertandingan.</span></h2>
+            </div>
+            <div className="venue-carousel-controls" aria-label="Kontrol carousel venue">
+              <Button type="button" variant="outline" size="icon" aria-label="Venue sebelumnya" onClick={() => scrollCarousel(-1)}>
+                <ChevronLeft aria-hidden="true" />
+              </Button>
+              <Button type="button" variant="outline" size="icon" aria-label="Venue berikutnya" onClick={() => scrollCarousel(1)}>
+                <ChevronRight aria-hidden="true" />
+              </Button>
+            </div>
+          </div>
+          {loading && <p className="venue-carousel-status" role="status">Memuat venue...</p>}
+          {error && <p className="venue-carousel-status" role="alert">Venue belum dapat dimuat dari backend.</p>}
+          {!loading && !error && venues.length > 0 && (
+            <div className="venue-carousel-track" ref={carouselRef}>
+              {venues.map((venue, index) => (
+                <button
+                  className={`venue-carousel-card${selectedName === venue.name ? " is-selected" : ""}`}
+                  key={venue.id}
+                  type="button"
+                  aria-pressed={selectedName === venue.name}
+                  onClick={() => {
+                    setQuery("");
+                    setCategory("");
+                    setSelectedName(venue.name);
+                    document.getElementById("daftar-venue")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                >
+                  <span className="venue-carousel-card-top">
+                    <span className="venue-carousel-index">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="venue-carousel-pin"><MapPin aria-hidden="true" /></span>
+                  </span>
+                  <span className="venue-carousel-copy">
+                    <small>{venue.category}</small>
+                    <strong>{venue.name}</strong>
+                    <span>{venue.address || venue.note || "Lokasi pertandingan PORPROV XIII"}</span>
+                  </span>
+                  <span className="venue-carousel-link">LIHAT DI PETA <ChevronRight aria-hidden="true" /></span>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+
         <section id="daftar-venue" className="cabor-content section-wrap">
           <div className="cabor-section-heading">
             <div>
               <p className="cabor-section-kicker">
-                <span>01</span> LOKASI PERTANDINGAN
+                <span>02</span> LOKASI PERTANDINGAN
               </p>
               <h2>
                 Cari venue

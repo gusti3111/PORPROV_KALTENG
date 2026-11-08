@@ -7,15 +7,50 @@ export type Sport = {
   description: string;
 };
 
+export type SportTournamentStanding = {
+  rank: number;
+  contingent: string;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  points: number;
+};
+
+export type SportTournamentGroup = {
+  code: string;
+  name: string;
+  standings: SportTournamentStanding[];
+};
+
+export type SportTournamentMatch = {
+  label: string;
+  home: string;
+  away: string;
+  home_score: number | null;
+  away_score: number | null;
+  status: "SCHEDULED" | "FINISHED";
+};
+
+export type SportTournament = {
+  sport_id: number;
+  sport_name: string;
+  groups: SportTournamentGroup[];
+  semifinals: SportTournamentMatch[];
+  final: SportTournamentMatch;
+  bronze: SportTournamentMatch;
+};
+
 export type Venue = {
   id: number;
   name: string;
   category: string;
-  address: string;
+  address?: string;
   latitude: number;
   longitude: number;
   note: string;
   position: [number, number];
+  image_url?: string; // <-- Tambahkan baris ini
 };
 
 export type MatchStatus =
@@ -45,6 +80,7 @@ export type ScheduleMatch = {
   time: string;
   start_time: string;
   status: MatchStatus;
+  live_stream_url?: string;
   participants: MatchParticipant[];
 };
 

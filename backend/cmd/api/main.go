@@ -26,7 +26,7 @@ func main() {
 	// Connect to Database
 	db, err := database.Connect(ctx, cfg.DatabaseURL)
 	if err != nil {
-		log.Printf("[server] Warning: Database connection failed: %v", err)
+		log.Fatalf("[server] Database connection failed: %v", err)
 	}
 	defer db.Close()
 

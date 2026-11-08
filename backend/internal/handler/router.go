@@ -39,6 +39,7 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 	medalRepo := repository.NewMedalRepository(db)
 	matchRepo := repository.NewMatchRepository(db)
 	sportMedalRepo := repository.NewSportMedalRepository(db)
+	sportTournamentRepo := repository.NewSportTournamentRepository(db)
 
 	// Handlers
 	healthHandler := NewHealthHandler(db)
@@ -48,6 +49,7 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 	medalHandler := NewMedalHandler(medalRepo)
 	matchHandler := NewMatchHandler(matchRepo)
 	sportMedalHandler := NewSportMedalHandler(sportMedalRepo)
+	sportTournamentHandler := NewSportTournamentHandler(sportTournamentRepo)
 
 	// Base health check
 	r.Get("/healthz", healthHandler.Health)
@@ -58,6 +60,7 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 
 		api.Route("/sports", func(sr chi.Router) {
 			sr.Get("/", sportHandler.GetAll)
+			sr.Get("/{id}/tournament", sportTournamentHandler.GetBySportID)
 			sr.Get("/{id}", sportHandler.GetByID)
 		})
 

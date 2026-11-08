@@ -193,6 +193,11 @@ export default function ResultsView() {
             Rekap hasil pertandingan dan perolehan medali PORPROV XIII
             Kalimantan Tengah.
           </p>
+          <img
+            className="results-hero-illustration"
+            src="/hasilBurung.png"
+            alt="Maskot PORPROV menunjukkan medali"
+          />
           <Card className="results-total flex-row" aria-label={`${totalMedals} medali`}>
             <div className="results-total-icon" aria-hidden="true">
               XIII
@@ -384,7 +389,7 @@ export default function ResultsView() {
                           aria-label="Skor pertandingan"
                         >
                           <div
-                            className={`flex min-w-0 items-center justify-between gap-3 rounded-md px-2.5 py-2 ${homeWon ? "bg-[var(--ui-subtle)]" : ""}`}
+                            className={`flex min-w-0 items-center justify-between gap-3 rounded-md px-2.5 py-2 ${homeWon ? "winner-highlight" : ""}`}
                           >
                             <strong className="min-w-0 [overflow-wrap:anywhere] text-left text-[10px] font-semibold leading-tight text-[var(--ink)] sm:text-sm">
                               {result.home}
@@ -396,7 +401,7 @@ export default function ResultsView() {
                             </span>
                           </div>
                           <div
-                            className={`flex min-w-0 items-center justify-between gap-3 rounded-md px-2.5 py-2 ${awayWon ? "bg-[var(--ui-subtle)]" : ""}`}
+                            className={`flex min-w-0 items-center justify-between gap-3 rounded-md px-2.5 py-2 ${awayWon ? "winner-highlight" : ""}`}
                           >
                             <strong className="min-w-0 [overflow-wrap:anywhere] text-left text-[10px] font-semibold leading-tight text-[var(--ink)] sm:text-sm">
                               {result.away}

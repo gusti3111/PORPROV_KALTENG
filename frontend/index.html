@@ -7,7 +7,17 @@
       name="description"
       content="Portal informasi PORPROV XIII Kalimantan Tengah 2026."
     />
-    <meta name="theme-color" content="#164b36" />
+    <meta name="theme-color" content="#102b49" />
+    <script>
+      (() => {
+        const savedTheme = localStorage.getItem("porprov-theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+          document.documentElement.classList.add("dark");
+          document.documentElement.style.colorScheme = "dark";
+        }
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <title>PORPROV XIII Kalimantan Tengah 2026</title>
   </head>

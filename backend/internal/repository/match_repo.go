@@ -55,6 +55,7 @@ func (r *MatchRepository) List(ctx context.Context, filters MatchFilters) ([]mod
 			COALESCE(m.round_name, ''),
 			m.start_time,
 			m.status::text,
+			COALESCE(m.live_stream_url, ''),
 			COALESCE(
 				jsonb_agg(
 					jsonb_build_object(
@@ -102,6 +103,7 @@ func (r *MatchRepository) List(ctx context.Context, filters MatchFilters) ([]mod
 			&match.RoundName,
 			&match.StartTime,
 			&match.Status,
+			&match.LiveStreamURL,
 			&participantsJSON,
 		); err != nil {
 			return nil, fmt.Errorf("scan match: %w", err)
