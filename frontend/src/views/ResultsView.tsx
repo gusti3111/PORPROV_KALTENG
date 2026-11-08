@@ -179,7 +179,7 @@ export default function ResultsView() {
       <main className="results-page">
         <section className="results-hero section-wrap">
           <div className="schedule-breadcrumb">
-            <Link to="/">Beranda</Link>
+            <Link to="/">BERANDA</Link>
             <span aria-hidden="true">/</span>
             <span>Hasil pertandingan</span>
           </div>
