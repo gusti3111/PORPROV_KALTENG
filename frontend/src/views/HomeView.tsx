@@ -9,11 +9,21 @@ import SiteHeader from "../components/SiteHeader";
 import { EVENT_START_LABEL } from "../event-config";
 import { useCompetitionStore } from "../stores/competitionStore";
 
+function getTodaysDate(): string {
+  const now = new Date();
+  const options: Intl.DateTimeFormatOptions = {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  };
+  return new Intl.DateTimeFormat("en-CA", options).format(now);
+}
+
 const featuredStadiums = [
   {
     club: "ARSENAL",
     stadium: "Emirates Stadium",
-    city: "London, Inggris",
     file: "Emirates Stadium 3.jpg",
     source: "https://commons.wikimedia.org/wiki/File:Emirates_Stadium_3.jpg",
     credit: "Photo: Photo2023 · CC0",
@@ -21,7 +31,6 @@ const featuredStadiums = [
   {
     club: "CHELSEA",
     stadium: "Stamford Bridge",
-    city: "London, Inggris",
     file: "Stamford Bridge stadium.jpg",
     source: "https://commons.wikimedia.org/wiki/File:Stamford_Bridge_stadium.jpg",
     credit: "Photo: Andrew · CC BY-SA 3.0",
@@ -29,7 +38,6 @@ const featuredStadiums = [
   {
     club: "LIVERPOOL",
     stadium: "Anfield",
-    city: "Liverpool, Inggris",
     file: "Liverpool anfield road stadium.jpg",
     source: "https://commons.wikimedia.org/wiki/File:Liverpool_anfield_road_stadium.jpg",
     credit: "Photo: Arne Müseler / arne-mueseler.com · CC BY-SA 3.0",
@@ -38,7 +46,6 @@ const featuredStadiums = [
   {
     club: "MANCHESTER CITY",
     stadium: "Etihad Stadium",
-    city: "Manchester, Inggris",
     file: "Etihad Stadium.jpg",
     source: "https://commons.wikimedia.org/wiki/File:Etihad_Stadium.jpg",
     credit: "Photo: Cléria De Souza · CC BY 2.0",
@@ -46,7 +53,6 @@ const featuredStadiums = [
   {
     club: "MANCHESTER UNITED",
     stadium: "Old Trafford",
-    city: "Manchester, Inggris",
     file: "Manchester United Old Trafford.jpg",
     source: "https://commons.wikimedia.org/wiki/File:Manchester_United_Old_Trafford.jpg",
     credit: "Photo: Arne Müseler / arne-mueseler.com · CC BY-SA 3.0",
@@ -125,7 +131,10 @@ export default function HomeView() {
               Panggung prestasi Kalimantan Tengah
             </p>
             <h1 className="m-0 text-[clamp(72px,9.5vw,142px)] font-black leading-[0.84] tracking-[-0.105em] max-[900px]:text-[clamp(67px,11vw,100px)] max-[620px]:text-[clamp(76px,20vw,114px)]">
-              PORPROV
+              PORPROV 
+              <span className="mt-[21px] ml-[6px] flex items-center gap-[18px] text-[clamp(33px,4vw,55px)] tracking-[-0.055em] max-[620px]:mt-[17px] max-[620px]:text-[39px]">
+                KALIMANTAN TENGAH
+              </span>
               <span className="mt-[21px] ml-[6px] flex items-center gap-[18px] text-[clamp(33px,4vw,55px)] tracking-[-0.055em] max-[620px]:mt-[17px] max-[620px]:text-[39px]">
                 XIII{" "}
                 <i className="text-[0.62em] font-semibold not-italic tracking-normal text-[var(--lime)]">
@@ -338,13 +347,17 @@ export default function HomeView() {
             </div>
             <div className="border-t border-[#dcded4] max-[620px]:mt-[10px]" aria-label="Contoh cabang olahraga">
               {sports.slice(0, 10).map((sport, index) => (
-                <div key={sport.id} className="grid min-h-[54px] grid-cols-[40px_1fr_20px] items-center border-b border-[#dcded4] text-xs font-bold [&>.arrow-icon]:w-[14px] [&>.arrow-icon]:text-[#687365]">
+                <Link
+                  key={sport.id}
+                  to={`/jadwal?tanggal=${getTodaysDate()}&cabang=${encodeURIComponent(sport.name)}`}
+                  className="grid min-h-[54px] grid-cols-[40px_1fr_20px] items-center border-b border-[#dcded4] text-xs font-bold text-[var(--green)] transition-colors duration-[160ms] hover:bg-[var(--green)] hover:text-white [&>.arrow-icon]:w-[14px] [&>.arrow-icon]:text-white"
+                >
                   <span className="text-[9px] font-extrabold tracking-[0.08em] text-[var(--orange)]">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <span>{sport.name}</span>
                   <ArrowIcon diagonal />
-                </div>
+                </Link>
               ))}
               {loadingSports && (
                 <p className="mt-[13px] mb-0 text-[9px] leading-[1.7] text-[var(--muted)]" role="status">
@@ -379,7 +392,7 @@ export default function HomeView() {
           <div className="relative z-[1] mx-auto w-[min(85.6%,1120px)] pt-[62px] pb-[65px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:pt-[55px] max-[620px]:pb-[55px]">
             <p className="mb-6 flex items-center gap-[10px] text-[10px] font-extrabold uppercase tracking-[0.15em] text-white [&>span]:bg-[var(--lime)]">
               <span className="size-[7px] rounded-full shadow-[0_0_14px_rgba(211,237,113,0.75)]" />
-              Menuju PORPROV XIII 2026
+              Menuju PORPROV XIII KALIMANTAN TENGAH 2026
             </p>
             <h2 className="mt-0 mb-[26px] text-[clamp(42px,6vw,76px)] font-black leading-[0.98] tracking-[-0.08em] [&>span]:text-[var(--lime)]">
               Bersama kita

@@ -170,10 +170,10 @@ export default function ScheduleView() {
           />
           <div className="schedule-source-note" role="note">
             <strong>Jadwal dari backend</strong>
-            <span>
+            {/* <span>
               Data seed yang digunakan saat ini adalah simulasi dan bukan
               jadwal resmi. Konfirmasi jadwal kepada panitia.
-            </span>
+            </span> */}
           </div>
         </section>
 
@@ -329,6 +329,14 @@ export default function ScheduleView() {
                     <article
                       className="schedule-event-card"
                       key={event.id}
+                      role={event.liveStreamUrl ? "link" : undefined}
+                      tabIndex={event.liveStreamUrl ? 0 : undefined}
+                      aria-label={event.liveStreamUrl ? `Tonton live: ${event.title}` : undefined}
+                      onClick={() => {
+                        if (event.liveStreamUrl) {
+                          window.open(event.liveStreamUrl, "_blank", "noopener,noreferrer");
+                        }
+                      }}
                     >
                       <time>{event.time}</time>
                       <div>
@@ -336,9 +344,9 @@ export default function ScheduleView() {
                         <span className="schedule-event-title">{event.title}</span>
                         <small>{event.venue}</small>
                         {event.status === "ONGOING" && event.liveStreamUrl && (
-                          <a className="schedule-live-link" href={event.liveStreamUrl} target="_blank" rel="noreferrer">
+                          <span className="schedule-live-link" aria-hidden="true">
                             Tonton live di YouTube (demo)
-                          </a>
+                          </span>
                         )}
                       </div>
                       <Badge variant="secondary" className={`schedule-event-badge schedule-status-${event.status.toLowerCase()}`}>
@@ -360,7 +368,7 @@ export default function ScheduleView() {
 }
 
 function statusLabel(status: string) {
-  if (status === "ONGOING") return "Live";
+  if (status === "ONGOING") return "ONGOING";
   if (status === "FINISHED") return "Finished";
   if (status === "SCHEDULED") return "Terjadwal";
   if (status === "POSTPONED") return "Ditunda";

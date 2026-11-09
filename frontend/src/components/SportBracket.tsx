@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { SportTournament, SportTournamentMatch } from "../api/types";
 
 function getOutcome(match: SportTournamentMatch) {
@@ -131,13 +131,7 @@ export default function SportBracket({ tournament }: { tournament: SportTourname
           <h3>Perebutan peringkat 3</h3>
           {matchCard(tournament.bronze)}
         </div>
-        <div className="sport-bracket-third-flow">
-          <span>{outcomes[0]?.loser || "Kalah semifinal 1"}</span>
-          <span aria-hidden="true">+</span>
-          <span>{outcomes[1]?.loser || "Kalah semifinal 2"}</span>
-          <ArrowDown aria-hidden="true" />
-          <strong>Tim yang kalah bertanding untuk peringkat 3</strong>
-        </div>
+      
       </section>
     </div>
   );

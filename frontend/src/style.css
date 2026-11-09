@@ -927,7 +927,7 @@ body {
   width: 54px;
   height: 54px;
   border-color: rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 50%;
 }
 
 .site-footer > p {
@@ -3576,6 +3576,10 @@ body {
   transition: background 150ms ease;
 }
 
+.schedule-event-card[role="link"] {
+  cursor: pointer;
+}
+
 .schedule-event-card:hover {
   background: #fafafa;
 }
@@ -3739,9 +3743,10 @@ a:focus-visible {
   height: 52px;
   flex: 0 0 auto;
   border: 1px solid var(--ui-border);
-  border-radius: 8px;
+  border-radius: 50%;
   background: #fff;
   object-fit: contain;
+
 }
 
 .footer-top {

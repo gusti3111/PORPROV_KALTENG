@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
 const links = [
-  { label: "Beranda", to: "/beranda" },
+  { label: "BERANDA", to: "/beranda" },
   { label: "CABOR", to: "/cabor", active: "/cabor" },
   { label: "BAGAN", to: "/bagan", active: "/bagan" },
   { label: "VENUE", to: "/venue", active: "/venue" },
