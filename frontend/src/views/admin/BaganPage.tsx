@@ -35,7 +35,7 @@ export default function BaganPage() {
   useEffect(() => {
     void fetchSports();
     void fetchMatches();
-  }, []);
+  }, [fetchSports, fetchMatches]);
 
   useEffect(() => {
     if (selectedSportId === null) {
@@ -50,7 +50,7 @@ export default function BaganPage() {
           const data = await res.json();
           setBracketMatches(data.matches || []);
         }
-      } catch (err) {
+      } catch {
         alert("Gagal memuat bagan");
       } finally {
         setLoadingBracket(false);
@@ -88,7 +88,7 @@ export default function BaganPage() {
       });
       closeEditForm();
       void fetchMatches();
-    } catch (err) {
+    } catch {
       alert("Gagal menyimpan bagan");
     }
   };
@@ -98,7 +98,7 @@ export default function BaganPage() {
     try {
       await fetch(`/api/v1/brackets/${id}`, { method: "DELETE" });
       void fetchMatches();
-    } catch (err) {
+    } catch {
       alert("Gagal menghapus");
     }
   };

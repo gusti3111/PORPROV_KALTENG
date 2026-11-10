@@ -31,7 +31,7 @@ export default function HasilPage() {
 
   useEffect(() => {
     void fetchMatches();
-  }, []);
+  }, [fetchMatches]);
 
   const filteredMatches = matches.filter((m) => {
     if (filterStatus !== "all" && m.status !== filterStatus) return false;
@@ -70,7 +70,7 @@ export default function HasilPage() {
       });
       closeScoreForm();
       void fetchMatches();
-    } catch (err) {
+    } catch {
       alert("Gagal menyimpan hasil");
     }
   };
@@ -80,7 +80,7 @@ export default function HasilPage() {
     try {
       await fetch(`/api/v1/matches/${id}`, { method: "DELETE" });
       void fetchMatches();
-    } catch (err) {
+    } catch {
       alert("Gagal menghapus pertandingan");
     }
   };

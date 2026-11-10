@@ -109,14 +109,14 @@ export default function MatchUpdateForm() {
 
             <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg text-sm text-blue-700 flex gap-3">
               <CheckCircle2 className="h-5 w-5 shrink-0" />
-              <p>
-                Jika status diubah menjadi <strong>"Selesai"</strong>, sistem akan otomatis:
+              <div>
+                Jika status diubah menjadi <strong>&quot;Selesai&quot;</strong>, sistem akan otomatis:
                 <ul className="list-disc ml-4 mt-1">
                   <li>Menentukan pemenang pertandingan.</li>
                   <li>Memindahkan pemenang ke babak selanjutnya di bagan.</li>
                   <li>Menambahkan poin ke klasemen grup.</li>
                 </ul>
-              </p>
+              </div>
             </div>
 
             <Button 
