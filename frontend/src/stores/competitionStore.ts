@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { apiClient, getAPIData, getAPIErrorMessage } from "../api/client";
+import { API_BASE_URL, apiClient, getAPIData, getAPIErrorMessage } from "../api/client";
 import type {
   Contingent,
   MedalStanding,
@@ -205,7 +205,7 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
   },
 
   async updateMatch(id: string, data: { status: string; scores: string[] }) {
-    const response = await fetch(`/api/v1/matches/${id}/result`, {
+    const response = await fetch(`${API_BASE_URL}/matches/${id}/result`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),

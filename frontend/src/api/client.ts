@@ -6,8 +6,12 @@ type APIResponse<T> = {
   error?: string;
 };
 
+export const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || "/api/v1"
+).replace(/\/$/, "");
+
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "/api/v1",
+  baseURL: API_BASE_URL,
   timeout: 10_000,
   headers: {
     Accept: "application/json",

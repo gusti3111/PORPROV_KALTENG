@@ -11,6 +11,7 @@ import SiteFooter from "../../components/SiteFooter";
 import {
   Plus, Edit3, Trash2, X, LayoutGrid,
 } from "lucide-react";
+import { API_BASE_URL } from "../../api/client";
 import type { ScheduleMatch } from "../../api/types";
 
 interface MatchFormState {
@@ -191,8 +192,8 @@ export default function JadwalPage() {
         status: form.status,
       };
       const url = editing?.match_id
-        ? `/api/v1/matches/${editing.match_id}`
-        : "/api/v1/matches";
+        ? `${API_BASE_URL}/matches/${editing.match_id}`
+        : `${API_BASE_URL}/matches`;
       const method = editing ? "PUT" : "POST";
       const response = await fetch(url, {
         method,
@@ -216,7 +217,7 @@ export default function JadwalPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Hapus pertandingan ini?")) return;
     try {
-      await fetch(`/api/v1/matches/${id}`, { method: "DELETE" });
+      await fetch(`${API_BASE_URL}/matches/${id}`, { method: "DELETE" });
       void fetchMatches();
     } catch (err) {
       console.error("Failed to delete match:", err);

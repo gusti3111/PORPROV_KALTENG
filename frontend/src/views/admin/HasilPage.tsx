@@ -9,6 +9,7 @@ import { useCompetitionStore } from "../../stores/competitionStore";
 import SiteHeader from "../../components/SiteHeader";
 import SiteFooter from "../../components/SiteFooter";
 import { Trophy, Trash2, ArrowLeft, Save, X } from "lucide-react";
+import { API_BASE_URL } from "../../api/client";
 import type { ScheduleMatch } from "../../api/types";
 
 interface ScoreFormState {
@@ -63,7 +64,7 @@ export default function HasilPage() {
         status: form.status,
         scores: scoresArray,
       };
-      await fetch(`/api/v1/matches/${selectedMatch.id}/result`, {
+      await fetch(`${API_BASE_URL}/matches/${selectedMatch.id}/result`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -78,7 +79,7 @@ export default function HasilPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Hapus pertandingan ini?")) return;
     try {
-      await fetch(`/api/v1/matches/${id}`, { method: "DELETE" });
+      await fetch(`${API_BASE_URL}/matches/${id}`, { method: "DELETE" });
       void fetchMatches();
     } catch {
       alert("Gagal menghapus pertandingan");

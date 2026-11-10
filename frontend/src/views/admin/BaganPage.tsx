@@ -8,6 +8,7 @@ import { useCompetitionStore } from "../../stores/competitionStore";
 import SiteHeader from "../../components/SiteHeader";
 import SiteFooter from "../../components/SiteFooter";
 import { ArrowLeft, Save, X, Edit3, Trash2 } from "lucide-react";
+import { API_BASE_URL } from "../../api/client";
 import type { BracketMatch } from "../../api/types";
 
 interface BracketFormState {
@@ -45,7 +46,7 @@ export default function BaganPage() {
     const load = async () => {
       setLoadingBracket(true);
       try {
-        const res = await fetch(`/api/v1/brackets/${selectedSportId}`);
+        const res = await fetch(`${API_BASE_URL}/brackets/${selectedSportId}`);
         if (res.ok) {
           const data = await res.json();
           setBracketMatches(data.matches || []);
@@ -81,7 +82,7 @@ export default function BaganPage() {
         away_score: form.away_score ? Number(form.away_score) : null,
         status: form.status,
       };
-      await fetch(`/api/v1/brackets/${editingMatch.id}`, {
+      await fetch(`${API_BASE_URL}/brackets/${editingMatch.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -96,7 +97,7 @@ export default function BaganPage() {
   const handleDelete = async (id: number) => {
     if (!confirm("Hapus pertandingan bagan ini?")) return;
     try {
-      await fetch(`/api/v1/brackets/${id}`, { method: "DELETE" });
+      await fetch(`${API_BASE_URL}/brackets/${id}`, { method: "DELETE" });
       void fetchMatches();
     } catch {
       alert("Gagal menghapus");
