@@ -149,7 +149,7 @@ export default function VenueView() {
                   <span className="venue-carousel-copy">
                     <small>{venue.category}</small>
                     <strong>{venue.name}</strong>
-                    <span>{venue.address || venue.note || "Lokasi pertandingan PORPROV XIII"}</span>
+                    <span>{venue.note || venue.address || "Lokasi pertandingan PORPROV XIII"}</span>
                   </span>
                   <span className="venue-carousel-link">LIHAT DI PETA <ChevronRight aria-hidden="true" /></span>
                 </button>
@@ -284,7 +284,7 @@ export default function VenueView() {
                       </span>
                       <span className="venue-list-copy">
                         <strong>{venue.name}</strong>
-                        <small>{venue.category}</small>
+                        <small>{venue.note || venue.category}</small>
                       </span>
                       <span className="venue-list-arrow" aria-hidden="true">
                         ↗

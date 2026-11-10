@@ -9,6 +9,7 @@ export type Sport = {
 
 export type SportTournamentStanding = {
   rank: number;
+  contingent_id?: number;
   contingent: string;
   played: number;
   won: number;
@@ -29,13 +30,14 @@ export type SportTournamentMatch = {
   away: string;
   home_score: number | null;
   away_score: number | null;
-  status: "SCHEDULED" | "FINISHED";
+  status: "SCHEDULED" | "ONGOING" | "FINISHED";
 };
 
 export type SportTournament = {
   sport_id: number;
   sport_name: string;
   groups: SportTournamentGroup[];
+  quarterfinals?: SportTournamentMatch[];
   semifinals: SportTournamentMatch[];
   final: SportTournamentMatch;
   bronze: SportTournamentMatch;
@@ -86,6 +88,9 @@ export type MatchParticipant = {
 
 export type ScheduleMatch = {
   id: string;
+  sport_id?: number;
+  event_id?: number;
+  venue_id?: number;
   sport_name: string;
   event_name: string;
   venue_name: string;

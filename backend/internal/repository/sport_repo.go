@@ -22,7 +22,7 @@ func (r *SportRepository) GetAll(ctx context.Context) ([]model.Sport, error) {
 	rows, err := r.db.Pool.Query(ctx, `
 		SELECT id, name, code, category, icon_symbol, description
 		FROM sports
-		ORDER BY category ASC, name ASC
+		ORDER BY id ASC
 	`)
 	if err != nil {
 		// Fallback to defaults if table doesn't exist yet

@@ -5,7 +5,64 @@ import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { cn } from "@/lib/utils"
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
 
-const Select = SelectPrimitive.Root
+function extractSelectItems(
+  node: React.ReactNode,
+  acc: Record<string, React.ReactNode> = {}
+): Record<string, React.ReactNode> {
+  React.Children.forEach(node, (child) => {
+    if (!React.isValidElement(child)) return
+    const props = child.props as {
+      value?: unknown
+      children?: React.ReactNode
+    }
+    if (
+      (typeof props.value === "string" || typeof props.value === "number") &&
+      props.children !== undefined
+    ) {
+      acc[String(props.value)] = props.children
+    } else if (props.children) {
+      extractSelectItems(props.children, acc)
+    }
+  })
+  return acc
+}
+
+function Select<Value, Multiple extends boolean | undefined = false>({
+  items,
+  children,
+  value,
+  ...props
+}: SelectPrimitive.Root.Props<Value, Multiple>) {
+  const resolvedItems = React.useMemo(
+    () => items ?? extractSelectItems(children),
+    [items, children]
+  )
+
+  const normalizedValue = React.useMemo(() => {
+    if (value === undefined) return undefined
+    if (value === null || value === "") return null
+    if (
+      !Array.isArray(resolvedItems) &&
+      resolvedItems &&
+      (typeof value === "string" || typeof value === "number")
+    ) {
+      return Object.prototype.hasOwnProperty.call(resolvedItems, String(value))
+        ? value
+        : null
+    }
+    return value
+  }, [value, resolvedItems])
+
+  return (
+    <SelectPrimitive.Root
+      items={resolvedItems}
+      value={normalizedValue as SelectPrimitive.Root.Props<Value, Multiple>["value"]}
+      {...props}
+    >
+      {children}
+    </SelectPrimitive.Root>
+  )
+}
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (

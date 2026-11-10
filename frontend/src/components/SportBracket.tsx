@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import type { SportTournament, SportTournamentMatch } from "../api/types";
+import { getContingentLogoUrl } from "../utils/contingentLogo";
 
 function getOutcome(match: SportTournamentMatch) {
   const hasWinner =
@@ -33,7 +34,15 @@ function matchCard(match: SportTournamentMatch) {
     match.home_score !== null &&
     match.away_score !== null &&
     match.away_score > match.home_score;
-  const statusLabel = match.status === "FINISHED" ? "Selesai" : "Akan bertanding";
+  const statusLabel =
+    match.status === "FINISHED"
+      ? "Selesai"
+      : match.status === "ONGOING"
+        ? "Berlangsung"
+        : "Akan bertanding";
+
+  const homeLogo = getContingentLogoUrl(match.home);
+  const awayLogo = getContingentLogoUrl(match.away);
 
   return (
     <article className="sport-bracket-match" key={match.label}>
@@ -44,11 +53,37 @@ function matchCard(match: SportTournamentMatch) {
         </small>
       </div>
       <div className={`sport-bracket-team${homeWon ? " winner-highlight" : ""}`}>
-        <strong>{match.home || "Menunggu peserta"}</strong>
+        <strong className="inline-flex items-center gap-2 min-w-0">
+          {homeLogo && (
+            <img
+              src={homeLogo}
+              alt={`Logo ${match.home}`}
+              className="h-5 w-5 shrink-0 object-contain"
+              loading="lazy"
+            />
+          )}
+          <span className="truncate">
+            {match.home || "Menunggu peserta"}
+            {homeWon ? " 🏆" : ""}
+          </span>
+        </strong>
         <span>{match.home_score ?? "–"}</span>
       </div>
       <div className={`sport-bracket-team${awayWon ? " winner-highlight" : ""}`}>
-        <strong>{match.away || "Menunggu peserta"}</strong>
+        <strong className="inline-flex items-center gap-2 min-w-0">
+          {awayLogo && (
+            <img
+              src={awayLogo}
+              alt={`Logo ${match.away}`}
+              className="h-5 w-5 shrink-0 object-contain"
+              loading="lazy"
+            />
+          )}
+          <span className="truncate">
+            {match.away || "Menunggu peserta"}
+            {awayWon ? " 🏆" : ""}
+          </span>
+        </strong>
         <span>{match.away_score ?? "–"}</span>
       </div>
     </article>
@@ -56,6 +91,7 @@ function matchCard(match: SportTournamentMatch) {
 }
 
 export default function SportBracket({ tournament }: { tournament: SportTournament }) {
+  const quarterfinals = tournament.quarterfinals ?? [];
   const outcomes = tournament.semifinals.map(getOutcome);
   const bracketHeight = 260;
   const sourceCenters = [
@@ -67,11 +103,29 @@ export default function SportBracket({ tournament }: { tournament: SportTourname
       ? 105
       : winner === tournament.final.away
         ? 134
-        : index === 0 ? 105 : 134;
+        : index === 0
+          ? 105
+          : 134;
   const markerID = `bracket-arrow-${tournament.sport_id}`;
 
   return (
     <div className="sport-bracket-tree">
+      {quarterfinals.length > 0 && (
+        <section
+          className="sport-bracket-third mb-5"
+          aria-label="Babak Perempat Final"
+        >
+          <div className="w-full">
+            <h3 className="mb-3 text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+              Babak Perempat Final (Penyisihan 8 Besar)
+            </h3>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {quarterfinals.map((match) => matchCard(match))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <div className="sport-bracket-knockout">
         <div className="sport-bracket-semifinals">
           <h3>Semifinal</h3>
@@ -131,7 +185,6 @@ export default function SportBracket({ tournament }: { tournament: SportTourname
           <h3>Perebutan peringkat 3</h3>
           {matchCard(tournament.bronze)}
         </div>
-      
       </section>
     </div>
   );

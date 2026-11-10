@@ -41,7 +41,7 @@ INSERT INTO sport_groups (sport_id, group_code, name, sort_order)
 SELECT s.id, g.group_code, g.name, g.sort_order
 FROM sports s
 CROSS JOIN (VALUES ('A', 'Grup A', 1), ('B', 'Grup B', 2)) AS g(group_code, name, sort_order)
-WHERE s.id BETWEEN 1 AND 10
+WHERE s.id BETWEEN 1 AND 32
 ON CONFLICT (sport_id, group_code) DO NOTHING;
 
 WITH standings_seed(group_code, contingent_id, rank, won, drawn, points) AS (
@@ -60,7 +60,7 @@ SELECT g.id, seed.contingent_id, seed.rank, 3, seed.won, seed.drawn, 3 - seed.wo
 FROM sports s
 JOIN sport_groups g ON g.sport_id = s.id
 JOIN standings_seed seed ON seed.group_code = g.group_code
-WHERE s.id BETWEEN 1 AND 10
+WHERE s.id BETWEEN 1 AND 32
 ON CONFLICT (group_id, contingent_id) DO NOTHING;
 
 INSERT INTO sport_bracket_matches (
@@ -76,5 +76,5 @@ CROSS JOIN (VALUES
     ('FINAL', 2, 1, 'Perebutan juara 1', 1, 3, NULL, NULL, 'SCHEDULED'),
     ('THIRD_PLACE', 2, 2, 'Perebutan juara 3', 4, 2, NULL, NULL, 'SCHEDULED')
 ) AS seed(round_name, round_order, match_order, label, home_contingent_id, away_contingent_id, home_score, away_score, status)
-WHERE s.id BETWEEN 1 AND 10
+WHERE s.id BETWEEN 1 AND 32
 ON CONFLICT (sport_id, round_name, match_order) DO NOTHING;

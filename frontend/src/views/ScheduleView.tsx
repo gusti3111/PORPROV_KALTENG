@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,10 +21,13 @@ type ScheduleEvent = {
   date: string;
   time: string;
   sport: string;
+  eventName: string;
+  roundName: string;
   venue: string;
   title: string;
   status: string;
   liveStreamUrl?: string;
+  participantsSummary?: string;
 };
 
 
@@ -81,16 +84,27 @@ export default function ScheduleView() {
 
   const scheduleEvents = useMemo(
     () =>
-      matches.map((match) => ({
-        id: match.id,
-        date: match.date,
-        time: match.time,
-        sport: match.sport_name,
-        venue: match.venue_name,
-        title: match.title,
-        status: match.status,
-        liveStreamUrl: match.live_stream_url,
-      })),
+      matches.map((match) => {
+        const p0 = match.participants?.[0];
+        const p1 = match.participants?.[1];
+        const participantsSummary =
+          p0 && p1
+            ? `${p0.contingent_name}${p0.score ? ` (${p0.score})` : ""} vs ${p1.contingent_name}${p1.score ? ` (${p1.score})` : ""}`
+            : undefined;
+        return {
+          id: match.id,
+          date: match.date,
+          time: match.time,
+          sport: match.sport_name,
+          eventName: match.event_name,
+          roundName: match.round_name,
+          venue: match.venue_name,
+          title: match.title,
+          status: match.status,
+          liveStreamUrl: match.live_stream_url,
+          participantsSummary,
+        };
+      }),
     [matches],
   );
   const scheduleDates = useMemo(
@@ -340,8 +354,19 @@ export default function ScheduleView() {
                     >
                       <time>{event.time}</time>
                       <div>
-                        <strong>{event.sport}</strong>
-                        <span className="schedule-event-title">{event.title}</span>
+                        <strong>
+                          {event.sport}
+                          {event.roundName ? ` · ${event.roundName}` : ""}
+                        </strong>
+                        <span className="schedule-event-title">
+                          {event.eventName ? `${event.eventName} — ` : ""}
+                          {event.title}
+                        </span>
+                        {event.participantsSummary && (
+                          <small className="font-semibold text-foreground">
+                            {event.participantsSummary}
+                          </small>
+                        )}
                         <small>{event.venue}</small>
                         {event.status === "ONGOING" && event.liveStreamUrl && (
                           <span className="schedule-live-link" aria-hidden="true">

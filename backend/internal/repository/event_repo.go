@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -24,7 +26,7 @@ func (r *EventRepository) GetAll(ctx context.Context) ([]model.Event, error) {
 	}
 
 	rows, err := r.db.Pool.Query(ctx, `
-		SELECT id, sport_id, name, gender, created_at
+		SELECT id, sport_id, name, COALESCE(gender, 'Mixed'), created_at
 		FROM sport_events
 		ORDER BY sport_id, name ASC
 	`)
@@ -51,6 +53,42 @@ func (r *EventRepository) GetAll(ctx context.Context) ([]model.Event, error) {
 		return DefaultEvents, nil
 	}
 	return events, nil
+}
+
+func (r *EventRepository) FindOrCreate(ctx context.Context, sportID int, name, gender string) (*model.Event, error) {
+	if r.db == nil || r.db.Pool == nil {
+		return nil, ErrDatabaseUnavailable
+	}
+	cleanName := strings.TrimSpace(name)
+	if cleanName == "" {
+		cleanName = "Nomor Pertandingan"
+	}
+	switch gender {
+	case "Men", "Women", "Mixed":
+	default:
+		gender = "Mixed"
+	}
+
+	var ev model.Event
+	err := r.db.Pool.QueryRow(ctx, `
+		SELECT id, sport_id, name, COALESCE(gender, 'Mixed'), created_at
+		FROM sport_events
+		WHERE sport_id = $1 AND LOWER(name) = LOWER($2)
+		LIMIT 1
+	`, sportID, cleanName).Scan(&ev.ID, &ev.SportID, &ev.Name, &ev.Gender, &ev.CreatedAt)
+	if err == nil {
+		return &ev, nil
+	}
+
+	err = r.db.Pool.QueryRow(ctx, `
+		INSERT INTO sport_events (sport_id, name, gender)
+		VALUES ($1, $2, $3)
+		RETURNING id, sport_id, name, COALESCE(gender, 'Mixed'), created_at
+	`, sportID, cleanName, gender).Scan(&ev.ID, &ev.SportID, &ev.Name, &ev.Gender, &ev.CreatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("create event: %w", err)
+	}
+	return &ev, nil
 }
 
 var DefaultEvents = []model.Event{

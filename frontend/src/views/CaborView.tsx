@@ -29,11 +29,10 @@ export default function CaborView() {
   }, [fetchSports]);
 
   const sportCards = toSportCards(sports);
-  const demoSportCards = sportCards.slice(0, 10);
-  const mainSportsCount = demoSportCards.filter(
+  const mainSportsCount = sportCards.filter(
     (sport) => sport.group === "Utama",
   ).length;
-  const exhibitionSportsCount = demoSportCards.filter(
+  const exhibitionSportsCount = sportCards.filter(
     (sport) => sport.group === "Eksebisi",
   ).length;
 
@@ -109,15 +108,14 @@ export default function CaborView() {
           )}
           {!loading && !error && sportCards.length > 0 && (
             <SportSearch
-              sports={demoSportCards}
+              sports={sportCards}
               mainSportsCount={mainSportsCount}
               exhibitionSportsCount={exhibitionSportsCount}
             />
           )}
 
           <p className="cabor-disclaimer">
-            Untuk gambaran, halaman ini menampilkan 10 cabang pertama. Klasemen,
-            skor, dan bagan penyisihan pada halaman detail masih berupa data dummy.
+            Daftar cabang olahraga, lokasi venue, klasemen grup, perolehan medali, dan bagan penyisihan terhubung langsung dengan sistem basis data resmi PORPROV XIII/2026 Kalimantan Tengah di Kotawaringin Barat (28 November – 8 Desember 2026).
           </p>
         </section>
 

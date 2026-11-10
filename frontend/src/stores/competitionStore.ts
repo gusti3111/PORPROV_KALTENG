@@ -36,7 +36,11 @@ type CompetitionState = {
   fetchSportMedalStandings: () => Promise<void>;
   fetchEvents: () => Promise<void>;
   fetchContingents: () => Promise<void>;
-  updateMatch: (id: string, data: { status: string; scores: string[] }) => Promise<void>;
+  createEvent: (data: { sport_id: number; name: string; gender: string }) => Promise<Event>;
+  updateMatch: (
+    id: string,
+    data: { status: string; scores: string[]; winner_contingent_id?: number },
+  ) => Promise<void>;
   updateMatchContingents: (id: string, contingentIds: number[]) => Promise<void>;
 };
 
@@ -204,7 +208,24 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
     }
   },
 
-  async updateMatch(id: string, data: { status: string; scores: string[] }) {
+  async createEvent(data: { sport_id: number; name: string; gender: string }) {
+    const response = await fetch(`${API_BASE_URL}/events`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to create event (${response.status})`);
+    }
+    const created = (await response.json()) as Event;
+    await get().fetchEvents();
+    return created;
+  },
+
+  async updateMatch(
+    id: string,
+    data: { status: string; scores: string[]; winner_contingent_id?: number },
+  ) {
     const response = await fetch(`${API_BASE_URL}/matches/${id}/result`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -213,7 +234,11 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
     if (!response.ok) {
       throw new Error(`Failed to update match result (${response.status})`);
     }
-    await get().fetchMatches();
+    await Promise.all([
+      get().fetchMatches(),
+      get().fetchMedalStandings(),
+      get().fetchSportMedalStandings(),
+    ]);
   },
 
   async updateMatchContingents(id: string, contingentIds: number[]) {

@@ -57,6 +57,9 @@ type MatchParticipant struct {
 
 type ScheduleMatch struct {
 	ID            string             `json:"id"`
+	SportID       int                `json:"sport_id"`
+	EventID       int                `json:"event_id"`
+	VenueID       int                `json:"venue_id"`
 	SportName     string             `json:"sport_name"`
 	EventName     string             `json:"event_name"`
 	VenueName     string             `json:"venue_name"`
@@ -102,12 +105,13 @@ type SportMedalStanding struct {
 }
 
 type SportTournament struct {
-	SportID    int                    `json:"sport_id"`
-	SportName  string                 `json:"sport_name"`
-	Groups     []SportTournamentGroup `json:"groups"`
-	Semifinals []SportTournamentMatch `json:"semifinals"`
-	Final      SportTournamentMatch   `json:"final"`
-	Bronze     SportTournamentMatch   `json:"bronze"`
+	SportID       int                    `json:"sport_id"`
+	SportName     string                 `json:"sport_name"`
+	Groups        []SportTournamentGroup `json:"groups"`
+	Quarterfinals []SportTournamentMatch `json:"quarterfinals"`
+	Semifinals    []SportTournamentMatch `json:"semifinals"`
+	Final         SportTournamentMatch   `json:"final"`
+	Bronze        SportTournamentMatch   `json:"bronze"`
 }
 
 type SportTournamentGroup struct {
@@ -117,13 +121,14 @@ type SportTournamentGroup struct {
 }
 
 type SportTournamentStanding struct {
-	Rank       int    `json:"rank"`
-	Contingent string `json:"contingent"`
-	Played     int    `json:"played"`
-	Won        int    `json:"won"`
-	Drawn      int    `json:"drawn"`
-	Lost       int    `json:"lost"`
-	Points     int    `json:"points"`
+	Rank         int    `json:"rank"`
+	ContingentID int    `json:"contingent_id"`
+	Contingent   string `json:"contingent"`
+	Played       int    `json:"played"`
+	Won          int    `json:"won"`
+	Drawn        int    `json:"drawn"`
+	Lost         int    `json:"lost"`
+	Points       int    `json:"points"`
 }
 
 type SportTournamentMatch struct {

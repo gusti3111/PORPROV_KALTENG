@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Sport } from "../types/sport";
+import { getSportEmblemInfo } from "../utils/sportEmblem";
 import ArrowIcon from "./ArrowIcon";
 
 type SportSearchProps = {
@@ -92,7 +93,9 @@ export default function SportSearch({
         <span>
           {query
             ? `HASIL PENCARIAN: ${filteredSports.length}`
-            : `${mainSportsCount} CABANG UTAMA + ${exhibitionSportsCount} EKSEBISI`}
+            : exhibitionSportsCount > 0
+            ? `${mainSportsCount} CABANG UTAMA + ${exhibitionSportsCount} EKSEBISI`
+            : `${mainSportsCount} CABANG OLAHRAGA RESMI`}
         </span>
         <span>
           {String(filteredSports.length).padStart(2, "0")} DARI{" "}
@@ -102,38 +105,82 @@ export default function SportSearch({
 
       {filteredSports.length > 0 ? (
         <div className="cabor-grid">
-          {filteredSports.map((sport) => (
-            <Link
-              key={sport.name}
-              className="cabor-card"
-              to={sport.id ? `/cabor/${sport.id}` : "/cabor"}
-              aria-label={sport.name}
-            >
-              <div className="cabor-card-top">
-                <span className="cabor-card-index">
-                  {sport.group === "Utama"
-                    ? String(sport.index).padStart(2, "0")
-                    : `E${sport.index}`}
-                </span>
-                <span className="cabor-card-icon" aria-hidden="true">
-                  {sport.icon}
-                </span>
-              </div>
-              <div className="cabor-card-info">
-                <span className="cabor-category">
-                  {sport.group === "Utama" ? "CABANG UTAMA" : "EKSEBISI"}
-                </span>
-                <h3>{sport.name}</h3>
-                <p>{sport.description}</p>
-              </div>
-              <div className="cabor-card-bottom">
-                <span>
-                  {sport.group === "Utama" ? "CABANG UTAMA" : "EKSEBISI"}
-                </span>
-                <ArrowIcon />
-              </div>
-            </Link>
-          ))}
+          {filteredSports.map((sport) => {
+            const emblem = getSportEmblemInfo(sport.id, sport.name);
+            return (
+              <Link
+                key={sport.name}
+                className="cabor-card"
+                to={sport.id ? `/cabor/${sport.id}` : "/cabor"}
+                aria-label={sport.name}
+              >
+                {emblem && (
+                  <img
+                    src={emblem.pictogramUrl}
+                    alt=""
+                    aria-hidden="true"
+                    className="cabor-card-watermark"
+                    loading="lazy"
+                  />
+                )}
+                <div className="cabor-card-top">
+                  <span className="cabor-card-index">
+                    {sport.group === "Utama"
+                      ? String(sport.index).padStart(2, "0")
+                      : `E${sport.index}`}
+                  </span>
+                  {emblem ? (
+                    <div className="cabor-card-badges">
+                      <span
+                        className="cabor-card-pictogram-badge"
+                        title={`Simbol Cabang Olahraga ${sport.name}`}
+                      >
+                        <img
+                          src={emblem.pictogramUrl}
+                          alt={`Piktogram ${sport.name}`}
+                          className="cabor-card-pictogram-img"
+                          loading="lazy"
+                        />
+                      </span>
+                      <span
+                        className="cabor-card-icon"
+                        title={`Logo Resmi ${emblem.federationCode} (${emblem.federationName})`}
+                      >
+                        <img
+                          src={emblem.emblemUrl}
+                          alt={`Logo Resmi ${emblem.federationCode} - ${sport.name}`}
+                          className="cabor-card-emblem-img"
+                          loading="lazy"
+                        />
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="cabor-card-icon" aria-hidden="true">
+                      {sport.icon}
+                    </span>
+                  )}
+                </div>
+                <div className="cabor-card-info">
+                  <span className="cabor-category">
+                    {sport.group === "Utama" ? "CABANG UTAMA" : "EKSEBISI"}
+                    {emblem ? ` • ${emblem.federationCode}` : ""}
+                  </span>
+                  <h3>{sport.name}</h3>
+                  <p>{sport.description}</p>
+                </div>
+                <div className="cabor-card-bottom">
+                  <span>
+                    {emblem
+                      ? `${emblem.federationName.toUpperCase()}`
+                      : sport.group === "Utama"
+                        ? "CABANG UTAMA"
+                        : "EKSEBISI"}
+                  </span>
+                  <ArrowIcon />
+                </div>
+              </Link>
+            );
+          })}
         </div>
       ) : (
         <p className="cabor-empty" role="status">

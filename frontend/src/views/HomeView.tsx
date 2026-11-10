@@ -22,71 +22,55 @@ function getTodaysDate(): string {
 
 const featuredStadiums = [
   {
-    club: "ARSENAL",
-    stadium: "Emirates Stadium",
-    file: "Emirates Stadium 3.jpg",
-    source: "https://commons.wikimedia.org/wiki/File:Emirates_Stadium_3.jpg",
-    credit: "Photo: Photo2023 · CC0",
+    category: "KOMPLEKS UTAMA",
+    venue: "Sport Center Pangkalan Bun",
+    city: "Madurejo, Kotawaringin Barat",
+    cabor: "Upacara Pembukaan & Penutupan, Grass Track, Voli Pantai, Drumband, Korfball, Panahan, Sepatu Roda & Skateboard",
+    image: "/sportcenter.webp",
   },
   {
-    club: "CHELSEA",
-    stadium: "Stamford Bridge",
-    file: "Stamford Bridge stadium.jpg",
-    source: "https://commons.wikimedia.org/wiki/File:Stamford_Bridge_stadium.jpg",
-    credit: "Photo: Andrew · CC BY-SA 3.0",
+    category: "STADION SEPAK BOLA",
+    venue: "Stadion Sepak Bola Sport Center",
+    city: "Madurejo, Kotawaringin Barat",
+    cabor: "Cabang Olahraga Sepak Bola",
+    image: "/sportcenter.webp",
   },
   {
-    club: "LIVERPOOL",
-    stadium: "Anfield",
-    file: "Liverpool anfield road stadium.jpg",
-    source: "https://commons.wikimedia.org/wiki/File:Liverpool_anfield_road_stadium.jpg",
-    credit: "Photo: Arne Müseler / arne-mueseler.com · CC BY-SA 3.0",
-    photographer: "https://arne-mueseler.com",
+    category: "GELANGGANG OLAHRAGA",
+    venue: "GOR Sport Center Ratu Alamsyah",
+    city: "Madurejo, Kotawaringin Barat",
+    cabor: "Bola Voli Indoor & Futsal",
+    image: "/sportcenter.webp",
   },
   {
-    club: "MANCHESTER CITY",
-    stadium: "Etihad Stadium",
-    file: "Etihad Stadium.jpg",
-    source: "https://commons.wikimedia.org/wiki/File:Etihad_Stadium.jpg",
-    credit: "Photo: Cléria De Souza · CC BY 2.0",
+    category: "GELANGGANG OLAHRAGA",
+    venue: "GOR KONI Kotawaringin Barat",
+    city: "Sidorejo, Pangkalan Bun",
+    cabor: "Cabang Olahraga Bulutangkis",
+    image: "/sportcenter.webp",
   },
   {
-    club: "MANCHESTER UNITED",
-    stadium: "Old Trafford",
-    file: "Manchester United Old Trafford.jpg",
-    source: "https://commons.wikimedia.org/wiki/File:Manchester_United_Old_Trafford.jpg",
-    credit: "Photo: Arne Müseler / arne-mueseler.com · CC BY-SA 3.0",
-    photographer: "https://arne-mueseler.com",
+    category: "ARENA PERAIRAN",
+    venue: "Kampung Sega Sungai Arut",
+    city: "Mendawai, Pangkalan Bun",
+    cabor: "Dayung (Canoeing, Traditional Boat Race, & Ergometer)",
+    image: "/sportcenter.webp",
   },
   {
-    club: "TOTTENHAM HOTSPUR",
-    stadium: "Tottenham Hotspur Stadium",
-    city: "London, Inggris",
-    file: "London Tottenham Hotspur Stadium.jpg",
-    source: "https://commons.wikimedia.org/wiki/File:London_Tottenham_Hotspur_Stadium.jpg",
-    credit: "Photo: Arne Müseler / arne-mueseler.com · CC BY-SA 3.0",
-    photographer: "https://arne-mueseler.com",
+    category: "ARENA TERBUKA",
+    venue: "Pangkalan Bun Park",
+    city: "Madurejo, Pangkalan Bun",
+    cabor: "MMA & Panjat Tebing",
+    image: "/sportcenter.webp",
   },
   {
-    club: "NEWCASTLE UNITED",
-    stadium: "St James’ Park",
-    city: "Newcastle, Inggris",
-    file: "Newcastle st-james-park stadium.jpg",
-    source: "https://commons.wikimedia.org/wiki/File:Newcastle_st-james-park_stadium.jpg",
-    credit: "Photo: Arne Müseler · CC BY-SA 3.0",
-    photographer: "https://arne-mueseler.com",
+    category: "AKUATIK & SIRKUIT",
+    venue: "Kolam Renang Isen Mulang & Sirkuit Sabaru",
+    city: "Kota Palangka Raya",
+    cabor: "Akuatik & Bermotor (Motoprix)",
+    image: "/sportcenter.webp",
   },
 ];
-
-const stadiumImageUrl = (file: string) =>
-  `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=1000`;
-
-const licenseUrl = (credit: string) =>
-  credit.includes("CC BY-SA 3.0")
-    ? "https://creativecommons.org/licenses/by-sa/3.0/"
-    : credit.includes("CC BY 2.0")
-      ? "https://creativecommons.org/licenses/by/2.0/"
-      : "https://creativecommons.org/publicdomain/zero/1.0/";
 
 export default function HomeView() {
   const stadiumTrackRef = useRef<HTMLDivElement>(null);
@@ -287,33 +271,31 @@ export default function HomeView() {
           </div>
           <div className="home-stadium-track" ref={stadiumTrackRef}>
             {featuredStadiums.map((item, index) => (
-              <article className="home-stadium-card" key={item.club}>
-                <a
+              <article className="home-stadium-card" key={item.venue}>
+                <Link
                   className="home-stadium-image-link"
-                  href={item.source}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={`Lihat sumber foto ${item.stadium} di Wikimedia Commons`}
+                  to="/venue"
+                  aria-label={`Lihat detail ${item.venue} di halaman Venue`}
                 >
                   <img
                     className="home-stadium-image"
-                    src={stadiumImageUrl(item.file)}
-                    alt={`${item.stadium}, stadion ${item.club}`}
+                    src={item.image}
+                    alt={item.venue}
                     loading="lazy"
                     decoding="async"
                   />
                   <span className="home-stadium-index">{String(index + 1).padStart(2, "0")}</span>
-                </a>
+                </Link>
                 <div className="home-stadium-copy">
-                  <small>{item.club}</small>
-                  <h3>{item.stadium}</h3>
+                  <small>{item.category}</small>
+                  <h3>{item.venue}</h3>
                   <p>{item.city}</p>
-                  <a className="home-stadium-credit" href={item.photographer ?? item.source} target="_blank" rel="noreferrer">
-                    {item.credit}
-                  </a>
-                  <a className="home-stadium-license" href={licenseUrl(item.credit)} target="_blank" rel="noreferrer">
-                    Lisensi dan sumber foto
-                  </a>
+                  <span className="home-stadium-credit" style={{ textDecoration: "none" }}>
+                    {item.cabor}
+                  </span>
+                  <Link className="home-stadium-license" to="/venue">
+                    Lihat di peta venue →
+                  </Link>
                 </div>
               </article>
             ))}

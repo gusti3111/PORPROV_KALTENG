@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -14,11 +15,16 @@ import (
 )
 
 type MatchHandler struct {
-	repo *repository.MatchRepository
+	repo      *repository.MatchRepository
+	eventRepo *repository.EventRepository
 }
 
-func NewMatchHandler(repo *repository.MatchRepository) *MatchHandler {
-	return &MatchHandler{repo: repo}
+func NewMatchHandler(repo *repository.MatchRepository, eventRepo ...*repository.EventRepository) *MatchHandler {
+	var er *repository.EventRepository
+	if len(eventRepo) > 0 {
+		er = eventRepo[0]
+	}
+	return &MatchHandler{repo: repo, eventRepo: er}
 }
 
 func (h *MatchHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -42,17 +48,31 @@ func (h *MatchHandler) List(w http.ResponseWriter, r *http.Request) {
 
 func (h *MatchHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		EventID   int               `json:"event_id"`
-		VenueID   int               `json:"venue_id"`
-		Title     string            `json:"title"`
-		RoundName string            `json:"round_name"`
-		StartTime time.Time         `json:"start_time"`
-		EndTime   time.Time         `json:"end_time"`
-		Status    model.MatchStatus `json:"status"`
+		SportID            int               `json:"sport_id"`
+		EventID            int               `json:"event_id"`
+		EventName          string            `json:"event_name"`
+		EventGender        string            `json:"event_gender"`
+		VenueID            int               `json:"venue_id"`
+		Title              string            `json:"title"`
+		RoundName          string            `json:"round_name"`
+		StartTime          time.Time         `json:"start_time"`
+		EndTime            time.Time         `json:"end_time"`
+		Status             model.MatchStatus `json:"status"`
+		ContingentIDs      []int             `json:"contingent_ids"`
+		Scores             []string          `json:"scores"`
+		WinnerContingentID int               `json:"winner_contingent_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		Error(w, http.StatusBadRequest, "invalid request body")
 		return
+	}
+	if req.EventID < 1 && req.SportID > 0 && strings.TrimSpace(req.EventName) != "" && h.eventRepo != nil {
+		ev, err := h.eventRepo.FindOrCreate(r.Context(), req.SportID, req.EventName, req.EventGender)
+		if err != nil {
+			Error(w, http.StatusInternalServerError, "failed to create event: "+err.Error())
+			return
+		}
+		req.EventID = ev.ID
 	}
 	if req.EventID < 1 || req.VenueID < 1 {
 		Error(w, http.StatusBadRequest, "event_id and venue_id must be positive")
@@ -62,7 +82,22 @@ func (h *MatchHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Error(w, http.StatusBadRequest, "start_time is required")
 		return
 	}
-	id, err := h.repo.CreateMatch(r.Context(), req.EventID, req.VenueID, req.Title, req.RoundName, req.StartTime, req.EndTime, req.Status)
+	if req.EndTime.IsZero() {
+		req.EndTime = req.StartTime.Add(90 * time.Minute)
+	}
+	id, err := h.repo.CreateMatch(
+		r.Context(),
+		req.EventID,
+		req.VenueID,
+		req.Title,
+		req.RoundName,
+		req.StartTime,
+		req.EndTime,
+		req.Status,
+		req.ContingentIDs,
+		req.Scores,
+		req.WinnerContingentID,
+	)
 	if err != nil {
 		Error(w, http.StatusInternalServerError, "failed to create match: "+err.Error())
 		return
@@ -95,24 +130,42 @@ func (h *MatchHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req struct {
-		Title     string            `json:"title"`
-		RoundName string            `json:"round_name"`
-		StartTime time.Time         `json:"start_time"`
-		EndTime   time.Time         `json:"end_time"`
-		Status    model.MatchStatus `json:"status"`
+		SportID       int               `json:"sport_id"`
+		EventID       int               `json:"event_id"`
+		EventName     string            `json:"event_name"`
+		EventGender   string            `json:"event_gender"`
+		VenueID       int               `json:"venue_id"`
+		Title         string            `json:"title"`
+		RoundName     string            `json:"round_name"`
+		StartTime     time.Time         `json:"start_time"`
+		EndTime       time.Time         `json:"end_time"`
+		Status        model.MatchStatus `json:"status"`
+		ContingentIDs []int             `json:"contingent_ids"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		Error(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
+	if req.EventID < 1 && req.SportID > 0 && strings.TrimSpace(req.EventName) != "" && h.eventRepo != nil {
+		ev, err := h.eventRepo.FindOrCreate(r.Context(), req.SportID, req.EventName, req.EventGender)
+		if err == nil {
+			req.EventID = ev.ID
+		}
+	}
 	if req.StartTime.IsZero() {
 		Error(w, http.StatusBadRequest, "start_time is required")
 		return
 	}
-	err := h.repo.UpdateMatchFields(r.Context(), id, req.Title, req.RoundName, req.StartTime, req.EndTime, req.Status)
+	if req.EndTime.IsZero() {
+		req.EndTime = req.StartTime.Add(90 * time.Minute)
+	}
+	err := h.repo.UpdateMatchFields(r.Context(), id, req.EventID, req.VenueID, req.Title, req.RoundName, req.StartTime, req.EndTime, req.Status)
 	if err != nil {
 		Error(w, http.StatusInternalServerError, "failed to update match: "+err.Error())
 		return
+	}
+	if len(req.ContingentIDs) == 2 && req.ContingentIDs[0] > 0 && req.ContingentIDs[1] > 0 && req.ContingentIDs[0] != req.ContingentIDs[1] {
+		_ = h.repo.UpdateMatchParticipants(r.Context(), id, req.ContingentIDs)
 	}
 	JSON(w, http.StatusOK, map[string]string{"message": "match updated successfully"})
 }
@@ -124,14 +177,15 @@ func (h *MatchHandler) UpdateResult(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req struct {
-		Status model.MatchStatus `json:"status"`
-		Scores []string          `json:"scores"`
+		Status             model.MatchStatus `json:"status"`
+		Scores             []string          `json:"scores"`
+		WinnerContingentID int               `json:"winner_contingent_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		Error(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
-	err := h.repo.UpdateMatch(r.Context(), id, req.Status, req.Scores)
+	err := h.repo.UpdateMatchWithWinner(r.Context(), id, req.Status, req.Scores, req.WinnerContingentID)
 	if err != nil {
 		Error(w, http.StatusInternalServerError, "failed to update result: "+err.Error())
 		return

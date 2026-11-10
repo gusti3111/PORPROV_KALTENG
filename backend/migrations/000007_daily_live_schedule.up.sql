@@ -22,12 +22,12 @@ SELECT
 FROM local_day
 CROSS JOIN (VALUES
     (
-        '10000000-0000-4000-8000-000000000011', 1, 1,
+        '10000000-0000-4000-8000-000000000011', 1, 3,
         'Lari 100 Meter Putra - Final Simulasi',
         INTERVAL '08 hours', INTERVAL '09 hours', 'FINISHED', NULL::TEXT
     ),
     (
-        '10000000-0000-4000-8000-000000000012', 3, 5,
+        '10000000-0000-4000-8000-000000000012', 3, 4,
         'Renang Gaya Bebas Putra - Final Simulasi',
         INTERVAL '10 hours', INTERVAL '11 hours', 'ONGOING',
         'https://www.youtube.com/results?search_query=PORPROV+XIII+Kalimantan+Tengah+Live'

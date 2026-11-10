@@ -10,4 +10,4 @@ WHERE name = 'GOR KONI';
 UPDATE venues
 SET latitude = -2.7198037755266635,
     longitude = 111.63115888357069
-WHERE name = 'Sport Center';
+WHERE name IN ('Sport Center', 'Sport Center Pangkalan Bun');

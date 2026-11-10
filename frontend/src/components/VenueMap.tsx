@@ -70,16 +70,33 @@ export default function VenueMap({
           >
             <Popup>
               <strong>{venue.name}</strong>
-              <br />
-              <span>Pin p</span>
+              {venue.category && (
+                <>
+                  <br />
+                  <small style={{ color: "#174a72", fontWeight: 700 }}>
+                    {venue.category}
+                  </small>
+                </>
+              )}
+              {venue.address && (
+                <>
+                  <br />
+                  <span>{venue.address}</span>
+                </>
+              )}
+              {venue.note && (
+                <>
+                  <br />
+                  <small style={{ color: "#555" }}>{venue.note}</small>
+                </>
+              )}
             </Popup>
           </Marker>
         ))}
       </MapContainer>
       <div className="venue-map-notice">
         <span aria-hidden="true">!</span>
-        Semua pin adalah perkiraan di area Pangkalan Bun, bukan titik alamat
-        resmi.
+        Titik pin disesuaikan dengan lokasi geografis venue di Kotawaringin Barat & Palangka Raya.
       </div>
     </div>
   );

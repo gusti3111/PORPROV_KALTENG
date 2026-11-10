@@ -17,7 +17,7 @@ func NewVenueRepository(db *database.DB) *VenueRepository {
 
 func (r *VenueRepository) GetAll(ctx context.Context) ([]model.Venue, error) {
 	if r.db == nil || r.db.Pool == nil {
-		return nil, ErrDatabaseUnavailable
+		return DefaultVenues, nil
 	}
 
 	rows, err := r.db.Pool.Query(ctx, `
@@ -45,8 +45,8 @@ func (r *VenueRepository) GetAll(ctx context.Context) ([]model.Venue, error) {
 		return nil, fmt.Errorf("iterate venues: %w", err)
 	}
 
-	if venues == nil {
-		venues = make([]model.Venue, 0)
+	if len(venues) == 0 {
+		return DefaultVenues, nil
 	}
 
 	return venues, nil

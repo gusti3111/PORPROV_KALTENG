@@ -20,13 +20,17 @@ import {
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { useCompetitionStore } from "../stores/competitionStore";
+import { getContingentLogoUrl } from "../utils/contingentLogo";
 
 type ResultsTab = "matches" | "medals" | "sports";
 
 type MatchResult = {
+  id: string;
   date: string;
   sport: string;
   event: string;
+  title: string;
+  roundName: string;
   venue: string;
   home: string;
   homeScore: string;
@@ -125,15 +129,18 @@ export default function ResultsView() {
           const home = match.participants[0];
           const away = match.participants[1];
           return {
+            id: match.id,
             date: match.date,
             sport: match.sport_name,
             event: match.event_name,
+            title: match.title,
+            roundName: match.round_name || "Penyisihan",
             venue: match.venue_name,
             home: home.contingent_name,
-            homeScore: home.score,
+            homeScore: home.score || "–",
             homeWinner: home.is_winner,
             away: away?.contingent_name ?? "Belum ditentukan",
-            awayScore: away?.score ?? "—",
+            awayScore: away?.score || "–",
             awayWinner: away?.is_winner ?? false,
           };
         }),
@@ -251,11 +258,6 @@ export default function ResultsView() {
             </TabsTrigger>
           </TabsList>
 
-          <div className="results-demo-note" role="note">
-            Data diambil dari backend. Seed yang tersedia saat ini adalah data
-            simulasi dan bukan hasil resmi penyelenggara.
-          </div>
-
           {(matchesError || sportsError || medalsError || sportMedalsError) && (
             <div className="results-demo-note" role="alert">
               Gagal memuat sebagian data:{" "}
@@ -361,16 +363,16 @@ export default function ResultsView() {
                     return (
                       <Card
                         className="gap-3 rounded-none border-x-0 border-t-0 border-b border-[var(--ui-border)] bg-transparent p-4 shadow-none ring-0 last:border-b-0 sm:gap-4 sm:px-5 sm:py-4"
-                        key={`${result.date}-${result.sport}-${result.event}`}
+                        key={result.id}
                         role="article"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="grid min-w-0 gap-1">
                             <span className="text-[9px] font-extrabold uppercase tracking-[0.1em] text-[var(--green)]">
-                              {result.sport}
+                              {result.sport} · {result.roundName}
                             </span>
                             <h2 className="m-0 text-sm font-bold leading-snug text-[var(--ink)]">
-                              {result.event}
+                              {result.event} ({result.title})
                             </h2>
                           </div>
                           <time
@@ -391,8 +393,19 @@ export default function ResultsView() {
                           <div
                             className={`flex min-w-0 items-center justify-between gap-3 rounded-md px-2.5 py-2 ${homeWon ? "winner-highlight" : ""}`}
                           >
-                            <strong className="min-w-0 [overflow-wrap:anywhere] text-left text-[10px] font-semibold leading-tight text-[var(--ink)] sm:text-sm">
-                              {result.home}
+                            <strong className="inline-flex min-w-0 items-center gap-2.5 [overflow-wrap:anywhere] text-left text-[10px] font-semibold leading-tight text-[var(--ink)] sm:text-sm">
+                              {getContingentLogoUrl(result.home) && (
+                                <img
+                                  src={getContingentLogoUrl(result.home)!}
+                                  alt={`Logo ${result.home}`}
+                                  className="h-6 w-6 shrink-0 object-contain"
+                                  loading="lazy"
+                                />
+                              )}
+                              <span>
+                                {result.home}
+                                {homeWon ? " 🏆" : ""}
+                              </span>
                             </strong>
                             <span
                               className={`shrink-0 text-right text-sm font-bold tabular-nums sm:text-base ${homeWon ? "text-[var(--ink)]" : "text-[var(--muted)]"}`}
@@ -403,8 +416,19 @@ export default function ResultsView() {
                           <div
                             className={`flex min-w-0 items-center justify-between gap-3 rounded-md px-2.5 py-2 ${awayWon ? "winner-highlight" : ""}`}
                           >
-                            <strong className="min-w-0 [overflow-wrap:anywhere] text-left text-[10px] font-semibold leading-tight text-[var(--ink)] sm:text-sm">
-                              {result.away}
+                            <strong className="inline-flex min-w-0 items-center gap-2.5 [overflow-wrap:anywhere] text-left text-[10px] font-semibold leading-tight text-[var(--ink)] sm:text-sm">
+                              {getContingentLogoUrl(result.away) && (
+                                <img
+                                  src={getContingentLogoUrl(result.away)!}
+                                  alt={`Logo ${result.away}`}
+                                  className="h-6 w-6 shrink-0 object-contain"
+                                  loading="lazy"
+                                />
+                              )}
+                              <span>
+                                {result.away}
+                                {awayWon ? " 🏆" : ""}
+                              </span>
                             </strong>
                             <span
                               className={`shrink-0 text-right text-sm font-bold tabular-nums sm:text-base ${awayWon ? "text-[var(--ink)]" : "text-[var(--muted)]"}`}
@@ -418,7 +442,7 @@ export default function ResultsView() {
                             {result.venue}
                           </span>
                           <Badge variant="secondary" className="result-simulation-badge">
-                            DATA SIMULASI
+                            SELESAI
                           </Badge>
                         </div>
                       </Card>
@@ -474,16 +498,35 @@ export default function ResultsView() {
                         </tr>
                       </thead>
                       <tbody>
-                        {medalStandings.map((standing) => (
-                          <tr key={standing.contingent_id}>
-                            <td>{String(standing.rank).padStart(2, "0")}</td>
-                            <th scope="row">{standing.contingent_name}</th>
-                            <td>{standing.gold}</td>
-                            <td>{standing.silver}</td>
-                            <td>{standing.bronze}</td>
-                            <td>{standing.total}</td>
-                          </tr>
-                        ))}
+                        {medalStandings.map((standing) => {
+                          const logoUrl = getContingentLogoUrl(
+                            standing.contingent_name,
+                            standing.contingent_id,
+                            standing.logo_url,
+                          );
+                          return (
+                            <tr key={standing.contingent_id}>
+                              <td>{String(standing.rank).padStart(2, "0")}</td>
+                              <th scope="row">
+                                <span className="inline-flex items-center gap-2.5">
+                                  {logoUrl && (
+                                    <img
+                                      src={logoUrl}
+                                      alt={`Logo ${standing.contingent_name}`}
+                                      className="h-6 w-6 shrink-0 object-contain"
+                                      loading="lazy"
+                                    />
+                                  )}
+                                  <span>{standing.contingent_name}</span>
+                                </span>
+                              </th>
+                              <td>{standing.gold}</td>
+                              <td>{standing.silver}</td>
+                              <td>{standing.bronze}</td>
+                              <td>{standing.total}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

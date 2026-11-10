@@ -48,3 +48,4 @@ export const onRequest = async (context: PagesContext): Promise<Response> => {
 
   return fetch(targetUrl, init);
 };
+
