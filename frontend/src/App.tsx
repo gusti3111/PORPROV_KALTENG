@@ -14,6 +14,11 @@ import ResultsView from "./views/ResultsView";
 import ScheduleView from "./views/ScheduleView";
 import SportDetailView from "./views/SportDetailView";
 import VenueView from "./views/VenueView";
+import AdminDashboard from "./views/admin/AdminDashboard";
+import MatchUpdateForm from "./views/admin/MatchUpdateForm";
+import JadwalPage from "./views/admin/JadwalPage";
+import HasilPage from "./views/admin/HasilPage";
+import BaganPage from "./views/admin/BaganPage";
 
 function RouteEffects() {
   const { pathname, hash } = useLocation();
@@ -24,20 +29,23 @@ function RouteEffects() {
     const isVenue = pathname === "/venue";
     const isSchedule = pathname === "/jadwal";
     const isResults = pathname === "/hasil";
-    const isNews = pathname === "/berita";
+    const isNews = pathname === "/informasi";
+    const isAdmin = pathname.startsWith("/admin");
     document.title = isCabor
       ? "Cabang Olahraga | PORPROV XIII Kalimantan Tengah 2026"
       : isBracket
         ? "Bagan Pertandingan | PORPROV XIII Kalimantan Tengah 2026"
-      : isVenue
-        ? "Venue | PORPROV XIII Kalimantan Tengah 2026"
-        : isSchedule
-          ? "Jadwal Pertandingan | PORPROV XIII Kalimantan Tengah 2026"
-          : isResults
-            ? "Hasil Pertandingan | PORPROV XIII Kalimantan Tengah 2026"
-            : isNews
-              ? "Berita | PORPROV XIII Kalimantan Tengah 2026"
-        : "PORPROV XIII Kalimantan Tengah 2026";
+        : isVenue
+          ? "Venue | PORPROV XIII Kalimantan Tengah 2026"
+          : isSchedule
+            ? "Jadwal Pertandingan | PORPROV XIII Kalimantan Tengah 2026"
+            : isResults
+              ? "Rekap hasil pertandingan | PORPROV XIII Kalimantan Tengah 2026"
+              : isNews
+                ? "Berita dan informasi | PORPROV XIII Kalimantan Tengah 2026"
+                : isAdmin
+                  ? "Admin Panel | PORPROV XIII Kalimantan Tengah 2026"
+                  : "PORPROV XIII Kalimantan Tengah 2026";
     document
       .querySelector('meta[name="description"]')
       ?.setAttribute(
@@ -46,15 +54,17 @@ function RouteEffects() {
           ? "Daftar cabang olahraga PORPROV XIII Kalimantan Tengah 2026."
           : isBracket
             ? "Bagan dan alur pertandingan cabang olahraga PORPROV XIII Kalimantan Tengah 2026."
-          : isVenue
-            ? "Daftar venue pada jadwal sementara PORPROV XIII Kalimantan Tengah 2026."
-            : isSchedule
-              ? "Jadwal harian PORPROV XIII Kalimantan Tengah 2026."
-              : isResults
-                ? "Rekap hasil pertandingan PORPROV XIII Kalimantan Tengah 2026."
-                : isNews
-                  ? "Berita dan informasi PORPROV XIII Kalimantan Tengah 2026."
-            : "Portal informasi Pekan Olahraga Provinsi XIII Kalimantan Tengah 2026.",
+            : isVenue
+              ? "Daftar venue pada jadwal sementara PORPROV XIII Kalimantan Tengah 2026."
+              : isSchedule
+                ? "Jadwal harian PORPROV XIII Kalimantan Tengah 2026."
+                : isResults
+                  ? "Rekap hasil pertandingan PORPROV XIII Kalimantan Tengah 2026."
+                  : isNews
+                    ? "Berita dan informasi PORPROV XIII Kalimantan Tengah 2026."
+                    : isAdmin
+                      ? "Panel Admin untuk pembaruan skor dan jadwal pertandingan."
+                      : "Portal informasi Pekan Olahraga Provinsi XIII Kalimantan Tengah 2026.",
       );
 
     if (hash) {
@@ -83,7 +93,12 @@ export default function App() {
         <Route path="/venue" element={<VenueView />} />
         <Route path="/jadwal" element={<ScheduleView />} />
         <Route path="/hasil" element={<ResultsView />} />
-        <Route path="/berita" element={<Newsview />} />
+        <Route path="/informasi" element={<Newsview />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/jadwal" element={<JadwalPage />} />
+        <Route path="/admin/hasil" element={<HasilPage />} />
+        <Route path="/admin/bagan" element={<BaganPage />} />
+        <Route path="/admin/update/:id" element={<MatchUpdateForm />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

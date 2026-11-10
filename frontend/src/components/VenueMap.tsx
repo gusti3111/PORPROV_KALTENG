@@ -71,7 +71,7 @@ export default function VenueMap({
             <Popup>
               <strong>{venue.name}</strong>
               <br />
-              <span>Pin perkiraan area — koordinat resmi belum tersedia.</span>
+              <span>Pin p</span>
             </Popup>
           </Marker>
         ))}

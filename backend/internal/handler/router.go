@@ -50,6 +50,11 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 	matchHandler := NewMatchHandler(matchRepo)
 	sportMedalHandler := NewSportMedalHandler(sportMedalRepo)
 	sportTournamentHandler := NewSportTournamentHandler(sportTournamentRepo)
+	bracketRepo := repository.NewBracketRepository(db)
+	bracketHandler := NewBracketHandler(bracketRepo)
+
+	eventRepo := repository.NewEventRepository(db)
+	eventHandler := NewEventHandler(eventRepo)
 
 	// Base health check
 	r.Get("/healthz", healthHandler.Health)
@@ -62,6 +67,10 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 			sr.Get("/", sportHandler.GetAll)
 			sr.Get("/{id}/tournament", sportTournamentHandler.GetBySportID)
 			sr.Get("/{id}", sportHandler.GetByID)
+		})
+
+		api.Route("/events", func(er chi.Router) {
+			er.Get("/", eventHandler.List)
 		})
 
 		api.Route("/venues", func(vr chi.Router) {
@@ -78,6 +87,20 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 		})
 
 		api.Get("/matches", matchHandler.List)
+		api.Post("/matches", matchHandler.Create)
+		api.Get("/matches/{id}", matchHandler.Get)
+		api.Put("/matches/{id}", matchHandler.Update)
+		api.Put("/matches/{id}/participants", matchHandler.UpdateParticipants)
+		api.Put("/matches/{id}/result", matchHandler.UpdateResult)
+		api.Delete("/matches/{id}", matchHandler.Delete)
+
+		api.Route("/brackets", func(br chi.Router) {
+			br.Get("/{sportId}", bracketHandler.ListBySport)
+			br.Get("/{id}", bracketHandler.Get)
+			br.Post("/", bracketHandler.Create)
+			br.Put("/{id}", bracketHandler.Update)
+			br.Delete("/{id}", bracketHandler.Delete)
+		})
 	})
 
 	return r

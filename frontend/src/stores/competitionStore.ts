@@ -1,14 +1,23 @@
 import { create } from "zustand";
-import { getAPIData, getAPIErrorMessage } from "../api/client";
+import { apiClient, getAPIData, getAPIErrorMessage } from "../api/client";
 import type {
+  Contingent,
   MedalStanding,
   ScheduleMatch,
   Sport,
   SportMedalStanding,
   Venue,
+  Event,
 } from "../api/types";
 
-type Resource = "sports" | "venues" | "matches" | "medals" | "sportMedals";
+type Resource =
+  | "sports"
+  | "venues"
+  | "matches"
+  | "medals"
+  | "sportMedals"
+  | "events"
+  | "contingents";
 
 type CompetitionState = {
   sports: Sport[];
@@ -16,6 +25,8 @@ type CompetitionState = {
   matches: ScheduleMatch[];
   medalStandings: MedalStanding[];
   sportMedalStandings: SportMedalStanding[];
+  events: Event[];
+  contingents: Contingent[];
   loading: Record<Resource, boolean>;
   errors: Partial<Record<Resource, string>>;
   fetchSports: () => Promise<void>;
@@ -23,6 +34,10 @@ type CompetitionState = {
   fetchMatches: () => Promise<void>;
   fetchMedalStandings: () => Promise<void>;
   fetchSportMedalStandings: () => Promise<void>;
+  fetchEvents: () => Promise<void>;
+  fetchContingents: () => Promise<void>;
+  updateMatch: (id: string, data: { status: string; scores: string[] }) => Promise<void>;
+  updateMatchContingents: (id: string, contingentIds: number[]) => Promise<void>;
 };
 
 const initialLoading: Record<Resource, boolean> = {
@@ -31,6 +46,8 @@ const initialLoading: Record<Resource, boolean> = {
   matches: false,
   medals: false,
   sportMedals: false,
+  events: false,
+  contingents: false,
 };
 
 export const useCompetitionStore = create<CompetitionState>((set, get) => ({
@@ -39,6 +56,8 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
   matches: [],
   medalStandings: [],
   sportMedalStandings: [],
+  events: [],
+  contingents: [],
   loading: initialLoading,
   errors: {},
 
@@ -109,8 +128,7 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
       errors: { ...state.errors, medals: undefined },
     }));
     try {
-      const medalStandings =
-        await getAPIData<MedalStanding[]>("/medals/standings");
+      const medalStandings = await getAPIData<MedalStanding[]>("/medals/standings");
       set({ medalStandings });
     } catch (error) {
       set((state) => ({
@@ -130,8 +148,7 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
       errors: { ...state.errors, sportMedals: undefined },
     }));
     try {
-      const sportMedalStandings =
-        await getAPIData<SportMedalStanding[]>("/medals/by-sport");
+      const sportMedalStandings = await getAPIData<SportMedalStanding[]>("/medals/by-sport");
       set({ sportMedalStandings });
     } catch (error) {
       set((state) => ({
@@ -145,5 +162,63 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
         loading: { ...state.loading, sportMedals: false },
       }));
     }
+  },
+
+  async fetchEvents() {
+    if (get().loading.events) return;
+    set((state) => ({
+      loading: { ...state.loading, events: true },
+      errors: { ...state.errors, events: undefined },
+    }));
+    try {
+      const events = await getAPIData<Event[]>("/events/");
+      set({ events });
+    } catch (error) {
+      set((state) => ({
+        errors: { ...state.errors, events: getAPIErrorMessage(error) },
+      }));
+    } finally {
+      set((state) => ({
+        loading: { ...state.loading, events: false },
+      }));
+    }
+  },
+
+  async fetchContingents() {
+    if (get().loading.contingents) return;
+    set((state) => ({
+      loading: { ...state.loading, contingents: true },
+      errors: { ...state.errors, contingents: undefined },
+    }));
+    try {
+      const contingents = await getAPIData<Contingent[]>("/contingents/");
+      set({ contingents });
+    } catch (error) {
+      set((state) => ({
+        errors: { ...state.errors, contingents: getAPIErrorMessage(error) },
+      }));
+    } finally {
+      set((state) => ({
+        loading: { ...state.loading, contingents: false },
+      }));
+    }
+  },
+
+  async updateMatch(id: string, data: { status: string; scores: string[] }) {
+    const response = await fetch(`/api/v1/matches/${id}/result`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to update match result (${response.status})`);
+    }
+    await get().fetchMatches();
+  },
+
+  async updateMatchContingents(id: string, contingentIds: number[]) {
+    await apiClient.put(`/matches/${id}/participants`, {
+      contingent_ids: contingentIds,
+    });
   },
 }));

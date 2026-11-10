@@ -41,6 +41,14 @@ export type SportTournament = {
   bronze: SportTournamentMatch;
 };
 
+export type Event = {
+  id: number;
+  sport_id: number;
+  name: string;
+  gender: string;
+  created_at?: string;
+};
+
 export type Venue = {
   id: number;
   name: string;
@@ -51,6 +59,13 @@ export type Venue = {
   note: string;
   position: [number, number];
   image_url?: string; // <-- Tambahkan baris ini
+};
+
+export type Contingent = {
+  id: number;
+  name: string;
+  short_code: string;
+  logo_url?: string;
 };
 
 export type MatchStatus =
@@ -104,4 +119,20 @@ export type SportMedalStanding = {
   bronze: number;
   total: number;
   rank: number;
+};
+
+export type BracketMatch = {
+  id: number;
+  sport_id: number;
+  round_name: string;
+  round_order: number;
+  match_order: number;
+  label: string;
+  home_contingent_id: number | null;
+  away_contingent_id: number | null;
+  home_name: string;
+  away_name: string;
+  home_score: number | null;
+  away_score: number | null;
+  status: string;
 };

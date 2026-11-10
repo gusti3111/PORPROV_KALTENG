@@ -10,7 +10,7 @@ const links = [
   { label: "VENUE", to: "/venue", active: "/venue" },
   { label: "JADWAL PERTANDINGAN", to: "/jadwal", active: "/jadwal" },
   { label: "HASIL PERTANDINGAN", to: "/hasil", active: "/hasil" },
-  { label: "BERITA", to: "/berita", active: "/berita" },
+  { label: "INFORMASI", to: "/informasi", active: "/informasi" },
 ];
 
 export default function SiteNavigation() {

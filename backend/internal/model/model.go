@@ -68,6 +68,15 @@ type ScheduleMatch struct {
 	Status        MatchStatus        `json:"status"`
 	LiveStreamURL string             `json:"live_stream_url,omitempty"`
 	Participants  []MatchParticipant `json:"participants"`
+	NextMatchID   string             `json:"next_match_id,omitempty"` // Relasi ke pertandingan selanjutnya di bagan
+}
+
+type Event struct {
+	ID        int    `json:"id"`
+	SportID   int    `json:"sport_id"`
+	Name      string `json:"name"`
+	Gender    string `json:"gender"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 }
 
 type MedalStanding struct {
