@@ -50,7 +50,7 @@ import SiteHeader from "../components/SiteHeader";
 import { getContingentLogoUrl } from "../utils/contingentLogo";
 
 type NewsCategory = "Berita" | "Sejarah" | "Galeri" | "UMKM" | "Hotel dan Penginapan";
-type CategoryFilter = "semua" | NewsCategory;
+type CategoryFilter = NewsCategory;
 
 type NewsArticle = {
   id: number;
@@ -269,7 +269,6 @@ const galleryPhotos: GalleryPhoto[] = [
 ];
 
 const categories: CategoryFilter[] = [
-  "semua",
   "Berita",
   "Sejarah",
   "Galeri",
@@ -444,7 +443,7 @@ function formatDate(date: string) {
 
 export default function Newsview() {
   const [selectedCategory, setSelectedCategory] =
-    useState<CategoryFilter>("semua");
+    useState<CategoryFilter>("Berita");
   const [selectedUMKMType, setSelectedUMKMType] =
     useState<"Semua" | KobarUMKMType>("Semua");
   const [selectedDistrict, setSelectedDistrict] =
@@ -492,7 +491,7 @@ export default function Newsview() {
     () =>
       articles.filter((article) => {
         const matchesCategory =
-          selectedCategory === "semua" ||
+          selectedCategory === "Berita" ||
           article.category === selectedCategory;
         const matchesQuery =
           !normalizedQuery ||
@@ -693,7 +692,7 @@ export default function Newsview() {
                   aria-pressed={selectedCategory === category}
                   onClick={() => setSelectedCategory(category)}
                 >
-                  {category === "semua" ? "Semua" : category}
+                  {category}
                 </Button>
               ))}
             </div>
