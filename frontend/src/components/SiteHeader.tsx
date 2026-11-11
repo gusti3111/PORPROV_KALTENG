@@ -5,15 +5,23 @@ import { Button } from "@/components/ui/button";
 import SiteNavigation from "./SiteNavigation";
 
 export default function SiteHeader() {
-  const [isDark, setIsDark] = useState(() =>
-    document.documentElement.classList.contains("dark"),
-  );
+  const [isDark, setIsDark] = useState(() => {
+    try {
+      return localStorage.getItem("porprov-theme-manual") === "dark";
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     const theme = isDark ? "dark" : "light";
     document.documentElement.classList.toggle("dark", isDark);
     document.documentElement.style.colorScheme = theme;
-    window.localStorage.setItem("porprov-theme", theme);
+    try {
+      localStorage.setItem("porprov-theme-manual", theme);
+    } catch {
+      // ignore
+    }
   }, [isDark]);
 
   return (

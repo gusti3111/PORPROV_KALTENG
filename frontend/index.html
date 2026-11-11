@@ -10,11 +10,18 @@
     <meta name="theme-color" content="#102b49" />
     <script>
       (() => {
-        const savedTheme = localStorage.getItem("porprov-theme");
-        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
-          document.documentElement.classList.add("dark");
-          document.documentElement.style.colorScheme = "dark";
+        try {
+          const savedTheme = localStorage.getItem("porprov-theme-manual");
+          if (savedTheme === "dark") {
+            document.documentElement.classList.add("dark");
+            document.documentElement.style.colorScheme = "dark";
+          } else {
+            document.documentElement.classList.remove("dark");
+            document.documentElement.style.colorScheme = "light";
+          }
+        } catch (e) {
+          document.documentElement.classList.remove("dark");
+          document.documentElement.style.colorScheme = "light";
         }
       })();
     </script>
