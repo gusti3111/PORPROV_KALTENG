@@ -39,7 +39,7 @@ const featuredStadiums = [
     venue: "Sport Center Pangkalan Bun",
     city: "Madurejo, Kotawaringin Barat",
     cabor: "Upacara Pembukaan & Penutupan, Grass Track, Voli Pantai, Drumband, Korfball, Panahan, Sepatu Roda & Skateboard",
-    image: "/sportcenter.webp",
+    image: "/venues/sport-center.webp",
   },
   {
     category: "STADION SEPAK BOLA",
@@ -53,7 +53,7 @@ const featuredStadiums = [
     venue: "GOR Sport Center Ratu Alamsyah",
     city: "Madurejo, Kotawaringin Barat",
     cabor: "Bola Voli Indoor & Futsal",
-    image: "/sportcenter.webp",
+    image: "/venues/sport-center.webp",
   },
   {
     category: "GELANGGANG OLAHRAGA",
@@ -84,11 +84,25 @@ const featuredStadiums = [
     image: "/venues/pasir-panjang.jpg",
   },
   {
+    category: "ARENA TERBUKA & DIRGANTARA",
+    venue: "Karanganyar Pangkalan Bun",
+    city: "Karang Anyar, Arut Selatan",
+    cabor: "Aerosport (Paramotor & Paralayang)",
+    image: "/venues/karanganyar.jpg",
+  },
+  {
+    category: "ARENA JALAN RAYA",
+    venue: "Koridor Jalan Utama Pangkalan Bun",
+    city: "Pangkalan Bun, Kotawaringin Barat",
+    cabor: "Balap Sepeda (Road Bike & Mountain Bike)",
+    image: "/venues/koridor-trans-kalimantan.jpg",
+  },
+  {
     category: "AKUATIK & SIRKUIT",
     venue: "Kolam Renang Isen Mulang & Sirkuit Sabaru",
     city: "Kota Palangka Raya",
     cabor: "Akuatik & Bermotor (Motoprix)",
-    image: "/sportcenter.webp",
+    image: "/venues/sport-center.webp",
   },
 ];
 
@@ -422,6 +436,12 @@ export default function HomeView() {
                     alt={item.venue}
                     loading="lazy"
                     decoding="async"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.src.includes("sport-center.webp") && !target.src.includes("sportcenter.webp")) {
+                        target.src = "/venues/sport-center.webp";
+                      }
+                    }}
                   />
                   <span className="home-stadium-index">{String(index + 1).padStart(2, "0")}</span>
                 </Link>

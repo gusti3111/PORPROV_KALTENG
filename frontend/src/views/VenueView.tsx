@@ -14,6 +14,7 @@ import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import VenueMap from "../components/VenueMap";
 import { useCompetitionStore } from "../stores/competitionStore";
+import { getVenuePhotoUrl } from "../utils/venuePhoto";
 
 function normalizeText(value: string) {
   return value
@@ -142,16 +143,29 @@ export default function VenueView() {
                     document.getElementById("daftar-venue")?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
-                  <span className="venue-carousel-card-top">
-                    <span className="venue-carousel-index">{String(index + 1).padStart(2, "0")}</span>
-                    <span className="venue-carousel-pin"><MapPin aria-hidden="true" /></span>
-                  </span>
+                  <div className="relative h-28 w-full overflow-hidden rounded-md mb-3 bg-slate-100 shrink-0">
+                    <img
+                      src={getVenuePhotoUrl(venue.name)}
+                      alt={venue.name}
+                      className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.src = "/venues/sport-center.webp";
+                      }}
+                    />
+                    <span className="absolute top-2 left-2 text-[10px] font-bold text-white bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="absolute top-2 right-2 text-white bg-black/60 backdrop-blur-xs p-1 rounded-full">
+                      <MapPin className="h-3 w-3" aria-hidden="true" />
+                    </span>
+                  </div>
                   <span className="venue-carousel-copy">
                     <small>{venue.category}</small>
                     <strong>{venue.name}</strong>
                     <span>{venue.note || venue.address || "Lokasi pertandingan PORPROV XIII"}</span>
                   </span>
-                  <span className="venue-carousel-link">LIHAT DI PETA <ChevronRight aria-hidden="true" /></span>
+                  <span className="venue-carousel-link mt-2">LIHAT DI PETA <ChevronRight aria-hidden="true" /></span>
                 </button>
               ))}
             </div>

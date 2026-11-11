@@ -8,6 +8,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import type { Venue } from "../api/types";
+import { getVenuePhotoUrl } from "../utils/venuePhoto";
 
 type VenueMapProps = {
   venues: Venue[];
@@ -69,27 +70,32 @@ export default function VenueMap({
             }}
           >
             <Popup>
-              <strong>{venue.name}</strong>
-              {venue.category && (
-                <>
-                  <br />
-                  <small style={{ color: "#174a72", fontWeight: 700 }}>
+              <div style={{ maxWidth: 220 }}>
+                <img
+                  src={getVenuePhotoUrl(venue.name)}
+                  alt={venue.name}
+                  style={{ width: "100%", height: 105, objectFit: "cover", borderRadius: 6, marginBottom: 8 }}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/venues/sport-center.webp";
+                  }}
+                />
+                <strong style={{ fontSize: 13, display: "block", marginBottom: 2 }}>{venue.name}</strong>
+                {venue.category && (
+                  <small style={{ color: "#174a72", fontWeight: 700, display: "block" }}>
                     {venue.category}
                   </small>
-                </>
-              )}
-              {venue.address && (
-                <>
-                  <br />
-                  <span>{venue.address}</span>
-                </>
-              )}
-              {venue.note && (
-                <>
-                  <br />
-                  <small style={{ color: "#555" }}>{venue.note}</small>
-                </>
-              )}
+                )}
+                {venue.address && (
+                  <span style={{ fontSize: 11, color: "#666", display: "block", marginTop: 2 }}>
+                    {venue.address}
+                  </span>
+                )}
+                {venue.note && (
+                  <small style={{ color: "#888", fontSize: 10, display: "block", marginTop: 4 }}>
+                    {venue.note}
+                  </small>
+                )}
+              </div>
             </Popup>
           </Marker>
         ))}
