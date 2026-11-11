@@ -1,6 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Compass,
+  Hotel,
+  MapPin,
+  Sparkles,
+  Star,
+  Trophy,
+  Utensils,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ArrowIcon from "../components/ArrowIcon";
 import EventCountdown from "../components/EventCountdown";
@@ -8,6 +18,9 @@ import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { EVENT_START_LABEL } from "../event-config";
 import { useCompetitionStore } from "../stores/competitionStore";
+import { kobarUMKMData } from "../data/umkmKobarData";
+import { hotelData } from "../data/hotelKobarData";
+import { wisataKobarData } from "../data/wisataKobarData";
 
 function getTodaysDate(): string {
   const now = new Date();
@@ -33,7 +46,7 @@ const featuredStadiums = [
     venue: "Stadion Sepak Bola Sport Center",
     city: "Madurejo, Kotawaringin Barat",
     cabor: "Cabang Olahraga Sepak Bola",
-    image: "/sportcenter.webp",
+    image: "/venues/sport-center.webp",
   },
   {
     category: "GELANGGANG OLAHRAGA",
@@ -47,21 +60,28 @@ const featuredStadiums = [
     venue: "GOR KONI Kotawaringin Barat",
     city: "Sidorejo, Pangkalan Bun",
     cabor: "Cabang Olahraga Bulutangkis",
-    image: "/sportcenter.webp",
+    image: "/venues/gor-koni.jpg",
   },
   {
     category: "ARENA PERAIRAN",
     venue: "Kampung Sega Sungai Arut",
     city: "Mendawai, Pangkalan Bun",
     cabor: "Dayung (Canoeing, Traditional Boat Race, & Ergometer)",
-    image: "/sportcenter.webp",
+    image: "/venues/sungai-arut.jpg",
   },
   {
     category: "ARENA TERBUKA",
     venue: "Pangkalan Bun Park",
     city: "Madurejo, Pangkalan Bun",
     cabor: "MMA & Panjat Tebing",
-    image: "/sportcenter.webp",
+    image: "/venues/pangkalan-bun-park.jpg",
+  },
+  {
+    category: "CAGAR BUDAYA & TRADISIONAL",
+    venue: "Desa Adat Pasir Panjang",
+    city: "Pasir Panjang, Arut Selatan",
+    cabor: "Sumpitan, Balogo & Cabor Tradisional",
+    image: "/venues/pasir-panjang.jpg",
   },
   {
     category: "AKUATIK & SIRKUIT",
@@ -72,12 +92,119 @@ const featuredStadiums = [
   },
 ];
 
+const featuredCaborList = [
+  {
+    name: "Sepak Bola",
+    category: "BOLA BESAR & PRESTISE",
+    venue: "Stadion Sepak Bola Sport Center",
+    city: "Madurejo, Pangkalan Bun",
+    desc: "Perebutan medali emas paling bergengsi antarkabupaten/kota se-Kalimantan Tengah.",
+    image: "/cabor/sepak-bola.svg",
+    color: "from-emerald-700 via-teal-800 to-slate-900",
+  },
+  {
+    name: "Atletik",
+    category: "INDUK SEMUA CABOR",
+    venue: "Lintasan Atletik Sport Center",
+    city: "Madurejo, Pangkalan Bun",
+    desc: "Lari cepat (sprint), estafet, lompat jauh, lompat tinggi, dan tolak peluru.",
+    image: "/cabor/atletik.svg",
+    color: "from-amber-700 via-orange-800 to-slate-900",
+  },
+  {
+    name: "Bulutangkis",
+    category: "RAKET & KELINCAHAN",
+    venue: "GOR KONI Kotawaringin Barat",
+    city: "Sidorejo, Pangkalan Bun",
+    desc: "Tunggal putra/putri, ganda, dan beregu dengan atmosfer suporter meriah.",
+    image: "/cabor/bulutangkis.svg",
+    color: "from-blue-700 via-indigo-800 to-slate-900",
+  },
+  {
+    name: "Akuatik / Renang",
+    category: "OLAHRAGA PERAIRAN",
+    venue: "Kolam Renang Isen Mulang",
+    city: "Palangka Raya (Venue Afiliasi)",
+    desc: "Gaya bebas, dada, punggung, dan kupu-kupu standar resmi perlombaan PRSI.",
+    image: "/cabor/akuatik.svg",
+    color: "from-cyan-700 via-blue-800 to-slate-900",
+  },
+  {
+    name: "Dayung (TBR & Kayak)",
+    category: "TRADISI PERAIRAN KALTENG",
+    venue: "Kampung Sega Sungai Arut",
+    city: "Mendawai, Pangkalan Bun",
+    desc: "Adu cepat di atas aliran Sungai Arut: Traditional Boat Race, Kayak & Kano.",
+    image: "/cabor/dayung.svg",
+    color: "from-sky-700 via-blue-900 to-slate-900",
+  },
+  {
+    name: "Panahan",
+    category: "FOKUS & AKURASI",
+    venue: "Lapangan Panahan Sport Center",
+    city: "Madurejo, Pangkalan Bun",
+    desc: "Divisi Recurve, Compound, dan Nasional di arena terbuka standar kompetisi.",
+    image: "/cabor/panahan.svg",
+    color: "from-green-700 via-emerald-800 to-slate-900",
+  },
+  {
+    name: "Pencak Silat",
+    category: "BELADIRI TRADISIONAL",
+    venue: "Gedung Serbaguna Antakusuma",
+    city: "Pusat Kota Pangkalan Bun",
+    desc: "Seni tunggal, ganda, regu, serta tanding penuh teknik warisan leluhur.",
+    image: "/cabor/pencak-silat.svg",
+    color: "from-rose-700 via-red-900 to-slate-900",
+  },
+  {
+    name: "Bola Voli & Pasir",
+    category: "KERJASAMA TIM & SMASH",
+    venue: "GOR Ratu Alamsyah & Sport Center",
+    city: "Madurejo, Pangkalan Bun",
+    desc: "Persaingan sengit bola voli indoor dan voli pantai dengan antusiasme penonton tinggi.",
+    image: "/cabor/bola-voli.svg",
+    color: "from-violet-700 via-purple-900 to-slate-900",
+  },
+  {
+    name: "Bermotor (Balap Motor)",
+    category: "ADRENALIN & KECEPATAN",
+    venue: "Sirkuit Balap Motor Sabaru",
+    city: "Palangka Raya & Road Race Kobar",
+    desc: "Adu kecepatan kelas bebek 150cc dan matic standar kejuaraan provinsi.",
+    image: "/cabor/bermotor.svg",
+    color: "from-zinc-700 via-stone-800 to-slate-900",
+  },
+  {
+    name: "Taekwondo & Karate",
+    category: "BELADIRI PRESTASI",
+    venue: "Gedung Olahraga Pangkalan Bun",
+    city: "Arut Selatan, Kotawaringin Barat",
+    desc: "Kategori Kyorugi (tarung) dan Poomsae (jurus) atlet terbaik se-Kalteng.",
+    image: "/cabor/taekwondo.svg",
+    color: "from-teal-700 via-cyan-900 to-slate-900",
+  },
+];
+
 export default function HomeView() {
   const stadiumTrackRef = useRef<HTMLDivElement>(null);
+  const caborTrackRef = useRef<HTMLDivElement>(null);
+  const umkmTrackRef = useRef<HTMLDivElement>(null);
+  const hotelTrackRef = useRef<HTMLDivElement>(null);
+  const wisataTrackRef = useRef<HTMLDivElement>(null);
+
   const sports = useCompetitionStore((state) => state.sports);
   const loadingSports = useCompetitionStore((state) => state.loading.sports);
   const sportsError = useCompetitionStore((state) => state.errors.sports);
   const fetchSports = useCompetitionStore((state) => state.fetchSports);
+
+  const featuredUMKMList = useMemo(() => {
+    return kobarUMKMData
+      .filter((u) => u.recommended && u.rating_google >= 4.5 && u.image)
+      .slice(0, 8);
+  }, []);
+
+  const featuredHotelList = useMemo(() => hotelData, []);
+  const featuredWisataList = useMemo(() => wisataKobarData, []);
 
   useEffect(() => {
     void fetchSports();
@@ -241,32 +368,44 @@ export default function HomeView() {
           </div>
         </section> */}
 
+        {/* ===================================================================
+            02. CAROUSEL VENUE PERTANDINGAN
+           =================================================================== */}
         <section className="home-stadium-section" aria-labelledby="home-stadium-title">
           <div className="home-stadium-heading">
             <div>
-              <p className="home-stadium-kicker"><span>02</span> GALERI STADION</p>
+              <p className="home-stadium-kicker"><span>02</span> GALERI VENUE</p>
               <h2 id="home-stadium-title">Venue yang tersedia</h2>
               <p className="home-stadium-description">Berikut adalah Venue yang digunakan untuk pertandingan nanti.</p>
             </div>
-            <div className="home-stadium-controls" aria-label="Kontrol carousel stadion">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label="Stadion sebelumnya"
-                onClick={() => stadiumTrackRef.current?.scrollBy({ left: -360, behavior: "smooth" })}
+            <div className="flex items-center gap-3">
+              <Link
+                to="/venue"
+                className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-950 hover:underline"
               >
-                <ChevronLeft aria-hidden="true" />
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label="Stadion berikutnya"
-                onClick={() => stadiumTrackRef.current?.scrollBy({ left: 360, behavior: "smooth" })}
-              >
-                <ChevronRight aria-hidden="true" />
-              </Button>
+                Semua Venue
+                <ArrowIcon diagonal />
+              </Link>
+              <div className="home-stadium-controls" aria-label="Kontrol carousel venue">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Venue sebelumnya"
+                  onClick={() => stadiumTrackRef.current?.scrollBy({ left: -360, behavior: "smooth" })}
+                >
+                  <ChevronLeft aria-hidden="true" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Venue berikutnya"
+                  onClick={() => stadiumTrackRef.current?.scrollBy({ left: 360, behavior: "smooth" })}
+                >
+                  <ChevronRight aria-hidden="true" />
+                </Button>
+              </div>
             </div>
           </div>
           <div className="home-stadium-track" ref={stadiumTrackRef}>
@@ -293,54 +432,93 @@ export default function HomeView() {
                   <span className="home-stadium-credit" style={{ textDecoration: "none" }}>
                     {item.cabor}
                   </span>
-                  <Link className="home-stadium-license" to="/venue">
+                  <Link className="home-stadium-license text-emerald-800 font-bold" to="/venue">
                     Lihat di peta venue →
                   </Link>
                 </div>
               </article>
             ))}
+
+            {/* End Action Card: Venue */}
+            <article className="home-stadium-card flex flex-col justify-between p-6 sm:p-7 bg-gradient-to-br from-[#0e2742] via-[#174a72] to-[#216396] text-white border-2 border-dashed border-sky-300/40 hover:border-amber-400 transition-all shrink-0">
+              <div className="space-y-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/15 text-amber-300 backdrop-blur-xs">
+                  <Sparkles className="h-3 w-3" />
+                  Arena Tuan Rumah
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-white leading-tight">
+                  Jelajahi 23 Venue Pertandingan
+                </h3>
+                <p className="text-xs text-sky-100/90 leading-relaxed">
+                  Cek peta lokasi interaktif, rute Google Maps, serta fasilitas pendukung seluruh venue resmi di Kabupaten Kotawaringin Barat.
+                </p>
+              </div>
+              <div className="pt-6 mt-auto">
+                <Link
+                  to="/venue"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm py-3.5 px-4 shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <span>Buka Halaman Venue</span>
+                  <ArrowIcon diagonal />
+                </Link>
+              </div>
+            </article>
           </div>
         </section>
-        <section className="cabor" aria-labelledby="home-stadium-title">
+
+        {/* ===================================================================
+            03. CAROUSEL CABANG OLAHRAGA
+           =================================================================== */}
+        <section className="home-stadium-section" aria-labelledby="home-cabor-title">
           <div className="home-stadium-heading">
             <div>
-              <p className="home-stadium-kicker"><span>02</span> GALERI STADION</p>
-              <h2 id="home-stadium-title">Venue yang tersedia</h2>
-              <p className="home-stadium-description">Berikut adalah Venue yang digunakan untuk pertandingan nanti.</p>
+              <p className="home-stadium-kicker"><span>03</span> CABANG OLAHRAGA</p>
+              <h2 id="home-cabor-title">Cabang Olahraga Pilihan</h2>
+              <p className="home-stadium-description">35 Cabang olahraga dipertandingkan untuk merebut supremasi tertinggi Kalteng.</p>
             </div>
-            <div className="home-stadium-controls" aria-label="Kontrol carousel stadion">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label="Stadion sebelumnya"
-                onClick={() => stadiumTrackRef.current?.scrollBy({ left: -360, behavior: "smooth" })}
+            <div className="flex items-center gap-3">
+              <Link
+                to="/cabor"
+                className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-950 hover:underline"
               >
-                <ChevronLeft aria-hidden="true" />
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label="Stadion berikutnya"
-                onClick={() => stadiumTrackRef.current?.scrollBy({ left: 360, behavior: "smooth" })}
-              >
-                <ChevronRight aria-hidden="true" />
-              </Button>
+                Semua Cabor
+                <ArrowIcon diagonal />
+              </Link>
+              <div className="home-stadium-controls" aria-label="Kontrol carousel cabor">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Cabor sebelumnya"
+                  onClick={() => caborTrackRef.current?.scrollBy({ left: -360, behavior: "smooth" })}
+                >
+                  <ChevronLeft aria-hidden="true" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Cabor berikutnya"
+                  onClick={() => caborTrackRef.current?.scrollBy({ left: 360, behavior: "smooth" })}
+                >
+                  <ChevronRight aria-hidden="true" />
+                </Button>
+              </div>
             </div>
           </div>
-          <div className="home-stadium-track" ref={stadiumTrackRef}>
-            {featuredStadiums.map((item, index) => (
-              <article className="home-stadium-card" key={item.venue}>
+
+          <div className="home-stadium-track" ref={caborTrackRef}>
+            {featuredCaborList.map((item, index) => (
+              <article className="home-stadium-card group" key={item.name}>
                 <Link
-                  className="home-stadium-image-link"
-                  to="/venue"
-                  aria-label={`Lihat detail ${item.venue} di halaman Venue`}
+                  className={`home-stadium-image-link flex items-center justify-center p-6 bg-gradient-to-br ${item.color}`}
+                  to="/cabor"
+                  aria-label={`Lihat detail cabor ${item.name}`}
                 >
                   <img
-                    className="home-stadium-image"
+                    className="h-24 w-24 object-contain brightness-0 invert opacity-95 transition-transform duration-300 group-hover:scale-110 drop-shadow-md"
                     src={item.image}
-                    alt={item.venue}
+                    alt={item.name}
                     loading="lazy"
                     decoding="async"
                   />
@@ -348,23 +526,366 @@ export default function HomeView() {
                 </Link>
                 <div className="home-stadium-copy">
                   <small>{item.category}</small>
-                  <h3>{item.venue}</h3>
-                  <p>{item.city}</p>
+                  <h3>{item.name}</h3>
+                  <p>{item.venue} • {item.city}</p>
                   <span className="home-stadium-credit" style={{ textDecoration: "none" }}>
-                    {item.cabor}
+                    {item.desc}
                   </span>
-                  <Link className="home-stadium-license" to="/venue">
-                    Lihat di peta venue →
+                  <Link className="home-stadium-license text-emerald-800 font-bold" to="/cabor">
+                    Lihat detail cabor →
                   </Link>
                 </div>
               </article>
             ))}
+
+            {/* End Action Card: Cabor */}
+            <article className="home-stadium-card flex flex-col justify-between p-6 sm:p-7 bg-gradient-to-br from-[#0e2742] via-[#1b4332] to-[#2d6a4f] text-white border-2 border-dashed border-emerald-300/40 hover:border-amber-400 transition-all shrink-0">
+              <div className="space-y-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/15 text-amber-300 backdrop-blur-xs">
+                  <Trophy className="h-3 w-3" />
+                  35 Cabang Olahraga
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-white leading-tight">
+                  Lihat Semua Cabang Olahraga
+                </h3>
+                <p className="text-xs text-emerald-100/90 leading-relaxed">
+                  Daftar lengkap 35 cabang olahraga, nomor pertandingan, lokasi arena, dan jadwal perebutan medali emas se-Kalimantan Tengah.
+                </p>
+              </div>
+              <div className="pt-6 mt-auto">
+                <Link
+                  to="/cabor"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm py-3.5 px-4 shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <span>Buka Halaman Cabor</span>
+                  <ArrowIcon diagonal />
+                </Link>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        {/* ===================================================================
+            04. CAROUSEL UMKM & KULINER KHAS KOBAR
+           =================================================================== */}
+        <section className="home-stadium-section" aria-labelledby="home-umkm-title">
+          <div className="home-stadium-heading">
+            <div>
+              <p className="home-stadium-kicker"><span>04</span> KULINER &amp; UMKM KOBAR</p>
+              <h2 id="home-umkm-title">Rekomendasi Kuliner &amp; Oleh-Oleh</h2>
+              <p className="home-stadium-description">Jelajahi kelezatan kuliner lokal dan UMKM khas Pangkalan Bun selama perhelatan PORPROV.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link
+                to="/informasi?tab=umkm"
+                className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-950 hover:underline"
+              >
+                Semua UMKM
+                <ArrowIcon diagonal />
+              </Link>
+              <div className="home-stadium-controls" aria-label="Kontrol carousel UMKM">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="UMKM sebelumnya"
+                  onClick={() => umkmTrackRef.current?.scrollBy({ left: -360, behavior: "smooth" })}
+                >
+                  <ChevronLeft aria-hidden="true" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="UMKM berikutnya"
+                  onClick={() => umkmTrackRef.current?.scrollBy({ left: 360, behavior: "smooth" })}
+                >
+                  <ChevronRight aria-hidden="true" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="home-stadium-track" ref={umkmTrackRef}>
+            {featuredUMKMList.map((item, index) => (
+              <article className="home-stadium-card" key={item.id}>
+                <Link
+                  className="home-stadium-image-link"
+                  to="/informasi?tab=umkm"
+                  aria-label={`Lihat detail ${item.nama}`}
+                >
+                  <img
+                    className="home-stadium-image"
+                    src={item.image}
+                    alt={item.nama}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-extrabold text-amber-300 backdrop-blur-xs">
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    <span>{item.rating_google.toFixed(1)}</span>
+                    <span className="text-[9px] text-white/80">({item.jumlah_ulasan})</span>
+                  </div>
+                  <span className="home-stadium-index">{String(index + 1).padStart(2, "0")}</span>
+                </Link>
+                <div className="home-stadium-copy">
+                  <small>{item.culinaryTheme || item.categoryLabel}</small>
+                  <h3>{item.nama}</h3>
+                  <p>{item.kecamatanFull}</p>
+                  <span className="home-stadium-credit text-slate-700 font-medium" style={{ textDecoration: "none" }}>
+                    🍴 {item.signatureDish}
+                  </span>
+                  <Link className="home-stadium-license text-emerald-800 font-bold" to="/informasi?tab=umkm">
+                    Lihat menu &amp; rute maps →
+                  </Link>
+                </div>
+              </article>
+            ))}
+
+            {/* End Action Card: UMKM */}
+            <article className="home-stadium-card flex flex-col justify-between p-6 sm:p-7 bg-gradient-to-br from-[#3d1a24] via-[#5c2434] to-[#7f2643] text-white border-2 border-dashed border-rose-300/40 hover:border-amber-400 transition-all shrink-0">
+              <div className="space-y-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/15 text-amber-300 backdrop-blur-xs">
+                  <Utensils className="h-3 w-3" />
+                  350+ Kuliner Kobar
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-white leading-tight">
+                  Jelajahi Kuliner &amp; UMKM
+                </h3>
+                <p className="text-xs text-rose-100/90 leading-relaxed">
+                  Cicipi Soto Manggala, Ikan Bakar Sungai Arut, Kerupuk Basah Kumai, dan ratusan warung makan khas Kotawaringin Barat.
+                </p>
+              </div>
+              <div className="pt-6 mt-auto">
+                <Link
+                  to="/informasi?tab=umkm"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm py-3.5 px-4 shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <span>Buka Direktori UMKM</span>
+                  <ArrowIcon diagonal />
+                </Link>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        {/* ===================================================================
+            05. CAROUSEL HOTEL & PENGINAPAN
+           =================================================================== */}
+        <section className="home-stadium-section" aria-labelledby="home-hotel-title">
+          <div className="home-stadium-heading">
+            <div>
+              <p className="home-stadium-kicker"><span>05</span> HOTEL &amp; PENGINAPAN</p>
+              <h2 id="home-hotel-title">Akomodasi Tamu &amp; Atlet</h2>
+              <p className="home-stadium-description">Pilihan hotel berbintang, wisma, dan penginapan nyaman strategis di Pangkalan Bun.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link
+                to="/informasi?tab=hotel"
+                className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-950 hover:underline"
+              >
+                Semua Hotel
+                <ArrowIcon diagonal />
+              </Link>
+              <div className="home-stadium-controls" aria-label="Kontrol carousel hotel">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Hotel sebelumnya"
+                  onClick={() => hotelTrackRef.current?.scrollBy({ left: -360, behavior: "smooth" })}
+                >
+                  <ChevronLeft aria-hidden="true" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Hotel berikutnya"
+                  onClick={() => hotelTrackRef.current?.scrollBy({ left: 360, behavior: "smooth" })}
+                >
+                  <ChevronRight aria-hidden="true" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="home-stadium-track" ref={hotelTrackRef}>
+            {featuredHotelList.map((item, index) => (
+              <article className="home-stadium-card" key={item.id}>
+                <Link
+                  className="home-stadium-image-link"
+                  to="/informasi?tab=hotel"
+                  aria-label={`Lihat detail ${item.hotelName}`}
+                >
+                  <img
+                    className="home-stadium-image"
+                    src={item.image}
+                    alt={item.hotelName}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-extrabold text-amber-300 backdrop-blur-xs">
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    <span>{item.rating}</span>
+                    <span className="text-[9px] text-white/80">({item.facilities[0]})</span>
+                  </div>
+                  <span className="home-stadium-index">{String(index + 1).padStart(2, "0")}</span>
+                </Link>
+                <div className="home-stadium-copy">
+                  <small>{item.type}</small>
+                  <h3>{item.hotelName}</h3>
+                  <p>{item.nearVenue}</p>
+                  <span className="home-stadium-credit text-slate-700 font-semibold" style={{ textDecoration: "none" }}>
+                    💰 {item.priceRange}
+                  </span>
+                  <Link className="home-stadium-license text-emerald-800 font-bold" to="/informasi?tab=hotel">
+                    Lihat fasilitas &amp; rute maps →
+                  </Link>
+                </div>
+              </article>
+            ))}
+
+            {/* End Action Card: Hotel */}
+            <article className="home-stadium-card flex flex-col justify-between p-6 sm:p-7 bg-gradient-to-br from-[#1c2541] via-[#3a506b] to-[#5bc0be] text-white border-2 border-dashed border-cyan-300/40 hover:border-amber-400 transition-all shrink-0">
+              <div className="space-y-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/15 text-amber-300 backdrop-blur-xs">
+                  <Hotel className="h-3 w-3" />
+                  Akomodasi Tamu &amp; Atlet
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-white leading-tight">
+                  Cari Hotel &amp; Penginapan
+                </h3>
+                <p className="text-xs text-sky-100/90 leading-relaxed">
+                  Temukan hotel bintang 4, wisma atlet, guest house terdekat dari Sport Center, serta kontak pemesanan langsung.
+                </p>
+              </div>
+              <div className="pt-6 mt-auto">
+                <Link
+                  to="/informasi?tab=hotel"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm py-3.5 px-4 shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <span>Buka Direktori Hotel</span>
+                  <ArrowIcon diagonal />
+                </Link>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        {/* ===================================================================
+            06. CAROUSEL PESONA WISATA KOBAR (DUMMY WISATA)
+           =================================================================== */}
+        <section className="home-stadium-section" aria-labelledby="home-wisata-title">
+          <div className="home-stadium-heading">
+            <div>
+              <p className="home-stadium-kicker"><span>06</span> PESONA WISATA KOBAR</p>
+              <h2 id="home-wisata-title">Destinasi Wisata Populer</h2>
+              <p className="home-stadium-description">Saksikan keindahan alam cagar biosfer dunia, pantai eksotis, dan cagar budaya Kesultanan Kutaringin.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link
+                to="/informasi"
+                className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-950 hover:underline"
+              >
+                Informasi Wisata
+                <ArrowIcon diagonal />
+              </Link>
+              <div className="home-stadium-controls" aria-label="Kontrol carousel wisata">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Wisata sebelumnya"
+                  onClick={() => wisataTrackRef.current?.scrollBy({ left: -360, behavior: "smooth" })}
+                >
+                  <ChevronLeft aria-hidden="true" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Wisata berikutnya"
+                  onClick={() => wisataTrackRef.current?.scrollBy({ left: 360, behavior: "smooth" })}
+                >
+                  <ChevronRight aria-hidden="true" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="home-stadium-track" ref={wisataTrackRef}>
+            {featuredWisataList.map((item, index) => (
+              <article className="home-stadium-card" key={item.id}>
+                <a
+                  className="home-stadium-image-link"
+                  href={item.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Buka peta wisata ${item.name}`}
+                >
+                  <img
+                    className="home-stadium-image"
+                    src={item.image}
+                    alt={item.name}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-extrabold text-sky-200 backdrop-blur-xs">
+                    <MapPin className="h-3 w-3 text-amber-300" />
+                    <span>{item.district}</span>
+                  </div>
+                  <span className="home-stadium-index">{String(index + 1).padStart(2, "0")}</span>
+                </a>
+                <div className="home-stadium-copy">
+                  <small>{item.category}</small>
+                  <h3>{item.name}</h3>
+                  <p>{item.openInfo}</p>
+                  <span className="home-stadium-credit text-slate-700 font-medium" style={{ textDecoration: "none" }}>
+                    ✨ {item.highlights}
+                  </span>
+                  <a
+                    className="home-stadium-license text-emerald-800 font-bold inline-flex items-center gap-1"
+                    href={item.mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Buka rute Google Maps <ArrowIcon diagonal />
+                  </a>
+                </div>
+              </article>
+            ))}
+
+            {/* End Action Card: Wisata */}
+            <article className="home-stadium-card flex flex-col justify-between p-6 sm:p-7 bg-gradient-to-br from-[#241e38] via-[#473b68] to-[#69589a] text-white border-2 border-dashed border-purple-300/40 hover:border-amber-400 transition-all shrink-0">
+              <div className="space-y-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/15 text-amber-300 backdrop-blur-xs">
+                  <Compass className="h-3 w-3" />
+                  Bumi Marunting Batu Aji
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-white leading-tight">
+                  Pesona Wisata Kotawaringin Barat
+                </h3>
+                <p className="text-xs text-purple-100/90 leading-relaxed">
+                  Jelajahi keajaiban Taman Nasional Tanjung Puting, Pantai Kubu, Istana Kuning, dan kekayaan budaya Dayak Tomun.
+                </p>
+              </div>
+              <div className="pt-6 mt-auto">
+                <Link
+                  to="/informasi"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm py-3.5 px-4 shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <span>Buka Informasi Wisata</span>
+                  <ArrowIcon diagonal />
+                </Link>
+              </div>
+            </article>
           </div>
         </section>
 
         <section id="cabang-olahraga" className="mx-auto w-[var(--container-width)] pt-[94px] pb-[108px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:py-[72px]">
           <div className="flex items-center gap-[13px] text-[9px] font-extrabold tracking-[0.16em] text-[#596156] [&>span:first-child]:text-[var(--orange)]">
-            <span>03</span>
+            <span>07</span>
             <span>ARENA PARA JUARA</span>
           </div>
           <div className="mt-[33px] grid grid-cols-[0.9fr_1.1fr] gap-[12%] max-[900px]:gap-[7%] max-[620px]:grid-cols-1 max-[620px]:gap-[27px]">
