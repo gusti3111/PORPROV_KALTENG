@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Award,
@@ -20,6 +20,7 @@ import {
   Info,
   MapPin,
   Medal,
+  Newspaper,
   Phone,
   RotateCcw,
   ShieldCheck,
@@ -60,6 +61,59 @@ type NewsArticle = {
   excerpt: string;
   theme: "green" | "orange" | "lime";
 };
+
+export interface MmcNewsItem {
+  id_berita: number;
+  sopd: string;
+  judul: string;
+  sub_judul?: string;
+  deskripsi: string;
+  slug_berita: string;
+  set_tanggal_publish: string;
+  filename1?: string;
+}
+
+export type DisplayArticle = {
+  id: string | number;
+  category: string;
+  sopd?: string;
+  date: string;
+  title: string;
+  excerpt: string;
+  fullHtml?: string;
+  slug?: string;
+  isMmcLive?: boolean;
+  theme: "green" | "orange" | "lime";
+};
+
+function decodeHtmlContent(rawStr: string): string {
+  if (!rawStr) return "";
+  try {
+    const parser = new DOMParser();
+    const doc1 = parser.parseFromString(rawStr, "text/html");
+    return doc1.body.textContent || rawStr;
+  } catch {
+    return rawStr
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&ndash;/g, "–")
+      .replace(/&nbsp;/g, " ");
+  }
+}
+
+function getCleanExcerpt(rawStr: string): string {
+  try {
+    const html = decodeHtmlContent(rawStr);
+    const parser = new DOMParser();
+    const doc2 = parser.parseFromString(html, "text/html");
+    return (doc2.body.textContent || "").replace(/\s+/g, " ").trim();
+  } catch {
+    return rawStr.replace(/<[^>]*>?/gm, " ").replace(/\s+/g, " ").trim();
+  }
+}
 
 type GalleryPhoto = {
   id: number;
@@ -433,12 +487,18 @@ const contingentProfiles: ContingentProfile[] = [
 ];
 
 function formatDate(date: string) {
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Asia/Jakarta",
-  }).format(new Date(`${date}T12:00:00+07:00`));
+  try {
+    const d = new Date(date.includes("T") ? date : `${date}T12:00:00+07:00`);
+    if (isNaN(d.getTime())) return date;
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "Asia/Jakarta",
+    }).format(d);
+  } catch {
+    return date;
+  }
 }
 
 export default function Newsview() {
@@ -457,11 +517,73 @@ export default function Newsview() {
   const [query, setQuery] = useState("");
   const [showAllGallery, setShowAllGallery] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryPhoto | null>(null);
+
+  // Live MMC Kobar API State
+  const [mmcArticles, setMmcArticles] = useState<MmcNewsItem[]>([]);
+  const [isLoadingMmc, setIsLoadingMmc] = useState<boolean>(true);
+  const [mmcError, setMmcError] = useState<string | null>(null);
+  const [selectedDetailArticle, setSelectedDetailArticle] = useState<DisplayArticle | null>(null);
+
+  const fetchMmcNews = async () => {
+    setIsLoadingMmc(true);
+    setMmcError(null);
+    try {
+      const res = await fetch("https://mmc.apikobar.id/api/berita?search=porprov%20xiii");
+      if (!res.ok) {
+        throw new Error(`HTTP error ${res.status}`);
+      }
+      const json = await res.json();
+      if (json && json.success && Array.isArray(json.data) && json.data.length > 0) {
+        setMmcArticles(json.data);
+      } else {
+        setMmcArticles([]);
+      }
+    } catch (err) {
+      console.warn("Gagal memuat berita MMC Kobar:", err);
+      setMmcError("Gagal memuat feed berita MMC Kobar");
+    } finally {
+      setIsLoadingMmc(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMmcNews();
+  }, []);
+
   const normalizedQuery = query.trim().toLocaleLowerCase("id");
   const isSejarahTab = selectedCategory === "Sejarah";
   const isGalleryTab = selectedCategory === "Galeri";
   const isUMKMTab = selectedCategory === "UMKM";
   const isHotelTab = selectedCategory === "Hotel dan Penginapan";
+
+  const liveMappedArticles: DisplayArticle[] = useMemo(() => {
+    if (mmcArticles.length > 0) {
+      return mmcArticles.map((item, idx) => ({
+        id: `mmc-${item.id_berita}`,
+        category: item.sopd || "MMC Kobar",
+        sopd: item.sopd || "Dispora Kobar",
+        date: item.set_tanggal_publish,
+        title: decodeHtmlContent(item.judul),
+        excerpt: getCleanExcerpt(item.deskripsi).slice(0, 160) + "...",
+        fullHtml: decodeHtmlContent(item.deskripsi),
+        slug: item.slug_berita,
+        isMmcLive: true,
+        theme: idx % 3 === 0 ? "green" : idx % 3 === 1 ? "lime" : "orange",
+      }));
+    }
+    // Fallback editorial articles
+    return articles.map((art) => ({
+      id: art.id,
+      category: art.category,
+      sopd: "Panitia PORPROV",
+      date: art.date,
+      title: art.title,
+      excerpt: art.excerpt,
+      fullHtml: `<p>${art.excerpt}</p>`,
+      isMmcLive: false,
+      theme: art.theme,
+    }));
+  }, [mmcArticles]);
 
   const visibleMilestones = useMemo(
     () =>
@@ -489,19 +611,19 @@ export default function Newsview() {
 
   const visibleArticles = useMemo(
     () =>
-      articles.filter((article) => {
+      liveMappedArticles.filter((article) => {
         const matchesCategory =
           selectedCategory === "Berita" ||
-          article.category === selectedCategory;
+          article.category.toLowerCase().includes(selectedCategory.toLowerCase());
         const matchesQuery =
           !normalizedQuery ||
-          `${article.title} ${article.excerpt} ${article.category}`
+          `${article.title} ${article.excerpt} ${article.category} ${article.sopd ?? ""}`
             .toLocaleLowerCase("id")
             .includes(normalizedQuery);
 
         return matchesCategory && matchesQuery;
       }),
-    [normalizedQuery, selectedCategory],
+    [liveMappedArticles, normalizedQuery, selectedCategory],
   );
 
   const visibleGalleryPhotos = useMemo(
@@ -1857,39 +1979,146 @@ export default function Newsview() {
                 </div>
               )}
             </div>
-          ) : visibleArticles.length > 0 ? (
-            <div className="news-grid" aria-live="polite">
-              {visibleArticles.map((article) => (
-                <Card
-                  className="news-card p-0"
-                  key={article.id}
-                  role="article"
-                  aria-labelledby={`news-title-${article.id}`}
-                >
-                  <div
-                    className={`news-card-cover news-cover-${article.theme}`}
-                    aria-hidden="true"
-                  >
-                    <span>PORPROV XIII</span>
-                    <strong>2026</strong>
-                  </div>
-                  <div className="news-card-copy">
-                    <p className="news-meta">
-                      <Badge variant="secondary">{article.category}</Badge>
-                      <time dateTime={article.date}>
-                        {formatDate(article.date)}
-                      </time>
-                    </p>
-                    <h2 id={`news-title-${article.id}`}>{article.title}</h2>
-                    <p>{article.excerpt}</p>
-                  </div>
-                </Card>
-              ))}
-            </div>
           ) : (
-            <p className="news-empty" role="status">
-              Berita tidak ditemukan. Coba kata kunci atau kategori lain.
-            </p>
+            <div className="space-y-6" aria-live="polite">
+              {/* Header Feed Berita Resmi MMC Kobar */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <span className="relative flex h-3 w-3 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-600"></span>
+                  </span>
+                  <div>
+                    <p className="text-sm font-bold text-emerald-950 flex items-center gap-1.5">
+                      <Newspaper className="h-4 w-4 text-emerald-700" />
+                      Live Feed Berita Resmi MMC Kobar
+                    </p>
+                    <p className="text-xs text-emerald-800">
+                      Terhubung langsung dengan API Media Center Pemerintah Kabupaten Kotawaringin Barat
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                  <span className="text-xs font-semibold text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+                    {visibleArticles.length} Berita
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={fetchMmcNews}
+                    disabled={isLoadingMmc}
+                    className="h-8 gap-1.5 text-xs font-semibold bg-white border-emerald-300 text-emerald-900 hover:bg-emerald-100"
+                  >
+                    <RotateCcw className={`h-3.5 w-3.5 ${isLoadingMmc ? "animate-spin" : ""}`} />
+                    Segarkan
+                  </Button>
+                </div>
+              </div>
+
+              {mmcError && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 flex items-center justify-between">
+                  <span>{mmcError}</span>
+                  <button
+                    type="button"
+                    onClick={() => setMmcError(null)}
+                    className="text-amber-900 font-bold hover:underline ml-2"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              )}
+
+              {isLoadingMmc && mmcArticles.length === 0 ? (
+                <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl border border-slate-200 bg-white">
+                  <RotateCcw className="h-8 w-8 animate-spin text-emerald-600 mb-3" />
+                  <p className="text-sm font-semibold text-slate-700">Mengambil rilis berita terkini dari MMC Kobar...</p>
+                  <p className="text-xs text-slate-500 mt-1">Mohon tunggu sebentar</p>
+                </div>
+              ) : visibleArticles.length > 0 ? (
+                <div className="news-grid">
+                  {visibleArticles.map((article) => (
+                    <Card
+                      className="news-card p-0 flex flex-col justify-between hover:shadow-lg transition-all"
+                      key={article.id}
+                      role="article"
+                      aria-labelledby={`news-title-${article.id}`}
+                    >
+                      <div
+                        className={`news-card-cover news-cover-${article.theme} cursor-pointer group`}
+                        onClick={() => setSelectedDetailArticle(article)}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <Badge className="bg-white/25 text-white backdrop-blur-xs border-white/30 text-[10px] uppercase font-bold tracking-wider">
+                            {article.sopd || article.category}
+                          </Badge>
+                          <span className="text-[11px] font-bold text-white/90 bg-black/25 px-2 py-0.5 rounded-full">
+                            PORPROV XIII
+                          </span>
+                        </div>
+                        <strong className="mt-auto text-xl sm:text-2xl font-black text-white leading-snug line-clamp-2">
+                          {article.title}
+                        </strong>
+                      </div>
+
+                      <div className="news-card-copy flex flex-col flex-1 justify-between p-5">
+                        <div>
+                          <p className="news-meta flex items-center justify-between text-xs text-slate-500 mb-2">
+                            <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
+                              <Calendar className="h-3.5 w-3.5" />
+                              {formatDate(article.date)}
+                            </span>
+                            {article.isMmcLive && (
+                              <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+                                MMC Official
+                              </span>
+                            )}
+                          </p>
+                          <h2
+                            id={`news-title-${article.id}`}
+                            className="text-base font-bold text-slate-900 hover:text-emerald-700 transition-colors cursor-pointer line-clamp-2 mb-2"
+                            onClick={() => setSelectedDetailArticle(article)}
+                          >
+                            {article.title}
+                          </h2>
+                          <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed mb-4">
+                            {article.excerpt}
+                          </p>
+                        </div>
+
+                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedDetailArticle(article)}
+                            className="inline-flex items-center text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline gap-1"
+                          >
+                            Baca Rilis Lengkap &rarr;
+                          </button>
+                          {article.slug && (
+                            <a
+                              href={`https://kotawaringinbaratkab.go.id/id/blog/${article.slug}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              title="Buka rilis resmi di Portal Pemkab Kobar"
+                              className="text-slate-400 hover:text-emerald-700 p-1 rounded hover:bg-slate-100 transition-colors inline-flex items-center gap-1 text-[11px]"
+                            >
+                              Portal Kobar
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center">
+                  <Newspaper className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+                  <p className="text-sm font-bold text-slate-700">Berita tidak ditemukan</p>
+                  <p className="text-xs text-slate-500 mt-1">Coba gunakan kata kunci pencarian lain atau klik tombol Segarkan.</p>
+                </div>
+              )}
+            </div>
           )}
         </section>
       </main>
@@ -1915,6 +2144,83 @@ export default function Newsview() {
             <div className="mt-4 text-center text-white">
               <Badge variant="secondary" className="mb-2">{selectedPhoto.category}</Badge>
               <h3 className="text-xl font-bold">{selectedPhoto.title}</h3>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Detail Rilis Berita MMC Kobar */}
+      {selectedDetailArticle && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
+          onClick={() => setSelectedDetailArticle(null)}
+        >
+          <div
+            className="relative max-w-3xl w-full max-h-[85vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between p-6 border-b border-slate-100 bg-slate-50/70">
+              <div className="space-y-1.5 pr-6">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
+                    {selectedDetailArticle.sopd || selectedDetailArticle.category}
+                  </Badge>
+                  <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {formatDate(selectedDetailArticle.date)}
+                  </span>
+                  <span className="text-xs font-medium text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                    Rilis Resmi MMC Kobar
+                  </span>
+                </div>
+                <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 leading-snug">
+                  {selectedDetailArticle.title}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedDetailArticle(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors shrink-0"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-4 text-slate-700 leading-relaxed text-sm sm:text-base">
+              <div
+                className="article-content space-y-3.5 [&_p]:mb-3.5 [&_p]:leading-relaxed [&_p]:text-slate-700 [&_strong]:font-bold [&_strong]:text-slate-900"
+                dangerouslySetInnerHTML={{
+                  __html: selectedDetailArticle.fullHtml || `<p>${selectedDetailArticle.excerpt}</p>`,
+                }}
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between p-4 px-6 border-t border-slate-100 bg-slate-50">
+              {selectedDetailArticle.slug ? (
+                <a
+                  href={`https://kotawaringinbaratkab.go.id/id/blog/${selectedDetailArticle.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
+                >
+                  Buka Berita di Portal Pemkab Kobar
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              ) : (
+                <span className="text-xs text-slate-400">Media Center Porprov XIII Kalteng</span>
+              )}
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                onClick={() => setSelectedDetailArticle(null)}
+                className="rounded-xl px-4 py-2 font-semibold"
+              >
+                Tutup
+              </Button>
             </div>
           </div>
         </div>

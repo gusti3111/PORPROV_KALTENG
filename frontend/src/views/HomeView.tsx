@@ -115,12 +115,12 @@ export default function HomeView() {
               Panggung prestasi Kalimantan Tengah
             </p>
             <h1 className="m-0 text-[clamp(72px,9.5vw,142px)] font-black leading-[0.84] tracking-[-0.105em] max-[900px]:text-[clamp(67px,11vw,100px)] max-[620px]:text-[clamp(76px,20vw,114px)]">
-              PORPROV
+              PORPROV XIII
               <span className="mt-[21px] ml-[6px] flex items-center gap-[18px] text-[clamp(33px,4vw,55px)] tracking-[-0.055em] max-[620px]:mt-[17px] max-[620px]:text-[39px]">
                 KALIMANTAN TENGAH
               </span>
               <span className="mt-[21px] ml-[6px] flex items-center gap-[18px] text-[clamp(33px,4vw,55px)] tracking-[-0.055em] max-[620px]:mt-[17px] max-[620px]:text-[39px]">
-                XIII{" "}
+                {" "}
                 <i className="text-[0.62em] font-semibold not-italic tracking-normal text-[var(--lime)]">
                   2026
                 </i>
