@@ -61,6 +61,7 @@ type NewsArticle = {
   title: string;
   excerpt: string;
   theme: "green" | "orange" | "lime";
+  image?: string;
 };
 
 export interface MmcNewsItem {
@@ -83,9 +84,41 @@ export type DisplayArticle = {
   excerpt: string;
   fullHtml?: string;
   slug?: string;
+  image?: string;
   isMmcLive?: boolean;
   theme: "green" | "orange" | "lime";
 };
+
+const officialArticleImages: Record<string, string> = {
+  "jadwal-porprov-xiii-kalteng-2026-resmi-disiapkan-kobar-matangkan-kesiapan-jadi-tuan-rumah":
+    "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/jadwal.jpeg",
+  "bupati-kobar-dampingi-gubernur-kalteng-tinjau-kesiapan-arena-porprov-xiii-2026":
+    "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/gub.jpeg",
+  "buka-cdm-meeting-porprov-xiii-wabup-kobar-tekankan-sportivitas-dan-keselamatan-atlet":
+    "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/dci.jpeg",
+  "dorong-pemulihan-ekonomi-daerah-pemkab-kobar-integrasikan-porprov-xiii-dan-kobar-expo-2026":
+    "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/expo.jpeg",
+};
+
+const venueImageFallbacks: string[] = [
+  "/venues/sport-center.webp",
+  "/venues/gor-koni.jpg",
+  "/venues/pangkalan-bun-park.jpg",
+  "/venues/sungai-arut.jpg",
+  "/venues/kotawaringin-lama.jpg",
+  "/venues/pasir-panjang.jpg",
+  "/venues/pelabuhan-kumai.jpg",
+  "/venues/karanganyar.jpg",
+  "/venues/koridor-trans-kalimantan.jpg",
+  "/sportcenter.webp",
+];
+
+function getArticleImage(slug?: string, _filename?: string, index: number = 0): string {
+  if (slug && officialArticleImages[slug]) {
+    return officialArticleImages[slug];
+  }
+  return venueImageFallbacks[index % venueImageFallbacks.length];
+}
 
 function decodeHtmlContent(rawStr: string): string {
   if (!rawStr) return "";
@@ -135,6 +168,7 @@ const articles: NewsArticle[] = [
     excerpt:
       "Ikuti perkembangan berita dan pengumuman resmi menjelang penyelenggaraan PORPROV XIII.",
     theme: "green",
+    image: "/venues/sport-center.webp",
   },
   {
     id: 2,
@@ -144,6 +178,7 @@ const articles: NewsArticle[] = [
     excerpt:
       "Jelajahi sejarah panjang dan prestasi yang telah dicapai dalam penyelenggaraan PORPROV XIII.",
     theme: "orange",
+    image: "/venues/gor-koni.jpg",
   },
   {
     id: 3,
@@ -153,6 +188,7 @@ const articles: NewsArticle[] = [
     excerpt:
       "Atlet dari berbagai kabupaten dan kota bersiap untuk bertanding dengan menjunjung sportivitas.",
     theme: "lime",
+    image: "/venues/pangkalan-bun-park.jpg",
   },
   {
     id: 4,
@@ -162,6 +198,7 @@ const articles: NewsArticle[] = [
     excerpt:
       "Cari tahu cabang olahraga dan informasi pertandingan dalam agenda PORPROV XIII.",
     theme: "green",
+    image: "/venues/sungai-arut.jpg",
   },
 ];
 
@@ -484,12 +521,13 @@ export default function Newsview() {
         excerpt: getCleanExcerpt(item.deskripsi).slice(0, 160) + "...",
         fullHtml: decodeHtmlContent(item.deskripsi),
         slug: item.slug_berita,
+        image: getArticleImage(item.slug_berita, item.filename1, idx),
         isMmcLive: true,
         theme: idx % 3 === 0 ? "green" : idx % 3 === 1 ? "lime" : "orange",
       }));
     }
     // Fallback editorial articles
-    return articles.map((art) => ({
+    return articles.map((art, idx) => ({
       id: art.id,
       category: art.category,
       sopd: "Panitia PORPROV",
@@ -497,6 +535,7 @@ export default function Newsview() {
       title: art.title,
       excerpt: art.excerpt,
       fullHtml: `<p>${art.excerpt}</p>`,
+      image: art.image || venueImageFallbacks[idx % venueImageFallbacks.length],
       isMmcLive: false,
       theme: art.theme,
     }));
@@ -1956,26 +1995,42 @@ export default function Newsview() {
                 <div className="news-grid">
                   {visibleArticles.map((article) => (
                     <Card
-                      className="news-card p-0 flex flex-col justify-between hover:shadow-lg transition-all"
+                      className="news-card flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-xs transition-all hover:-translate-y-1 hover:shadow-lg"
                       key={article.id}
                       role="article"
                       aria-labelledby={`news-title-${article.id}`}
                     >
+                      {/* Banner Gambar Berita */}
                       <div
-                        className={`news-card-cover news-cover-${article.theme} cursor-pointer group`}
+                        className="relative h-48 sm:h-52 w-full overflow-hidden bg-slate-900 cursor-pointer group"
                         onClick={() => setSelectedDetailArticle(article)}
                       >
-                        <div className="flex items-center justify-between w-full">
-                          <Badge className="bg-white/25 text-white backdrop-blur-xs border-white/30 text-[10px] uppercase font-bold tracking-wider">
-                            {article.sopd || article.category}
-                          </Badge>
-                          <span className="text-[11px] font-bold text-white/90 bg-black/25 px-2 py-0.5 rounded-full">
-                            PORPROV XIII
-                          </span>
+                        <img
+                          src={article.image || "/venues/sport-center.webp"}
+                          alt={article.title}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            if (!target.src.includes("sport-center.webp")) {
+                              target.src = "/venues/sport-center.webp";
+                            }
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/20 pointer-events-none" />
+
+                        <div className="absolute inset-0 p-4 flex flex-col justify-between pointer-events-none">
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <Badge className="bg-white/95 text-emerald-900 border-none font-bold text-[10px] uppercase tracking-wider backdrop-blur-sm shadow-sm">
+                              {article.sopd || article.category}
+                            </Badge>
+                            <span className="text-[10px] font-bold text-white bg-black/50 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-white/20">
+                              PORPROV XIII
+                            </span>
+                          </div>
+                          <strong className="text-base sm:text-lg font-black text-white leading-snug line-clamp-2 drop-shadow-md group-hover:text-emerald-300 transition-colors">
+                            {article.title}
+                          </strong>
                         </div>
-                        <strong className="mt-auto text-xl sm:text-2xl font-black text-white leading-snug line-clamp-2">
-                          {article.title}
-                        </strong>
                       </div>
 
                       <div className="news-card-copy flex flex-col flex-1 justify-between p-5">
@@ -2007,7 +2062,7 @@ export default function Newsview() {
                           <button
                             type="button"
                             onClick={() => setSelectedDetailArticle(article)}
-                            className="inline-flex items-center text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline gap-1"
+                            className="inline-flex items-center text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline gap-1 cursor-pointer"
                           >
                             Baca Rilis Lengkap &rarr;
                           </button>
@@ -2106,6 +2161,32 @@ export default function Newsview() {
 
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto space-y-4 text-slate-700 leading-relaxed text-sm sm:text-base">
+              {selectedDetailArticle.image && (
+                <div className="relative w-full h-60 sm:h-80 rounded-xl overflow-hidden shadow-md bg-slate-900 mb-6 group">
+                  <img
+                    src={selectedDetailArticle.image}
+                    alt={selectedDetailArticle.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.src.includes("sport-center.webp")) {
+                        target.src = "/venues/sport-center.webp";
+                      }
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white text-xs px-2 pointer-events-none">
+                    <span className="inline-flex items-center gap-1.5 bg-black/60 backdrop-blur-xs px-2.5 py-1 rounded-full text-[11px] font-medium border border-white/20">
+                      <Camera className="h-3.5 w-3.5 text-emerald-400" />
+                      Dokumentasi Resmi Media Center Pemkab Kobar
+                    </span>
+                    <span className="text-[11px] text-white/80 hidden sm:inline-block">
+                      PORPROV XIII Kalteng 2026
+                    </span>
+                  </div>
+                </div>
+              )}
+
               <div
                 className="article-content space-y-3.5 [&_p]:mb-3.5 [&_p]:leading-relaxed [&_p]:text-slate-700 [&_strong]:font-bold [&_strong]:text-slate-900"
                 dangerouslySetInnerHTML={{

@@ -98,7 +98,7 @@ export default function VenueView() {
           </div>
           <img
             className="venue-hero-illustration"
-            src="/stadionBurung.png"
+            src="/stadionKera.png"
             alt="Maskot PORPROV berdiri di atas ilustrasi stadion"
           />
           <div className="cabor-hero-number" aria-hidden="true">

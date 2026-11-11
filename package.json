@@ -18,5 +18,8 @@
     "lint:backend": "cd backend && go vet ./...",
     "test:backend": "cd backend && go test -v ./...",
     "test": "cd backend && go test -v ./..."
+  },
+  "dependencies": {
+    "turbo": "^2.11.10"
   }
 }
