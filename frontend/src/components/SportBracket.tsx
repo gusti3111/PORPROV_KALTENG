@@ -58,7 +58,7 @@ function matchCard(match: SportTournamentMatch) {
             <img
               src={homeLogo}
               alt={`Logo ${match.home}`}
-              className="h-5 w-5 shrink-0 object-contain"
+              className="h-5 w-5 xl:h-6 xl:w-6 2xl:h-8 2xl:w-8 min-[2560px]:h-10 min-[2560px]:w-10 min-[3400px]:h-12 min-[3400px]:w-12 shrink-0 object-contain"
               loading="lazy"
             />
           )}
@@ -75,7 +75,7 @@ function matchCard(match: SportTournamentMatch) {
             <img
               src={awayLogo}
               alt={`Logo ${match.away}`}
-              className="h-5 w-5 shrink-0 object-contain"
+              className="h-5 w-5 xl:h-6 xl:w-6 2xl:h-8 2xl:w-8 min-[2560px]:h-10 min-[2560px]:w-10 min-[3400px]:h-12 min-[3400px]:w-12 shrink-0 object-contain"
               loading="lazy"
             />
           )}
@@ -116,10 +116,10 @@ export default function SportBracket({ tournament }: { tournament: SportTourname
           aria-label="Babak Perempat Final"
         >
           <div className="w-full">
-            <h3 className="mb-3 text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+            <h3 className="mb-3 text-xs xl:text-sm 2xl:text-base min-[2560px]:text-lg min-[3400px]:text-xl font-extrabold uppercase tracking-wider text-muted-foreground">
               Babak Perempat Final (Penyisihan 8 Besar)
             </h3>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:gap-5 min-[2560px]:gap-6">
               {quarterfinals.map((match) => matchCard(match))}
             </div>
           </div>

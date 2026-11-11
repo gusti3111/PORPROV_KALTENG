@@ -138,7 +138,7 @@ export default function BaganView() {
           </div>
           <img
             className="bagan-page-hero-illustration"
-            src="/burungBagan.png"
+            src="/keraBagan.png"
             alt="Maskot PORPROV menunjuk papan bagan pertandingan"
           />
         </section>
@@ -172,22 +172,20 @@ export default function BaganView() {
               <button
                 type="button"
                 onClick={() => setOnlyUpdated(false)}
-                className={`rounded-full px-3 py-1 text-xs font-bold transition ${
-                  !onlyUpdated
+                className={`rounded-full px-3 py-1 2xl:px-4 2xl:py-1.5 min-[2560px]:px-5 min-[2560px]:py-2 text-xs 2xl:text-sm min-[2560px]:text-base font-bold transition ${!onlyUpdated
                     ? "bg-emerald-700 text-white"
                     : "bg-slate-200/70 text-slate-700 hover:bg-slate-300/70"
-                }`}
+                  }`}
               >
                 Semua ({entries.length})
               </button>
               <button
                 type="button"
                 onClick={() => setOnlyUpdated(true)}
-                className={`rounded-full px-3 py-1 text-xs font-bold transition ${
-                  onlyUpdated
+                className={`rounded-full px-3 py-1 2xl:px-4 2xl:py-1.5 min-[2560px]:px-5 min-[2560px]:py-2 text-xs 2xl:text-sm min-[2560px]:text-base font-bold transition ${onlyUpdated
                     ? "bg-emerald-700 text-white"
                     : "bg-slate-200/70 text-slate-700 hover:bg-slate-300/70"
-                }`}
+                  }`}
               >
                 Terupdate Admin ({updatedCount})
               </button>
@@ -216,8 +214,8 @@ export default function BaganView() {
                   rule.tableType === "KNOCKOUT_ONLY"
                     ? []
                     : tournament.groups.filter(
-                        (g) => g.standings && g.standings.length > 0,
-                      );
+                      (g) => g.standings && g.standings.length > 0,
+                    );
                 return (
                   <article className="bagan-event-card" key={id}>
                     <header className="bagan-event-heading">
@@ -304,7 +302,7 @@ export default function BaganView() {
                                               <img
                                                 src={logoUrl}
                                                 alt={`Logo ${row.contingent}`}
-                                                className="h-5 w-5 shrink-0 object-contain"
+                                                className="h-5 w-5 xl:h-6 xl:w-6 2xl:h-8 2xl:w-8 min-[2560px]:h-10 min-[2560px]:w-10 min-[3400px]:h-12 min-[3400px]:w-12 shrink-0 object-contain"
                                                 loading="lazy"
                                               />
                                             )}

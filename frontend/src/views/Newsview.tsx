@@ -574,12 +574,12 @@ export default function Newsview() {
   const searchPlaceholder = isGalleryTab
     ? "Cari foto galeri..."
     : isSejarahTab
-    ? "Cari sejarah edisi PORPROV, tuan rumah, atau kontingen daerah..."
-    : isUMKMTab
-    ? "Cari nama tempat makan, kedai kopi, menu masakan, atau alamat di Kobar..."
-    : isHotelTab
-    ? "Cari nama hotel, wisma, atau lokasi..."
-    : "Cari berita...";
+      ? "Cari sejarah edisi PORPROV, tuan rumah, atau kontingen daerah..."
+      : isUMKMTab
+        ? "Cari nama tempat makan, kedai kopi, menu masakan, atau alamat di Kobar..."
+        : isHotelTab
+          ? "Cari nama hotel, wisma, atau lokasi..."
+          : "Cari berita...";
 
   return (
     <>
@@ -594,12 +594,12 @@ export default function Newsview() {
               {isGalleryTab
                 ? "Galeri"
                 : isSejarahTab
-                ? "Profil & Sejarah"
-                : isUMKMTab
-                ? "UMKM"
-                : isHotelTab
-                ? "Hotel & Penginapan"
-                : "Informasi"}
+                  ? "Profil & Sejarah"
+                  : isUMKMTab
+                    ? "UMKM"
+                    : isHotelTab
+                      ? "Hotel & Penginapan"
+                      : "Informasi"}
             </span>
           </div>
           <p className="schedule-eyebrow">
@@ -607,12 +607,12 @@ export default function Newsview() {
             {isGalleryTab
               ? "GALERI PORPROV XIII KALIMANTAN TENGAH 2026"
               : isSejarahTab
-              ? "TENTANG KAMI • PROFIL & SEJARAH PORPROV KALIMANTAN TENGAH"
-              : isUMKMTab
-              ? "DIREKTORI RESMI KULINER & UMKM KOTAWARINGIN BARAT • PORPROV XIII"
-              : isHotelTab
-              ? "AKOMODASI PORPROV XIII KALIMANTAN TENGAH"
-              : "About PORPROV XIII Kalimantan Tengah 2026"}
+                ? "TENTANG KAMI • PROFIL & SEJARAH PORPROV KALIMANTAN TENGAH"
+                : isUMKMTab
+                  ? "DIREKTORI RESMI KULINER & UMKM KOTAWARINGIN BARAT • PORPROV XIII"
+                  : isHotelTab
+                    ? "AKOMODASI PORPROV XIII KALIMANTAN TENGAH"
+                    : "About PORPROV XIII Kalimantan Tengah 2026"}
           </p>
           <h1>
             {isGalleryTab ? (
@@ -641,16 +641,16 @@ export default function Newsview() {
             {isGalleryTab
               ? "Lihat momen dan semangat olahraga PORPROV XIII Kalimantan Tengah."
               : isSejarahTab
-              ? "Mengenal lebih dekat perjalanan sejarah, visi penyelenggaraan, filosofi Isen Mulang, serta profil 14 Kontingen Kabupaten/Kota dalam perhelatan Pekan Olahraga Provinsi XIII Kalimantan Tengah Tahun 2026."
-              : isUMKMTab
-              ? "Panduan 352 tempat makan, warung makan, kedai kopi, restoran, dan bakery di Kabupaten Kotawaringin Barat hasil crawl Google Maps untuk kontingen & penonton PORPROV XIII."
-              : isHotelTab
-              ? "Temukan rekomendasi hotel dan penginapan nyaman di sekitar lokasi pertandingan PORPROV XIII."
-              : "Informasi terkini seputar PORPROV XIII Kalimantan Tengah"}
+                ? "Mengenal lebih dekat perjalanan sejarah, visi penyelenggaraan, filosofi Isen Mulang, serta profil 14 Kontingen Kabupaten/Kota dalam perhelatan Pekan Olahraga Provinsi XIII Kalimantan Tengah Tahun 2026."
+                : isUMKMTab
+                  ? "Panduan 352 tempat makan, warung makan, kedai kopi, restoran, dan bakery di Kabupaten Kotawaringin Barat hasil crawl Google Maps untuk kontingen & penonton PORPROV XIII."
+                  : isHotelTab
+                    ? "Temukan rekomendasi hotel dan penginapan nyaman di sekitar lokasi pertandingan PORPROV XIII."
+                    : "Informasi terkini seputar PORPROV XIII Kalimantan Tengah"}
           </p>
           <img
             className="news-hero-illustration"
-            src="/burungBerita.png"
+            src="/keraBerita.png"
             alt="Maskot PORPROV memegang kamera"
           />
           {!isSejarahTab && (
@@ -667,8 +667,8 @@ export default function Newsview() {
             isGalleryTab
               ? "Galeri foto"
               : isSejarahTab
-              ? "Profil dan sejarah PORPROV Kalimantan Tengah"
-              : "Daftar berita"
+                ? "Profil dan sejarah PORPROV Kalimantan Tengah"
+                : "Daftar berita"
           }
         >
           <div className="news-toolbar">
@@ -1000,30 +1000,27 @@ export default function Newsview() {
                           className="relative pl-11 sm:pl-16"
                         >
                           <div
-                            className={`absolute top-5 left-1.5 flex h-6 w-6 items-center justify-center rounded-full border-2 text-xs font-extrabold sm:left-3.5 ${
-                              isCurrent
-                                ? "border-amber-400 bg-[#102b49] text-amber-300 shadow-sm"
-                                : "border-[#174a72] bg-white text-[#174a72]"
-                            }`}
+                            className={`absolute top-5 left-1.5 flex h-6 w-6 items-center justify-center rounded-full border-2 text-xs font-extrabold sm:left-3.5 ${isCurrent
+                              ? "border-amber-400 bg-[#102b49] text-amber-300 shadow-sm"
+                              : "border-[#174a72] bg-white text-[#174a72]"
+                              }`}
                           >
                             {idx + 1}
                           </div>
 
                           <Card
-                            className={`rounded-xl border p-5 shadow-xs transition-all ${
-                              isCurrent
-                                ? "border-[#174a72] bg-gradient-to-r from-sky-50/90 to-white ring-1 ring-[#174a72]/20"
-                                : "border-slate-200 bg-white"
-                            }`}
+                            className={`rounded-xl border p-5 shadow-xs transition-all ${isCurrent
+                              ? "border-[#174a72] bg-gradient-to-r from-sky-50/90 to-white ring-1 ring-[#174a72]/20"
+                              : "border-slate-200 bg-white"
+                              }`}
                           >
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <div className="flex flex-wrap items-center gap-2">
                                 <span
-                                  className={`rounded-full px-3 py-1 text-xs font-extrabold ${
-                                    isCurrent
-                                      ? "bg-[#102b49] text-amber-300"
-                                      : "bg-slate-100 text-slate-800"
-                                  }`}
+                                  className={`rounded-full px-3 py-1 text-xs font-extrabold ${isCurrent
+                                    ? "bg-[#102b49] text-amber-300"
+                                    : "bg-slate-100 text-slate-800"
+                                    }`}
                                 >
                                   {item.edition}
                                 </span>
@@ -1373,8 +1370,8 @@ export default function Newsview() {
                       theme.key === "Semua"
                         ? kobarUMKMData.length
                         : kobarUMKMData.filter(
-                            (item) => item.culinaryThemeKey === theme.key,
-                          ).length;
+                          (item) => item.culinaryThemeKey === theme.key,
+                        ).length;
 
                     return (
                       <button
@@ -1386,19 +1383,17 @@ export default function Newsview() {
                           );
                           setUmkmPage(1);
                         }}
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all ${
-                          isActive
-                            ? "bg-[#174a72] text-white shadow-xs"
-                            : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-[#397eae] hover:bg-slate-100"
-                        }`}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all ${isActive
+                          ? "bg-[#174a72] text-white shadow-xs"
+                          : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-[#397eae] hover:bg-slate-100"
+                          }`}
                       >
                         <span>{theme.label}</span>
                         <span
-                          className={`rounded-full px-1.5 py-0.2 text-[10px] ${
-                            isActive
-                              ? "bg-white/20 text-white"
-                              : "bg-slate-200 text-slate-600"
-                          }`}
+                          className={`rounded-full px-1.5 py-0.2 text-[10px] ${isActive
+                            ? "bg-white/20 text-white"
+                            : "bg-slate-200 text-slate-600"
+                            }`}
                         >
                           {count}
                         </span>
@@ -1437,11 +1432,10 @@ export default function Newsview() {
                             setSelectedUMKMType(cat.value);
                             setUmkmPage(1);
                           }}
-                          className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-                            isActive
-                              ? "bg-slate-900 text-white shadow-xs"
-                              : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                          }`}
+                          className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${isActive
+                            ? "bg-slate-900 text-white shadow-xs"
+                            : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                            }`}
                         >
                           {cat.label}
                         </button>
@@ -1477,18 +1471,16 @@ export default function Newsview() {
                         setOnlyRecommended(!onlyRecommended);
                         setUmkmPage(1);
                       }}
-                      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-                        onlyRecommended
-                          ? "bg-amber-400 text-slate-950 font-black shadow-xs ring-1 ring-amber-500"
-                          : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                      }`}
+                      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${onlyRecommended
+                        ? "bg-amber-400 text-slate-950 font-black shadow-xs ring-1 ring-amber-500"
+                        : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                        }`}
                     >
                       <Star
-                        className={`h-3.5 w-3.5 ${
-                          onlyRecommended
-                            ? "fill-slate-950"
-                            : "text-amber-500"
-                        }`}
+                        className={`h-3.5 w-3.5 ${onlyRecommended
+                          ? "fill-slate-950"
+                          : "text-amber-500"
+                          }`}
                       />
                       Rating Tinggi (4.8+)
                     </button>
@@ -1498,21 +1490,21 @@ export default function Newsview() {
                       selectedDistrict !== "Semua Kecamatan" ||
                       selectedCulinaryTheme !== "Semua" ||
                       onlyRecommended) && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedUMKMType("Semua");
-                          setSelectedDistrict("Semua Kecamatan");
-                          setSelectedCulinaryTheme("Semua");
-                          setOnlyRecommended(false);
-                          setUmkmPage(1);
-                        }}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-700 underline underline-offset-2 ml-1"
-                      >
-                        <RotateCcw className="h-3 w-3" />
-                        Reset Filter
-                      </button>
-                    )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedUMKMType("Semua");
+                            setSelectedDistrict("Semua Kecamatan");
+                            setSelectedCulinaryTheme("Semua");
+                            setOnlyRecommended(false);
+                            setUmkmPage(1);
+                          }}
+                          className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-700 underline underline-offset-2 ml-1"
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          Reset Filter
+                        </button>
+                      )}
                   </div>
                 </div>
 
@@ -1904,21 +1896,21 @@ export default function Newsview() {
       </main>
 
       {selectedPhoto && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
           onClick={() => setSelectedPhoto(null)}
         >
-          <button 
+          <button
             className="absolute top-6 right-6 text-white hover:text-gray-300 transition-colors"
             onClick={() => setSelectedPhoto(null)}
           >
             <span className="text-4xl">&times;</span>
           </button>
-          
+
           <div className="max-w-5xl w-full flex flex-col items-center">
-            <img 
-              src={selectedPhoto.src} 
-              alt={selectedPhoto.title} 
+            <img
+              src={selectedPhoto.src}
+              alt={selectedPhoto.title}
               className="max-h-[80vh] max-w-full rounded-lg shadow-2xl object-contain"
             />
             <div className="mt-4 text-center text-white">

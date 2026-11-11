@@ -79,7 +79,7 @@ function standingsTable(
                           <img
                             src={logoUrl}
                             alt={`Logo ${row.contingent}`}
-                            className="h-5 w-5 shrink-0 object-contain"
+                            className="h-5 w-5 xl:h-6 xl:w-6 2xl:h-8 2xl:w-8 min-[2560px]:h-10 min-[2560px]:w-10 min-[3400px]:h-12 min-[3400px]:w-12 shrink-0 object-contain"
                             loading="lazy"
                           />
                         )}

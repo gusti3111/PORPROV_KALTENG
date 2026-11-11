@@ -109,13 +109,13 @@ export default function HomeView() {
             aria-hidden="true"
           />
 
-          <div className="relative z-[2] w-[54%] pt-[76px] pb-[105px] pl-[10%] min-[1500px]:pl-[max(10%,calc((100vw-1200px)/2))] max-[900px]:w-[60%] max-[900px]:pl-[7%] max-[620px]:w-full max-[620px]:px-[6%] max-[620px]:pt-[65px] max-[620px]:pb-[170px]">
+          <div className="relative z-[2] w-[54%] pt-[76px] pb-[105px] pl-[10%] min-[1500px]:pl-[max(8%,calc((100vw-var(--container-max,1760px))/2))] max-[900px]:w-[60%] max-[900px]:pl-[7%] max-[620px]:w-full max-[620px]:px-[6%] max-[620px]:pt-[65px] max-[620px]:pb-[170px]">
             <p className="mb-6 flex items-center gap-[10px] text-[10px] font-extrabold uppercase tracking-[0.15em] text-[var(--lime)]">
               <span className="size-[7px] rounded-full bg-[var(--lime)] shadow-[0_0_14px_rgba(220,236,249,0.75)]" />
               Panggung prestasi Kalimantan Tengah
             </p>
             <h1 className="m-0 text-[clamp(72px,9.5vw,142px)] font-black leading-[0.84] tracking-[-0.105em] max-[900px]:text-[clamp(67px,11vw,100px)] max-[620px]:text-[clamp(76px,20vw,114px)]">
-              PORPROV 
+              PORPROV
               <span className="mt-[21px] ml-[6px] flex items-center gap-[18px] text-[clamp(33px,4vw,55px)] tracking-[-0.055em] max-[620px]:mt-[17px] max-[620px]:text-[39px]">
                 KALIMANTAN TENGAH
               </span>
@@ -126,7 +126,7 @@ export default function HomeView() {
                 </i>
               </span>
             </h1>
-            <p className="mt-7 ml-[5px] max-w-[390px] text-[14px] leading-[1.85] text-white/75 max-[620px]:max-w-[340px] max-[620px]:text-[12px]">
+            <p className="mt-7 ml-[5px] max-w-[390px] xl:max-w-[480px] 2xl:max-w-[620px] min-[2560px]:max-w-[800px] text-[14px] xl:text-[16px] 2xl:text-[18px] min-[2560px]:text-[22px] leading-[1.85] text-white/75 max-[620px]:max-w-[340px] max-[620px]:text-[12px]">
               Pekan Olahraga Provinsi Kalimantan Tengah. Satu semangat untuk
               berkompetisi, berprestasi, dan tumbuh bersama.
             </p>
@@ -183,7 +183,7 @@ export default function HomeView() {
         </section>
 
         <section
-          className="relative mx-auto mt-10 grid w-[min(85.6%,1120px)] grid-cols-[1fr_auto] items-center gap-x-[30px] gap-y-3 rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-6 shadow-[var(--ui-shadow)] max-[900px]:w-[90%] max-[620px]:mt-[25px] max-[620px]:w-[88%] max-[620px]:grid-cols-1 max-[620px]:gap-4 max-[620px]:p-5 max-[620px]:rounded-[10px]"
+          className="relative mx-auto mt-10 grid w-[var(--container-width)] grid-cols-[1fr_auto] items-center gap-x-[30px] gap-y-3 rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-6 shadow-[var(--ui-shadow)] max-[900px]:w-[90%] max-[620px]:mt-[25px] max-[620px]:w-[88%] max-[620px]:grid-cols-1 max-[620px]:gap-4 max-[620px]:p-5 max-[620px]:rounded-[10px]"
           aria-labelledby="countdown-title"
         >
           <div>
@@ -197,7 +197,7 @@ export default function HomeView() {
           </p>
         </section>
 
-        <section id="tentang" className="mx-auto w-[min(85.6%,1120px)] pt-[108px] pb-[94px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:pt-[73px] max-[620px]:pb-[70px]">
+        {/* <section id="tentang" className="mx-auto w-[min(85.6%,1120px)] pt-[108px] pb-[94px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:pt-[73px] max-[620px]:pb-[70px]">
           <div className="flex items-center gap-[13px] text-[9px] font-extrabold tracking-[0.16em] text-[#596156] [&>span:first-child]:text-[var(--orange)]">
             <span>01</span>
             <span>TENTANG PORPROV</span>
@@ -239,7 +239,7 @@ export default function HomeView() {
               <small className="text-[8px] font-extrabold tracking-[0.12em] text-[var(--muted)] max-[620px]:text-[6px] max-[620px]:leading-[1.5]">SEMANGAT SATU PROVINSI</small>
             </div>
           </div>
-        </section>
+        </section> */}
 
         <section className="home-stadium-section" aria-labelledby="home-stadium-title">
           <div className="home-stadium-heading">
@@ -301,9 +301,68 @@ export default function HomeView() {
             ))}
           </div>
         </section>
+        <section className="cabor" aria-labelledby="home-stadium-title">
+          <div className="home-stadium-heading">
+            <div>
+              <p className="home-stadium-kicker"><span>02</span> GALERI STADION</p>
+              <h2 id="home-stadium-title">Venue yang tersedia</h2>
+              <p className="home-stadium-description">Berikut adalah Venue yang digunakan untuk pertandingan nanti.</p>
+            </div>
+            <div className="home-stadium-controls" aria-label="Kontrol carousel stadion">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Stadion sebelumnya"
+                onClick={() => stadiumTrackRef.current?.scrollBy({ left: -360, behavior: "smooth" })}
+              >
+                <ChevronLeft aria-hidden="true" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Stadion berikutnya"
+                onClick={() => stadiumTrackRef.current?.scrollBy({ left: 360, behavior: "smooth" })}
+              >
+                <ChevronRight aria-hidden="true" />
+              </Button>
+            </div>
+          </div>
+          <div className="home-stadium-track" ref={stadiumTrackRef}>
+            {featuredStadiums.map((item, index) => (
+              <article className="home-stadium-card" key={item.venue}>
+                <Link
+                  className="home-stadium-image-link"
+                  to="/venue"
+                  aria-label={`Lihat detail ${item.venue} di halaman Venue`}
+                >
+                  <img
+                    className="home-stadium-image"
+                    src={item.image}
+                    alt={item.venue}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span className="home-stadium-index">{String(index + 1).padStart(2, "0")}</span>
+                </Link>
+                <div className="home-stadium-copy">
+                  <small>{item.category}</small>
+                  <h3>{item.venue}</h3>
+                  <p>{item.city}</p>
+                  <span className="home-stadium-credit" style={{ textDecoration: "none" }}>
+                    {item.cabor}
+                  </span>
+                  <Link className="home-stadium-license" to="/venue">
+                    Lihat di peta venue →
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
 
-
-        <section id="cabang-olahraga" className="mx-auto w-[min(85.6%,1120px)] pt-[94px] pb-[108px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:py-[72px]">
+        <section id="cabang-olahraga" className="mx-auto w-[var(--container-width)] pt-[94px] pb-[108px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:py-[72px]">
           <div className="flex items-center gap-[13px] text-[9px] font-extrabold tracking-[0.16em] text-[#596156] [&>span:first-child]:text-[var(--orange)]">
             <span>03</span>
             <span>ARENA PARA JUARA</span>
@@ -315,7 +374,7 @@ export default function HomeView() {
                 <br />
                 <span>satu kebanggaan.</span>
               </h2>
-              <p className="mt-[21px] mb-0 max-w-[390px] text-[13px] leading-[1.9] text-[var(--muted)]">
+              <p className="mt-[21px] mb-0 max-w-[390px] xl:max-w-[480px] 2xl:max-w-[620px] min-[2560px]:max-w-[800px] text-[13px] xl:text-[15px] 2xl:text-[17px] min-[2560px]:text-[20px] leading-[1.9] text-[var(--muted)]">
                 Berbagai cabang olahraga akan mempertemukan atlet-atlet terbaik
                 dari seluruh Kalimantan Tengah. Daftar cabang dan detail
                 pertandingan akan diumumkan melalui kanal resmi.
@@ -371,7 +430,7 @@ export default function HomeView() {
 
         <section className="relative min-h-[355px] overflow-hidden bg-[var(--orange)] text-white max-[620px]:min-h-[330px]">
           <div className="closing-pattern" aria-hidden="true" />
-          <div className="relative z-[1] mx-auto w-[min(85.6%,1120px)] pt-[62px] pb-[65px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:pt-[55px] max-[620px]:pb-[55px]">
+          <div className="relative z-[1] mx-auto w-[var(--container-width)] pt-[62px] pb-[65px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:pt-[55px] max-[620px]:pb-[55px]">
             <p className="mb-6 flex items-center gap-[10px] text-[10px] font-extrabold uppercase tracking-[0.15em] text-white [&>span]:bg-[var(--lime)]">
               <span className="size-[7px] rounded-full shadow-[0_0_14px_rgba(211,237,113,0.75)]" />
               Menuju PORPROV XIII KALIMANTAN TENGAH 2026
@@ -381,8 +440,8 @@ export default function HomeView() {
               <br />
               <span>jadi juara.</span>
             </h2>
-            <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[11px] font-extrabold text-[#102b49] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#c6e2f5] max-[620px]:min-h-[45px] max-[620px]:px-[15px]"href="#beranda">
-              Kembali ke atas 
+            <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[11px] font-extrabold text-[#102b49] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#c6e2f5] max-[620px]:min-h-[45px] max-[620px]:px-[15px]" href="#beranda">
+              Kembali ke atas
             </a>
           </div>
           <span className="absolute right-[8%] bottom-[-73px] text-[clamp(200px,35vw,420px)] font-black leading-none tracking-[-0.12em] text-white/10 max-[620px]:right-0 max-[620px]:bottom-[-32px] max-[620px]:text-[230px]" aria-hidden="true">

@@ -62,7 +62,7 @@ export default function CaborView() {
           </div>
           <img
             className="cabor-page-hero-illustration"
-            src="/burungCabor.png"
+            src="/keraCabor.png"
             alt="Maskot PORPROV membawa bola basket, sepak bola, tenis, dan voli"
           />
           <div className="cabor-hero-number" aria-hidden="true">

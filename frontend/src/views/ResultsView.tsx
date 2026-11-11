@@ -398,7 +398,7 @@ export default function ResultsView() {
                                 <img
                                   src={getContingentLogoUrl(result.home)!}
                                   alt={`Logo ${result.home}`}
-                                  className="h-6 w-6 shrink-0 object-contain"
+                                  className="h-6 w-6 xl:h-7 xl:w-7 2xl:h-9 2xl:w-9 min-[2560px]:h-11 min-[2560px]:w-11 min-[3400px]:h-14 min-[3400px]:w-14 shrink-0 object-contain"
                                   loading="lazy"
                                 />
                               )}
@@ -421,7 +421,7 @@ export default function ResultsView() {
                                 <img
                                   src={getContingentLogoUrl(result.away)!}
                                   alt={`Logo ${result.away}`}
-                                  className="h-6 w-6 shrink-0 object-contain"
+                                  className="h-6 w-6 xl:h-7 xl:w-7 2xl:h-9 2xl:w-9 min-[2560px]:h-11 min-[2560px]:w-11 min-[3400px]:h-14 min-[3400px]:w-14 shrink-0 object-contain"
                                   loading="lazy"
                                 />
                               )}
@@ -513,7 +513,7 @@ export default function ResultsView() {
                                     <img
                                       src={logoUrl}
                                       alt={`Logo ${standing.contingent_name}`}
-                                      className="h-6 w-6 shrink-0 object-contain"
+                                      className="h-6 w-6 xl:h-7 xl:w-7 2xl:h-9 2xl:w-9 min-[2560px]:h-11 min-[2560px]:w-11 min-[3400px]:h-14 min-[3400px]:w-14 shrink-0 object-contain"
                                       loading="lazy"
                                     />
                                   )}
