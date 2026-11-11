@@ -403,21 +403,23 @@ function formatDate(date: string) {
 
 export default function Newsview() {
   const [searchParams] = useSearchParams();
-  const getTabFromUrl = (): CategoryFilter => {
+
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>(() => {
     const tabParam = searchParams.get("tab")?.toLowerCase();
     if (tabParam === "umkm") return "UMKM";
     if (tabParam === "hotel" || tabParam === "penginapan") return "Hotel dan Penginapan";
     if (tabParam === "galeri" || tabParam === "gallery") return "Galeri";
     if (tabParam === "sejarah" || tabParam === "history") return "Sejarah";
     return "Berita";
-  };
-
-  const [selectedCategory, setSelectedCategory] =
-    useState<CategoryFilter>(getTabFromUrl());
+  });
 
   useEffect(() => {
-    const currentTab = getTabFromUrl();
-    setSelectedCategory(currentTab);
+    const tabParam = searchParams.get("tab")?.toLowerCase();
+    if (tabParam === "umkm") setSelectedCategory("UMKM");
+    else if (tabParam === "hotel" || tabParam === "penginapan") setSelectedCategory("Hotel dan Penginapan");
+    else if (tabParam === "galeri" || tabParam === "gallery") setSelectedCategory("Galeri");
+    else if (tabParam === "sejarah" || tabParam === "history") setSelectedCategory("Sejarah");
+    else if (tabParam === "berita") setSelectedCategory("Berita");
   }, [searchParams]);
   const [selectedUMKMType, setSelectedUMKMType] =
     useState<"Semua" | KobarUMKMType>("Semua");
@@ -1550,7 +1552,7 @@ export default function Newsview() {
                   </p>
                   <p className="flex items-center gap-1 font-semibold text-[#174a72]">
                     <Camera className="h-3.5 w-3.5 text-amber-500" />
-                    Klik <strong>"Foto Asli"</strong> pada kartu untuk melihat foto nyata tempat &amp; menu dari pengunjung Google Maps.
+                    Klik <strong>&quot;Foto Asli&quot;</strong> pada kartu untuk melihat foto nyata tempat &amp; menu dari pengunjung Google Maps.
                   </p>
                 </div>
               </div>

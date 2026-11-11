@@ -100,3 +100,4 @@ export const wisataKobarData: WisataItem[] = [
     openInfo: "Perjalanan Kapal Wisata dari Pelabuhan Kumai",
   },
 ];
+

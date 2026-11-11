@@ -99,3 +99,4 @@ export const hotelData: HotelItem[] = [
     image: "https://avilla-hotel.com/images/carousel/IMG34958.png",
   },
 ];
+
