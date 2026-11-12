@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   ChevronLeft,
@@ -17,21 +17,9 @@ import EventCountdown from "../components/EventCountdown";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { EVENT_START_LABEL } from "../event-config";
-import { useCompetitionStore } from "../stores/competitionStore";
 import { kobarUMKMData } from "../data/umkmKobarData";
 import { hotelData } from "../data/hotelKobarData";
 import { wisataKobarData } from "../data/wisataKobarData";
-
-function getTodaysDate(): string {
-  const now = new Date();
-  const options: Intl.DateTimeFormatOptions = {
-    timeZone: "Asia/Jakarta",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  };
-  return new Intl.DateTimeFormat("en-CA", options).format(now);
-}
 
 const featuredStadiums = [
   {
@@ -241,11 +229,6 @@ export default function HomeView() {
   const hotelTrackRef = useRef<HTMLDivElement>(null);
   const wisataTrackRef = useRef<HTMLDivElement>(null);
 
-  const sports = useCompetitionStore((state) => state.sports);
-  const loadingSports = useCompetitionStore((state) => state.loading.sports);
-  const sportsError = useCompetitionStore((state) => state.errors.sports);
-  const fetchSports = useCompetitionStore((state) => state.fetchSports);
-
   const featuredUMKMList = useMemo(() => {
     return kobarUMKMData
       .filter((u) => u.recommended && u.rating_google >= 4.5 && u.image)
@@ -254,10 +237,6 @@ export default function HomeView() {
 
   const featuredHotelList = useMemo(() => hotelData, []);
   const featuredWisataList = useMemo(() => wisataKobarData, []);
-
-  useEffect(() => {
-    void fetchSports();
-  }, [fetchSports]);
 
   return (
     <>
@@ -943,7 +922,16 @@ export default function HomeView() {
             <span>07</span>
             <span>ARENA PARA JUARA</span>
           </div>
-          <div className="mt-[33px] grid grid-cols-[0.9fr_1.1fr] gap-[12%] max-[900px]:gap-[7%] max-[620px]:grid-cols-1 max-[620px]:gap-[27px]">
+
+          <div className="mt-[33px] grid grid-cols-[1fr_1fr] items-center gap-[8%] max-[900px]:gap-[5%] max-[620px]:grid-cols-1 max-[620px]:gap-[27px]">
+            <div className="flex items-center justify-center p-2">
+              <img
+                src="/maskot-kuliner.png"
+                alt="Maskot PORPROV XIII Kalimantan Tengah menikmati kuliner khas Coto Manggala"
+                className="w-full max-w-[480px] h-auto object-contain drop-shadow-lg transition-transform duration-300 hover:scale-[1.02]"
+                loading="lazy"
+              />
+            </div>
             <div>
               <h2 className="m-0 text-[clamp(34px,4.5vw,60px)] font-extrabold leading-[1.08] tracking-[-0.075em] max-[620px]:text-[clamp(37px,10vw,52px)] [&>span]:text-[var(--green)]">
                 Setiap cabang,
@@ -955,52 +943,16 @@ export default function HomeView() {
                 dari seluruh Kalimantan Tengah. Daftar cabang dan detail
                 pertandingan akan diumumkan melalui kanal resmi.
               </p>
-              <Link className="mt-5 inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/cabor">
-                Lihat cabang olahraga <ArrowIcon diagonal />
-              </Link>
-              <Link className="mt-5 inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/venue">
-                Lihat venue pertandingan <ArrowIcon diagonal />
-              </Link>
-            </div>
-            <div className="border-t border-[#dcded4] max-[620px]:mt-[10px]" aria-label="Contoh cabang olahraga">
-              {sports.slice(0, 10).map((sport, index) => (
-                <Link
-                  key={sport.id}
-                  to={`/jadwal?tanggal=${getTodaysDate()}&cabang=${encodeURIComponent(sport.name)}`}
-                  className="grid min-h-[54px] grid-cols-[40px_1fr_20px] items-center border-b border-[#dcded4] text-xs font-bold text-[var(--green)] transition-colors duration-[160ms] hover:bg-[var(--green)] hover:text-white [&>.arrow-icon]:w-[14px] [&>.arrow-icon]:text-white"
-                >
-                  <span className="text-[9px] font-extrabold tracking-[0.08em] text-[var(--orange)]">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span>{sport.name}</span>
-                  <ArrowIcon diagonal />
+              <div className="mt-5 flex flex-wrap items-center gap-4">
+                <Link className="inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/cabor">
+                  Lihat cabang olahraga <ArrowIcon diagonal />
                 </Link>
-              ))}
-              {loadingSports && (
-                <p className="mt-[13px] mb-0 text-[9px] leading-[1.7] text-[var(--muted)]" role="status">
-                  Memuat cabang olahraga...
-                </p>
-              )}
-              {sportsError && (
-                <p className="mt-[13px] mb-0 text-[9px] leading-[1.7] text-[var(--muted)]" role="alert">
-                  Gagal memuat cabang olahraga: {sportsError}{" "}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => void fetchSports()}
-                  >
-                    Coba lagi
-                  </Button>
-                </p>
-              )}
-              {!loadingSports && !sportsError && (
-                <p className="mt-[13px] mb-0 text-[9px] leading-[1.7] text-[var(--muted)]">
-                  Daftar cabang dimuat dari backend dan dapat berubah setelah
-                  data resmi diperbarui.
-                </p>
-              )}
+                <Link className="inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/venue">
+                  Lihat venue pertandingan <ArrowIcon diagonal />
+                </Link>
+              </div>
             </div>
+
           </div>
         </section>
 
