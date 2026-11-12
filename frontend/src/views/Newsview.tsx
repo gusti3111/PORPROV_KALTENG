@@ -51,7 +51,7 @@ import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { getContingentLogoUrl } from "../utils/contingentLogo";
 
-type NewsCategory = "Berita" | "Sejarah" | "Galeri" | "UMKM" | "Hotel dan Penginapan";
+type NewsCategory = "Berita" | "Sejarah" | "Galeri" | "Tempat Makan dan Nongkrong" | "Hotel dan Penginapan";
 type CategoryFilter = NewsCategory;
 
 type NewsArticle = {
@@ -182,7 +182,7 @@ const articles: NewsArticle[] = [
   },
   {
     id: 3,
-    category: "UMKM",
+    category: "Tempat Makan dan Nongkrong",
     date: "2026-11-15",
     title: "Semangat atlet daerah menyambut pesta olahraga provinsi",
     excerpt:
@@ -260,11 +260,11 @@ const galleryPhotos: GalleryPhoto[] = [
 ];
 
 const categories: CategoryFilter[] = [
-  "Berita",
+  "Tempat Makan dan Nongkrong",
+  "Hotel dan Penginapan",
   "Sejarah",
   "Galeri",
-  "UMKM",
-  "Hotel dan Penginapan",
+  "Berita",
 ];
 
 type HistoryMilestone = {
@@ -318,8 +318,8 @@ const porprovMilestones: HistoryMilestone[] = [
     host: "Kabupaten Kotawaringin Timur (Sampit)",
     title: "Semangat Habaring Hurung di Kota Mentaya",
     description:
-      "Digelar dengan megah di Stadion 29 November Sampit, PORPROV XII mempertandingkan puluhan cabang olahraga dengan ribuan atlet dan ofisial. Ajang ini sukses melahirkan rekor-rekor baru provinsi sekaligus menggerakkan roda UMKM serta pariwisata lokal pasca pandemi.",
-    highlight: "Integrasi sport tourism dan pemberdayaan UMKM daerah secara masif.",
+      "Digelar dengan megah di Stadion 29 November Sampit, PORPROV XII mempertandingkan puluhan cabang olahraga dengan ribuan atlet dan ofisial. Ajang ini sukses melahirkan rekor-rekor baru provinsi sekaligus menggerakkan roda ekonomi kerakyatan, tempat makan dan nongkrong serta pariwisata lokal pasca pandemi.",
+    highlight: "Integrasi sport tourism dan pemberdayaan tempat makan dan nongkrong serta pelaku usaha daerah secara masif.",
   },
   {
     era: "Tahun 2026 (Edisi Saat Ini)",
@@ -443,19 +443,19 @@ export default function Newsview() {
 
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>(() => {
     const tabParam = searchParams.get("tab")?.toLowerCase();
-    if (tabParam === "umkm") return "UMKM";
+    if (tabParam === "umkm" || tabParam === "makan" || tabParam === "nongkrong" || tabParam === "kuliner") return "Tempat Makan dan Nongkrong";
     if (tabParam === "hotel" || tabParam === "penginapan") return "Hotel dan Penginapan";
     if (tabParam === "galeri" || tabParam === "gallery") return "Galeri";
-    if (tabParam === "sejarah" || tabParam === "history") return "Sejarah";
+    if (tabParam === "sejarah" || tabParam === "history" || tabParam === "about") return "Sejarah";
     return "Berita";
   });
 
   useEffect(() => {
     const tabParam = searchParams.get("tab")?.toLowerCase();
-    if (tabParam === "umkm") setSelectedCategory("UMKM");
+    if (tabParam === "umkm" || tabParam === "makan" || tabParam === "nongkrong" || tabParam === "kuliner") setSelectedCategory("Tempat Makan dan Nongkrong");
     else if (tabParam === "hotel" || tabParam === "penginapan") setSelectedCategory("Hotel dan Penginapan");
     else if (tabParam === "galeri" || tabParam === "gallery") setSelectedCategory("Galeri");
-    else if (tabParam === "sejarah" || tabParam === "history") setSelectedCategory("Sejarah");
+    else if (tabParam === "sejarah" || tabParam === "history" || tabParam === "about") setSelectedCategory("Sejarah");
     else if (tabParam === "berita") setSelectedCategory("Berita");
   }, [searchParams]);
   const [selectedUMKMType, setSelectedUMKMType] =
@@ -507,7 +507,7 @@ export default function Newsview() {
   const normalizedQuery = query.trim().toLocaleLowerCase("id");
   const isSejarahTab = selectedCategory === "Sejarah";
   const isGalleryTab = selectedCategory === "Galeri";
-  const isUMKMTab = selectedCategory === "UMKM";
+  const isUMKMTab = selectedCategory === "Tempat Makan dan Nongkrong";
   const isHotelTab = selectedCategory === "Hotel dan Penginapan";
 
   const liveMappedArticles: DisplayArticle[] = useMemo(() => {
@@ -673,7 +673,7 @@ export default function Newsview() {
                 : isSejarahTab
                   ? "Profil & Sejarah"
                   : isUMKMTab
-                    ? "UMKM"
+                    ? "Tempat Makan & Nongkrong"
                     : isHotelTab
                       ? "Hotel & Penginapan"
                       : "Informasi"}
@@ -684,12 +684,12 @@ export default function Newsview() {
             {isGalleryTab
               ? "GALERI PORPROV XIII KALIMANTAN TENGAH 2026"
               : isSejarahTab
-                ? "TENTANG KAMI • PROFIL & SEJARAH PORPROV KALIMANTAN TENGAH"
+                ? "SEJARAH • PROFIL & PERJALANAN PORPROV KALIMANTAN TENGAH"
                 : isUMKMTab
-                  ? "DIREKTORI RESMI KULINER & UMKM KOTAWARINGIN BARAT • PORPROV XIII"
+                  ? "DIREKTORI RESMI TEMPAT MAKAN & NONGKRONG KOTAWARINGIN BARAT • PORPROV XIII"
                   : isHotelTab
                     ? "AKOMODASI PORPROV XIII KALIMANTAN TENGAH"
-                    : "About PORPROV XIII Kalimantan Tengah 2026"}
+                    : "INFORMASI PORPROV XIII KALIMANTAN TENGAH 2026"}
           </p>
           <h1>
             {isGalleryTab ? (
@@ -698,11 +698,11 @@ export default function Newsview() {
               </>
             ) : isSejarahTab ? (
               <>
-                Profil & <span>Sejarah</span>
+                Profil &amp; <span>Sejarah</span>
               </>
             ) : isUMKMTab ? (
               <>
-                Katalog Kuliner & UMKM <span>Kotawaringin Barat</span>
+                Katalog Tempat Makan &amp; Nongkrong <span>Kotawaringin Barat</span>
               </>
             ) : isHotelTab ? (
               <>
@@ -778,7 +778,7 @@ export default function Newsview() {
 
           {isSejarahTab ? (
             <div className="space-y-10" aria-live="polite">
-              {/* 1. Hero About Us / Profil Singkat */}
+              {/* 1. Hero Sejarah / Profil Singkat */}
               <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-[#0e2742] via-[#174a72] to-[#216396] p-6 text-white shadow-lg sm:p-10">
                 <div className="relative z-10 grid gap-8 lg:grid-cols-12 lg:items-center">
                   <div className="space-y-4 lg:col-span-8">
@@ -911,12 +911,12 @@ export default function Newsview() {
                 </Card>
               </div>
 
-              {/* 3. Tentang Kami (About Us) & Filosofi Huma Betang */}
+              {/* 3. Sejarah & Filosofi Huma Betang */}
               <div className="grid gap-6 lg:grid-cols-12">
                 <Card className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8 lg:col-span-7">
                   <div className="flex items-center gap-2 text-xs font-extrabold tracking-wider text-[#174a72] uppercase">
                     <BookOpen className="h-4 w-4" />
-                    <span>Tentang Kami • Mengapa PORPROV Diselenggarakan?</span>
+                    <span>Sejarah • Mengapa PORPROV Diselenggarakan?</span>
                   </div>
                   <h3 className="mt-2 text-xl font-extrabold text-slate-900 sm:text-2xl">
                     Kawah Candradimuka Atlet Kalimantan Tengah Menuju Pentas Nasional
@@ -1026,10 +1026,10 @@ export default function Newsview() {
                         <Store className="mt-0.5 h-5 w-5 shrink-0 text-[#174a72]" />
                         <div>
                           <h4 className="text-sm font-extrabold text-slate-900">
-                            Sukses Ekonomi Kerakyatan & UMKM
+                            Sukses Ekonomi Kerakyatan, Tempat Makan &amp; Nongkrong
                           </h4>
                           <p className="mt-1 text-xs leading-relaxed text-slate-600">
-                            Menggerakkan sektor UMKM, kuliner lokal, perhotelan, transportasi, dan pariwisata (sport tourism) di Kotawaringin Barat dan sekitarnya.
+                            Menggerakkan sektor tempat makan dan nongkrong, kuliner lokal, perhotelan, transportasi, dan pariwisata (sport tourism) di Kotawaringin Barat dan sekitarnya.
                           </p>
                         </div>
                       </div>
@@ -1374,7 +1374,7 @@ export default function Newsview() {
                   <div className="max-w-2xl space-y-3">
                     <div className="inline-flex items-center gap-2 rounded-full bg-amber-400/20 border border-amber-400/30 px-3.5 py-1 text-xs font-bold text-amber-300">
                       <Utensils className="h-3.5 w-3.5" />
-                      <span>DIREKTORI RESMI KULINER & UMKM KOTAWARINGIN BARAT</span>
+                      <span>DIREKTORI RESMI TEMPAT MAKAN &amp; NONGKRONG KOTAWARINGIN BARAT</span>
                     </div>
 
                     <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">

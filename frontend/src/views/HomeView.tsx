@@ -621,29 +621,29 @@ export default function HomeView() {
         </section>
 
         {/* ===================================================================
-            04. CAROUSEL UMKM & KULINER KHAS KOBAR
+            04. CAROUSEL TEMPAT MAKAN & NONGKRONG KHAS KOBAR
            =================================================================== */}
         <section className="home-stadium-section" aria-labelledby="home-umkm-title">
           <div className="home-stadium-heading">
             <div>
-              <p className="home-stadium-kicker"><span>04</span> KULINER &amp; UMKM KOBAR</p>
-              <h2 id="home-umkm-title">Rekomendasi Kuliner &amp; Oleh-Oleh</h2>
-              <p className="home-stadium-description">Jelajahi kelezatan kuliner lokal dan UMKM khas Pangkalan Bun selama perhelatan PORPROV.</p>
+              <p className="home-stadium-kicker"><span>04</span> TEMPAT MAKAN &amp; NONGKRONG KOBAR</p>
+              <h2 id="home-umkm-title">Tempat Makan &amp; Nongkrong Kobar</h2>
+              <p className="home-stadium-description">Jelajahi pilihan tempat makan, kuliner lokal, dan tempat nongkrong khas Pangkalan Bun selama perhelatan PORPROV.</p>
             </div>
             <div className="flex items-center gap-3">
               <Link
                 to="/informasi?tab=umkm"
                 className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-950 hover:underline"
               >
-                Semua UMKM
+                Semua Tempat Makan &amp; Nongkrong
                 <ArrowIcon diagonal />
               </Link>
-              <div className="home-stadium-controls" aria-label="Kontrol carousel UMKM">
+              <div className="home-stadium-controls" aria-label="Kontrol carousel tempat makan dan nongkrong">
                 <Button
                   type="button"
                   variant="outline"
                   size="icon"
-                  aria-label="UMKM sebelumnya"
+                  aria-label="Tempat makan sebelumnya"
                   onClick={() => umkmTrackRef.current?.scrollBy({ left: -360, behavior: "smooth" })}
                 >
                   <ChevronLeft aria-hidden="true" />
@@ -652,7 +652,7 @@ export default function HomeView() {
                   type="button"
                   variant="outline"
                   size="icon"
-                  aria-label="UMKM berikutnya"
+                  aria-label="Tempat makan berikutnya"
                   onClick={() => umkmTrackRef.current?.scrollBy({ left: 360, behavior: "smooth" })}
                 >
                   <ChevronRight aria-hidden="true" />
@@ -697,7 +697,7 @@ export default function HomeView() {
               </article>
             ))}
 
-            {/* End Action Card: UMKM */}
+            {/* End Action Card: Tempat Makan & Nongkrong */}
             <article className="home-stadium-card flex flex-col justify-between p-6 sm:p-7 bg-gradient-to-br from-[#3d1a24] via-[#5c2434] to-[#7f2643] text-white border-2 border-dashed border-rose-300/40 hover:border-amber-400 transition-all shrink-0">
               <div className="space-y-3">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/15 text-amber-300 backdrop-blur-xs">
@@ -705,10 +705,10 @@ export default function HomeView() {
                   350+ Kuliner Kobar
                 </span>
                 <h3 className="text-xl sm:text-2xl font-black text-white leading-tight">
-                  Jelajahi Kuliner &amp; UMKM
+                  Jelajahi Tempat Makan &amp; Nongkrong
                 </h3>
                 <p className="text-xs text-rose-100/90 leading-relaxed">
-                  Cicipi Soto Manggala, Ikan Bakar Sungai Arut, Kerupuk Basah Kumai, dan ratusan warung makan khas Kotawaringin Barat.
+                  Cicipi Soto Manggala, Ikan Bakar Sungai Arut, Kerupuk Basah Kumai, dan ratusan warung makan serta tempat nongkrong khas Kotawaringin Barat.
                 </p>
               </div>
               <div className="pt-6 mt-auto">
@@ -716,7 +716,7 @@ export default function HomeView() {
                   to="/informasi?tab=umkm"
                   className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm py-3.5 px-4 shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <span>Buka Direktori UMKM</span>
+                  <span>Buka Direktori Kuliner &amp; Nongkrong</span>
                   <ArrowIcon diagonal />
                 </Link>
               </div>
