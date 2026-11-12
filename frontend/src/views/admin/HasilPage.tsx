@@ -18,6 +18,7 @@ import AdminNav from "../../components/AdminNav";
 import {
   ArrowLeft,
   CheckCircle2,
+  Lock,
   Plus,
   Save,
   Trash2,
@@ -32,6 +33,69 @@ interface ScoreFormState {
   scores: string[];
   contingent_ids: number[];
   winner_contingent_id: number;
+}
+
+function getRoundPhaseLevel(roundName?: string): { level: number; label: string } {
+  const r = (roundName || "").toLowerCase();
+  if (r.includes("perempat") || r.includes("quarter") || r.includes("8 besar")) {
+    return { level: 2, label: "Perempat Final" };
+  }
+  if (r.includes("semifinal") || r.includes("semi final") || r.includes("4 besar")) {
+    return { level: 3, label: "Semifinal" };
+  }
+  if (r.includes("juara 3") || r.includes("perebutan") || r.includes("final")) {
+    return { level: 4, label: "Final / Perebutan Juara 3" };
+  }
+  return { level: 1, label: "Fase Grup / Penyisihan" };
+}
+
+function getPhaseBlockReason(
+  targetMatch: ScheduleMatch,
+  allMatches: ScheduleMatch[],
+): string | null {
+  const targetPhase = getRoundPhaseLevel(targetMatch.round_name);
+  if (targetPhase.level <= 1) return null;
+
+  const sameScopeMatches = allMatches.filter((m) => {
+    if (m.id === targetMatch.id) return false;
+    if (m.sport_name !== targetMatch.sport_name) return false;
+    if (targetMatch.event_name && m.event_name) {
+      return m.event_name === targetMatch.event_name;
+    }
+    return true;
+  });
+
+  for (let prevLevel = 1; prevLevel < targetPhase.level; prevLevel++) {
+    const prevMatches = sameScopeMatches.filter(
+      (m) => getRoundPhaseLevel(m.round_name).level === prevLevel,
+    );
+    if (prevMatches.length === 0) continue;
+
+    const unfinished = prevMatches.filter((m) => m.status !== "FINISHED");
+    if (unfinished.length > 0) {
+      const prevLabel = getRoundPhaseLevel(unfinished[0].round_name).label;
+      return `Belum bisa mengisi ${targetPhase.label}: masih ada ${unfinished.length} pertandingan ${prevLabel} yang belum selesai.`;
+    }
+
+    if (prevLevel === 1) {
+      const hasAnyWinner = prevMatches.some((m) =>
+        m.participants?.some((p) => p.is_winner),
+      );
+      if (!hasAnyWinner) {
+        return `Belum bisa mengisi ${targetPhase.label}: pertandingan Fase Grup / Penyisihan belum memiliki pemenang.`;
+      }
+    } else {
+      const withoutWinner = prevMatches.filter(
+        (m) => !m.participants?.some((p) => p.is_winner),
+      );
+      if (withoutWinner.length > 0) {
+        const prevLabel = getRoundPhaseLevel(withoutWinner[0].round_name).label;
+        return `Belum bisa mengisi ${targetPhase.label}: ada ${withoutWinner.length} pertandingan ${prevLabel} yang belum memiliki pemenang.`;
+      }
+    }
+  }
+
+  return null;
 }
 
 export default function HasilPage() {
@@ -70,6 +134,11 @@ export default function HasilPage() {
   });
 
   const openScoreForm = (match: ScheduleMatch) => {
+    const blockReason = getPhaseBlockReason(match, matches);
+    if (blockReason) {
+      alert(blockReason);
+      return;
+    }
     setFeedbackMsg("");
     setSelectedMatch(match);
     const parts = match.participants || [];
@@ -96,6 +165,11 @@ export default function HasilPage() {
 
   const handleSave = async () => {
     if (!selectedMatch) return;
+    const blockReason = getPhaseBlockReason(selectedMatch, matches);
+    if (blockReason) {
+      alert(blockReason);
+      return;
+    }
     const filledPairs = form.contingent_ids
       .map((cid, idx) => ({ cid, score: (form.scores[idx] ?? "").trim() }))
       .filter((item) => item.cid > 0);
@@ -447,6 +521,7 @@ export default function HasilPage() {
                 <tbody>
                   {filteredMatches.map((match: ScheduleMatch) => {
                     const parts = match.participants || [];
+                    const blockReason = getPhaseBlockReason(match, matches);
                     return (
                       <tr key={match.id} className="border-b hover:bg-muted/20">
                         <td className="p-2 font-medium whitespace-nowrap">
@@ -494,12 +569,22 @@ export default function HasilPage() {
                         <td className="p-2">
                           <div className="flex gap-1.5">
                             <Button
-                              variant="default"
+                              variant={blockReason ? "outline" : "default"}
                               size="sm"
+                              disabled={Boolean(blockReason)}
+                              title={blockReason || "Input hasil pertandingan"}
                               onClick={() => openScoreForm(match)}
                               className="gap-1.5 text-xs"
                             >
-                              <Trophy className="h-3.5 w-3.5" /> Input Hasil
+                              {blockReason ? (
+                                <>
+                                  <Lock className="h-3.5 w-3.5" /> Terkunci
+                                </>
+                              ) : (
+                                <>
+                                  <Trophy className="h-3.5 w-3.5" /> Input Hasil
+                                </>
+                              )}
                             </Button>
                             <Button
                               variant="ghost"
