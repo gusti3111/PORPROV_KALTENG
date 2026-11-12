@@ -61,7 +61,12 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    inviteCode: string,
+  ) => Promise<void>;
   logout: () => void;
   clearError: () => void;
 }
@@ -97,13 +102,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  register: async (name, email, password) => {
+  register: async (name, email, password, inviteCode) => {
     set({ isLoading: true, error: null });
     try {
       const res = await apiClient.post<APIEnvelope<AuthResponsePayload>>("/auth/register", {
         name,
         email,
         password,
+        invite_code: inviteCode,
       });
       if (!res.data.success || !res.data.data) {
         throw new Error(res.data.error || "Gagal mendaftarkan akun admin");

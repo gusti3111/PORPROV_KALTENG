@@ -28,7 +28,7 @@ import {
   Trophy,
   X,
 } from "lucide-react";
-import { API_BASE_URL, getAPIData } from "../../api/client";
+import { API_BASE_URL, getAPIData, getAuthHeaders } from "../../api/client";
 import { getContingentLogoUrl } from "../../utils/contingentLogo";
 import {
   calculateStandingPoints,
@@ -189,7 +189,7 @@ export default function BaganPage() {
       };
       const res = await fetch(`${API_BASE_URL}/brackets/${editingMatch.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
@@ -247,7 +247,7 @@ export default function BaganPage() {
         `${API_BASE_URL}/sports/${selectedSportId}/standings`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify(payload),
         },
       );
@@ -299,7 +299,7 @@ export default function BaganPage() {
     try {
       await fetch(
         `${API_BASE_URL}/sports/${selectedSportId}/standings?group_code=${groupCode}&contingent_id=${cid}`,
-        { method: "DELETE" },
+        { method: "DELETE", headers: getAuthHeaders() },
       );
       await loadSportTournamentData(selectedSportId);
     } catch {
@@ -311,7 +311,7 @@ export default function BaganPage() {
     try {
       const res = await fetch(
         `${API_BASE_URL}/sports/${selectedSportId}/promote-groups`,
-        { method: "POST" },
+        { method: "POST", headers: getAuthHeaders() },
       );
       if (!res.ok) throw new Error("Failed to promote");
       await loadSportTournamentData(selectedSportId);

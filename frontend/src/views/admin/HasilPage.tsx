@@ -24,7 +24,7 @@ import {
   Trophy,
   X,
 } from "lucide-react";
-import { API_BASE_URL } from "../../api/client";
+import { API_BASE_URL, getAuthHeaders } from "../../api/client";
 import type { ScheduleMatch } from "../../api/types";
 
 interface ScoreFormState {
@@ -135,7 +135,10 @@ export default function HasilPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Hapus pertandingan ini?")) return;
     try {
-      await fetch(`${API_BASE_URL}/matches/${id}`, { method: "DELETE" });
+      await fetch(`${API_BASE_URL}/matches/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
       void fetchMatches();
     } catch {
       alert("Gagal menghapus pertandingan");

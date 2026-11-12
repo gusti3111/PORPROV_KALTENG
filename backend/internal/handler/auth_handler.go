@@ -32,10 +32,11 @@ type loginAttempt struct {
 }
 
 type AuthHandler struct {
-	repo     *repository.AuthRepository
-	secret   []byte
-	mu       sync.Mutex
-	attempts map[string]loginAttempt
+	repo       *repository.AuthRepository
+	secret     []byte
+	inviteCode string
+	mu         sync.Mutex
+	attempts   map[string]loginAttempt
 }
 
 func NewAuthHandler(repo *repository.AuthRepository) *AuthHandler {
@@ -43,17 +44,23 @@ func NewAuthHandler(repo *repository.AuthRepository) *AuthHandler {
 	if secret == "" {
 		secret = "porprov-kalteng-2026-admin-secret"
 	}
+	inviteCode := strings.TrimSpace(os.Getenv("ADMIN_REGISTER_CODE"))
+	if inviteCode == "" {
+		inviteCode = "PORPROV-KALTENG-2026"
+	}
 	return &AuthHandler{
-		repo:     repo,
-		secret:   []byte(secret),
-		attempts: make(map[string]loginAttempt),
+		repo:       repo,
+		secret:     []byte(secret),
+		inviteCode: inviteCode,
+		attempts:   make(map[string]loginAttempt),
 	}
 }
 
 type registerRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name       string `json:"name"`
+	Email      string `json:"email"`
+	Password   string `json:"password"`
+	InviteCode string `json:"invite_code"`
 }
 
 type loginRequest struct {
@@ -87,7 +94,12 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	name := strings.TrimSpace(req.Name)
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	password := req.Password
+	inviteCode := strings.TrimSpace(req.InviteCode)
 
+	if !hmac.Equal([]byte(inviteCode), []byte(h.inviteCode)) {
+		Error(w, http.StatusForbidden, "Kode undangan panitia tidak valid")
+		return
+	}
 	if errMsg := validateName(name); errMsg != "" {
 		Error(w, http.StatusBadRequest, errMsg)
 		return
@@ -214,6 +226,25 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 
 	JSON(w, http.StatusOK, map[string]any{
 		"user": user,
+	})
+}
+
+func (h *AuthHandler) RequireAdmin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			Error(w, http.StatusUnauthorized, "Autentikasi admin diperlukan")
+			return
+		}
+
+		tokenStr := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+		claims, err := parseToken(tokenStr, h.secret)
+		if err != nil || claims.Role != "admin" {
+			Error(w, http.StatusUnauthorized, "Sesi admin tidak valid atau sudah kedaluwarsa")
+			return
+		}
+
+		next.ServeHTTP(w, r)
 	})
 }
 

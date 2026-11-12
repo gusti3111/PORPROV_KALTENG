@@ -30,6 +30,19 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+export function getAuthHeaders(extra?: Record<string, string>): Record<string, string> {
+  const headers: Record<string, string> = { ...(extra ?? {}) };
+  try {
+    const token = localStorage.getItem("porprov_admin_token");
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+  } catch {
+    // Ignore storage errors
+  }
+  return headers;
+}
+
 export async function getAPIData<T>(path: string): Promise<T> {
   const response = await apiClient.get<APIResponse<T>>(path);
   if (!response.data.success || response.data.data === undefined) {

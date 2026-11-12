@@ -1,5 +1,11 @@
 import { create } from "zustand";
-import { API_BASE_URL, apiClient, getAPIData, getAPIErrorMessage } from "../api/client";
+import {
+  API_BASE_URL,
+  apiClient,
+  getAPIData,
+  getAPIErrorMessage,
+  getAuthHeaders,
+} from "../api/client";
 import type {
   Contingent,
   MedalStanding,
@@ -211,7 +217,7 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
   async createEvent(data: { sport_id: number; name: string; gender: string }) {
     const response = await fetch(`${API_BASE_URL}/events`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getAuthHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(data),
     });
     if (!response.ok) {
@@ -228,7 +234,7 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
   ) {
     const response = await fetch(`${API_BASE_URL}/matches/${id}/result`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: getAuthHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(data),
     });
     if (!response.ok) {

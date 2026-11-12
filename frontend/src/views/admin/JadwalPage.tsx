@@ -25,7 +25,7 @@ import {
   Trash2,
   Trophy,
 } from "lucide-react";
-import { API_BASE_URL } from "../../api/client";
+import { API_BASE_URL, getAuthHeaders } from "../../api/client";
 import type { ScheduleMatch } from "../../api/types";
 import { getSportScoringRule } from "../../utils/sportScoringConfig";
 
@@ -334,7 +334,7 @@ export default function JadwalPage() {
       const method = editing ? "PUT" : "POST";
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(payload),
       });
       if (!response.ok) {
@@ -348,7 +348,7 @@ export default function JadwalPage() {
         if (hasScores) {
           await fetch(`${API_BASE_URL}/matches/${editing.match_id}/result`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: getAuthHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify({
               status: form.status,
               scores: selectedScores,
@@ -387,7 +387,10 @@ export default function JadwalPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Hapus pertandingan ini?")) return;
     try {
-      await fetch(`${API_BASE_URL}/matches/${id}`, { method: "DELETE" });
+      await fetch(`${API_BASE_URL}/matches/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
       void fetchMatches();
     } catch (err) {
       console.error("Failed to delete match:", err);

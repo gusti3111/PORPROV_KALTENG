@@ -22,6 +22,7 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(30 * time.Second))
+	r.Use(securityHeadersMiddleware)
 
 	// CORS configuration
 	r.Use(cors.Handler(cors.Options{
@@ -75,17 +76,17 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 		api.Route("/sports", func(sr chi.Router) {
 			sr.Get("/", sportHandler.GetAll)
 			sr.Get("/{id}/tournament", sportTournamentHandler.GetBySportID)
-			sr.Put("/{id}/standings", sportTournamentHandler.UpsertStanding)
-			sr.Delete("/{id}/standings", sportTournamentHandler.DeleteStanding)
-			sr.Post("/{id}/promote-groups", sportTournamentHandler.PromoteGroups)
+			sr.With(authHandler.RequireAdmin).Put("/{id}/standings", sportTournamentHandler.UpsertStanding)
+			sr.With(authHandler.RequireAdmin).Delete("/{id}/standings", sportTournamentHandler.DeleteStanding)
+			sr.With(authHandler.RequireAdmin).Post("/{id}/promote-groups", sportTournamentHandler.PromoteGroups)
 			sr.Get("/{id}", sportHandler.GetByID)
 		})
 
 		api.Route("/events", func(er chi.Router) {
 			er.Get("/", eventHandler.List)
-			er.Post("/", eventHandler.Create)
+			er.With(authHandler.RequireAdmin).Post("/", eventHandler.Create)
 		})
-		api.Post("/events", eventHandler.Create)
+		api.With(authHandler.RequireAdmin).Post("/events", eventHandler.Create)
 
 		api.Route("/venues", func(vr chi.Router) {
 			vr.Get("/", venueHandler.GetAll)
@@ -101,19 +102,19 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 		})
 
 		api.Get("/matches", matchHandler.List)
-		api.Post("/matches", matchHandler.Create)
+		api.With(authHandler.RequireAdmin).Post("/matches", matchHandler.Create)
 		api.Get("/matches/{id}", matchHandler.Get)
-		api.Put("/matches/{id}", matchHandler.Update)
-		api.Put("/matches/{id}/participants", matchHandler.UpdateParticipants)
-		api.Put("/matches/{id}/result", matchHandler.UpdateResult)
-		api.Delete("/matches/{id}", matchHandler.Delete)
+		api.With(authHandler.RequireAdmin).Put("/matches/{id}", matchHandler.Update)
+		api.With(authHandler.RequireAdmin).Put("/matches/{id}/participants", matchHandler.UpdateParticipants)
+		api.With(authHandler.RequireAdmin).Put("/matches/{id}/result", matchHandler.UpdateResult)
+		api.With(authHandler.RequireAdmin).Delete("/matches/{id}", matchHandler.Delete)
 
 		api.Route("/brackets", func(br chi.Router) {
 			br.Get("/{sportId}", bracketHandler.ListBySport)
 			br.Get("/match/{id}", bracketHandler.Get)
-			br.Post("/", bracketHandler.Create)
-			br.Put("/{id}", bracketHandler.Update)
-			br.Delete("/{id}", bracketHandler.Delete)
+			br.With(authHandler.RequireAdmin).Post("/", bracketHandler.Create)
+			br.With(authHandler.RequireAdmin).Put("/{id}", bracketHandler.Update)
+			br.With(authHandler.RequireAdmin).Delete("/{id}", bracketHandler.Delete)
 		})
 
 		api.Route("/auth", func(ar chi.Router) {
@@ -124,4 +125,14 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 	})
 
 	return r
+}
+
+func securityHeadersMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		w.Header().Set("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+		next.ServeHTTP(w, r)
+	})
 }
