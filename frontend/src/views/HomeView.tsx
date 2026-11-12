@@ -920,7 +920,7 @@ export default function HomeView() {
         <section id="cabang-olahraga" className="mx-auto w-[var(--container-width)] pt-[94px] pb-[108px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:py-[72px]">
           <div className="flex items-center gap-[13px] text-[9px] font-extrabold tracking-[0.16em] text-[#596156] [&>span:first-child]:text-[var(--orange)]">
             <span>07</span>
-            <span>ARENA PARA JUARA</span>
+            <span>Sentra Kuliner dan Restoran </span>
           </div>
 
           <div className="mt-[33px] grid grid-cols-[1fr_1fr] items-center gap-[8%] max-[900px]:gap-[5%] max-[620px]:grid-cols-1 max-[620px]:gap-[27px]">
@@ -934,22 +934,20 @@ export default function HomeView() {
             </div>
             <div>
               <h2 className="m-0 text-[clamp(34px,4.5vw,60px)] font-extrabold leading-[1.08] tracking-[-0.075em] max-[620px]:text-[clamp(37px,10vw,52px)] [&>span]:text-[var(--green)]">
-                Setiap cabang,
+                Untuk apa memperebutkan semangkuk coto,
                 <br />
-                <span>satu kebanggaan.</span>
+                <span>kita bisa temukan jauh lebih banyak di sini </span>
               </h2>
               <p className="mt-[21px] mb-0 max-w-[390px] xl:max-w-[480px] 2xl:max-w-[620px] min-[2560px]:max-w-[800px] text-[13px] xl:text-[15px] 2xl:text-[17px] min-[2560px]:text-[20px] leading-[1.9] text-[var(--muted)]">
-                Berbagai cabang olahraga akan mempertemukan atlet-atlet terbaik
-                dari seluruh Kalimantan Tengah. Daftar cabang dan detail
-                pertandingan akan diumumkan melalui kanal resmi.
+                Berikut beberapa rekomendasi tempat makan yang enak dan cocok untuk menikmati kuliner khas Kotawaringin Barat.
               </p>
               <div className="mt-5 flex flex-wrap items-center gap-4">
-                <Link className="inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/cabor">
-                  Lihat cabang olahraga <ArrowIcon diagonal />
+                <Link className="inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/informasi?tab=makan">
+                  Lihat Tempat makan dan Restoran <ArrowIcon diagonal />
                 </Link>
-                <Link className="inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/venue">
+                {/* <Link className="inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/venue">
                   Lihat venue pertandingan <ArrowIcon diagonal />
-                </Link>
+                </Link> */}
               </div>
             </div>
 
