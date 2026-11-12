@@ -98,11 +98,18 @@ const featuredStadiums = [
     image: "/venues/koridor-trans-kalimantan.jpg",
   },
   {
-    category: "AKUATIK & SIRKUIT",
-    venue: "Kolam Renang Isen Mulang & Sirkuit Sabaru",
-    city: "Kota Palangka Raya",
-    cabor: "Akuatik & Bermotor (Motoprix)",
-    image: "/venues/sport-center.webp",
+    category: "ARENA BALAP MOTOR",
+    venue: "Sirkuit Sabaru Palangka Raya",
+    city: "Sabaru, Sebangau, Palangka Raya",
+    cabor: "Bermotor / Balap Motor (Motoprix)",
+    image: "/venues/sirkuitsabarupalangka.jpeg",
+  },
+  {
+    category: "AKUATIK & PERAIRAN",
+    venue: "Kolam Renang Isen Mulang",
+    city: "Jekan Raya, Palangka Raya",
+    cabor: "Cabang Olahraga Akuatik / Renang",
+    image: "/venues/kolamRenangIsenMulang.jpeg",
   },
 ];
 

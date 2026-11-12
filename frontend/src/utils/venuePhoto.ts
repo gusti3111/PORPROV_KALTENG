@@ -3,18 +3,25 @@
  */
 
 const venuePhotoMap: Record<string, string> = {
-  "sport center": "/venues/sport-center.webp",
+  "sabaru": "/venues/sirkuitsabarupalangka.jpeg",
+  "sirkuit": "/venues/sirkuitsabarupalangka.jpeg",
+  "balap motor": "/venues/sirkuitsabarupalangka.jpeg",
+  "motoprix": "/venues/sirkuitsabarupalangka.jpeg",
+  "isen mulang": "/venues/kolamRenangIsenMulang.jpeg",
+  "kolam renang": "/venues/kolamRenangIsenMulang.jpeg",
+  "akuatik": "/venues/kolamRenangIsenMulang.jpeg",
+  "sport center": "/venues/GORSportCenter.jpeg",
   "stadion": "/venues/sport-center.webp",
-  "atletik": "/venues/sport-center.webp",
-  "ratu alamsyah": "/venues/sport-center.webp",
+  "atletik": "/venues/trackLari.webp",
+  "ratu alamsyah": "/venues/GORSportCenter.jpeg",
   "basket": "/venues/sport-center.webp",
   "karanganyar": "/venues/karanganyar.jpg",
   "koni": "/venues/gor-koni.jpg",
-  "billiard": "/venues/gor-koni.jpg",
+  "billiard": "/venues/OnixBilliard.webp",
   "sungai arut": "/venues/sungai-arut.jpg",
   "pangkalan bun park": "/venues/pangkalan-bun-park.jpg",
   "pasir panjang": "/venues/pasir-panjang.jpg",
-  "jalan raya": "/venues/koridor-trans-kalimantan.jpg",
+  "jalan raya": "/venues/jalanraya.jpg",
   "kumai": "/venues/pelabuhan-kumai.jpg",
   "kiyai gede": "/venues/kotawaringin-lama.jpg",
   "kotawaringin lama": "/venues/kotawaringin-lama.jpg",
@@ -30,6 +37,6 @@ export function getVenuePhotoUrl(venueName?: string): string {
       return url;
     }
   }
-
   return "/venues/sport-center.webp";
 }
+
