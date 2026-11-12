@@ -96,6 +96,32 @@ function toApiDateTime(date: string, time: string) {
   return new Date(`${date}T${time}:00+07:00`).toISOString();
 }
 
+function getScheduleValidationError(form: MatchFormState): string | null {
+  if (!form.sport_id) return "Pilih cabang olahraga terlebih dahulu.";
+  if (!form.event_id && !form.custom_event_name.trim()) {
+    return "Pilih atau isi nomor pertandingan terlebih dahulu.";
+  }
+  if (!form.venue_id) return "Pilih tempat / venue pertandingan terlebih dahulu.";
+  if (!form.round_name.trim()) return "Pilih babak / fase pertandingan.";
+  if (form.contingent_ids.length < 2 || form.contingent_ids.some((cid) => !cid || cid <= 0)) {
+    return "Semua kolom kontingen peserta wajib dipilih.";
+  }
+  if (new Set(form.contingent_ids).size !== form.contingent_ids.length) {
+    return "Kontingen peserta tidak boleh ada yang ganda.";
+  }
+  if (!form.start_date.trim() || !form.start_time.trim()) {
+    return "Tanggal dan jam mulai wajib diisi.";
+  }
+  if (!form.end_date.trim() || !form.end_time.trim()) {
+    return "Tanggal dan jam selesai wajib diisi.";
+  }
+  if (`${form.end_date}T${form.end_time}` < `${form.start_date}T${form.start_time}`) {
+    return "Waktu selesai tidak boleh lebih awal dari waktu mulai.";
+  }
+  if (!form.status.trim()) return "Pilih status pertandingan.";
+  return null;
+}
+
 export default function JadwalPage() {
   const matches = useCompetitionStore((s) => s.matches);
   const sports = useCompetitionStore((s) => s.sports);
@@ -276,33 +302,14 @@ export default function JadwalPage() {
     e.preventDefault();
     setFeedbackMsg("");
 
-    if (!form.sport_id) {
-      alert("Silakan pilih cabang olahraga.");
-      return;
-    }
-    if (!form.event_id && !form.custom_event_name.trim()) {
-      alert("Silakan pilih atau ketik Nomor Pertandingan.");
-      return;
-    }
-    if (!form.venue_id) {
-      alert("Silakan pilih tempat / venue pertandingan.");
-      return;
-    }
-    if (!form.start_date || !form.end_date) {
-      alert("Silakan pilih tanggal mulai dan selesai.");
-      return;
-    }
-    const filledPairs = form.contingent_ids
-      .map((cid, idx) => ({ cid, score: form.scores[idx] ?? "" }))
-      .filter((item) => item.cid > 0);
-    const uniqueIds = new Set(filledPairs.map((item) => item.cid));
-    if (filledPairs.length < 2 || uniqueIds.size !== filledPairs.length) {
-      alert("Pilih minimal 2 kontingen yang berbeda (tidak boleh ada kontingen ganda).");
+    const validationError = getScheduleValidationError(form);
+    if (validationError) {
+      alert(validationError);
       return;
     }
 
-    const selectedContingentIds = filledPairs.map((item) => item.cid);
-    const selectedScores = filledPairs.map((item) => item.score);
+    const selectedContingentIds = form.contingent_ids;
+    const selectedScores = form.contingent_ids.map((_, idx) => form.scores[idx] ?? "");
     const selectedNames = selectedContingentIds.map(
       (cid, idx) => contingents.find((c) => c.id === cid)?.name || `Kontingen ${idx + 1}`,
     );
@@ -401,6 +408,7 @@ export default function JadwalPage() {
   const formEvents = events.filter((event) => event.sport_id === form.sport_id);
   const selectedSportObj = sports.find((s) => s.id === form.sport_id);
   const scoringRule = getSportScoringRule(form.sport_id, selectedSportObj?.name);
+  const scheduleValidationError = getScheduleValidationError(form);
 
   const statusLabels: Record<string, string> = {
     SCHEDULED: "Terjadwal",
@@ -821,8 +829,19 @@ export default function JadwalPage() {
                 </div>
               </div>
 
+              {scheduleValidationError && (
+                <p className="text-xs text-amber-600 font-medium" role="status">
+                  * Lengkapi semua kolom wajib sebelum menyimpan (kecuali Judul Pertandingan): {scheduleValidationError}
+                </p>
+              )}
+
               <div className="flex flex-wrap items-center gap-3 pt-2">
-                <Button type="submit" className="gap-2">
+                <Button
+                  type="submit"
+                  className="gap-2"
+                  disabled={Boolean(scheduleValidationError)}
+                  title={scheduleValidationError || "Simpan jadwal pertandingan"}
+                >
                   <LayoutGrid className="h-4 w-4" />
                   {editing
                     ? "Update Jadwal & Sinkronkan Web Utama"
