@@ -72,7 +72,7 @@ export default function VenueMap({
             <Popup>
               <div style={{ maxWidth: 220 }}>
                 <img
-                  src={getVenuePhotoUrl(venue.name)}
+                  src={getVenuePhotoUrl(venue.name, `${venue.category} ${venue.note || ""}`)}
                   alt={venue.name}
                   style={{ width: "100%", height: 105, objectFit: "cover", borderRadius: 6, marginBottom: 8 }}
                   onError={(e) => {

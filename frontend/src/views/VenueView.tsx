@@ -145,7 +145,7 @@ export default function VenueView() {
                 >
                   <div className="relative h-28 w-full overflow-hidden rounded-md mb-3 bg-slate-100 shrink-0">
                     <img
-                      src={getVenuePhotoUrl(venue.name)}
+                      src={getVenuePhotoUrl(venue.name, `${venue.category} ${venue.note || ""}`)}
                       alt={venue.name}
                       className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                       loading="lazy"

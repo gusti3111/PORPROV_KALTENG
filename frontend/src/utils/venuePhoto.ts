@@ -7,9 +7,9 @@ const venuePhotoMap: Record<string, string> = {
   "sirkuit": "/venues/sirkuitsabarupalangka.jpeg",
   "balap motor": "/venues/sirkuitsabarupalangka.jpeg",
   "motoprix": "/venues/sirkuitsabarupalangka.jpeg",
-  "isen mulang": "/venues/kolamRenangIsenMulang.jpeg",
-  "kolam renang": "/venues/kolamRenangIsenMulang.jpeg",
-  "akuatik": "/venues/kolamRenangIsenMulang.jpeg",
+  "isen mulang": "/venues/kolamRenang.webp",
+  "kolam renang": "/venues/kolamRenang.webp",
+  "akuatik": "/venues/kolamRenang.webp",
   "sport center": "/venues/GORSportCenter.jpeg",
   "stadion": "/venues/sport-center.webp",
   "atletik": "/venues/trackLari.webp",
@@ -28,11 +28,12 @@ const venuePhotoMap: Record<string, string> = {
   "antakusuma": "/venues/kotawaringin-lama.jpg",
   "sega": "/venues/kampung-sega.jpeg",
   "lintasan": "/venues/lintasanAtletik.jpeg",
+
 };
 
-export function getVenuePhotoUrl(venueName?: string): string {
+export function getVenuePhotoUrl(venueName?: string, additionalText?: string): string {
   if (!venueName) return "/venues/sport-center.webp";
-  const normalized = venueName.toLowerCase();
+  const normalized = `${venueName} ${additionalText || ""}`.toLowerCase();
 
   for (const [key, url] of Object.entries(venuePhotoMap)) {
     if (normalized.includes(key)) {
