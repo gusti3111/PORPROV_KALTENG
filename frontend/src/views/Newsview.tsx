@@ -43,6 +43,7 @@ import {
   type KobarUMKMType,
 } from "../data/umkmKobarData";
 import { hotelData } from "../data/hotelKobarData";
+import { wisataKobarData } from "../data/wisataKobarData";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -51,7 +52,7 @@ import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { getContingentLogoUrl } from "../utils/contingentLogo";
 
-type NewsCategory = "Berita" | "Sejarah" | "Galeri" | "Tempat Makan dan Nongkrong" | "Hotel dan Penginapan";
+type NewsCategory = "Berita" | "Sejarah" | "Galeri" | "Tempat Makan dan Nongkrong" | "Hotel dan Penginapan" | "Pariwisata";
 type CategoryFilter = NewsCategory;
 
 type NewsArticle = {
@@ -262,6 +263,7 @@ const galleryPhotos: GalleryPhoto[] = [
 const categories: CategoryFilter[] = [
   "Tempat Makan dan Nongkrong",
   "Hotel dan Penginapan",
+  "Pariwisata",
   "Sejarah",
   "Galeri",
   "Berita",
@@ -445,6 +447,7 @@ export default function Newsview() {
     const tabParam = searchParams.get("tab")?.toLowerCase();
     if (tabParam === "umkm" || tabParam === "makan" || tabParam === "nongkrong" || tabParam === "kuliner") return "Tempat Makan dan Nongkrong";
     if (tabParam === "hotel" || tabParam === "penginapan") return "Hotel dan Penginapan";
+    if (tabParam === "wisata" || tabParam === "pariwisata" || tabParam === "tourism") return "Pariwisata";
     if (tabParam === "galeri" || tabParam === "gallery") return "Galeri";
     if (tabParam === "sejarah" || tabParam === "history" || tabParam === "about") return "Sejarah";
     return "Berita";
@@ -454,6 +457,7 @@ export default function Newsview() {
     const tabParam = searchParams.get("tab")?.toLowerCase();
     if (tabParam === "umkm" || tabParam === "makan" || tabParam === "nongkrong" || tabParam === "kuliner") setSelectedCategory("Tempat Makan dan Nongkrong");
     else if (tabParam === "hotel" || tabParam === "penginapan") setSelectedCategory("Hotel dan Penginapan");
+    else if (tabParam === "wisata" || tabParam === "pariwisata" || tabParam === "tourism") setSelectedCategory("Pariwisata");
     else if (tabParam === "galeri" || tabParam === "gallery") setSelectedCategory("Galeri");
     else if (tabParam === "sejarah" || tabParam === "history" || tabParam === "about") setSelectedCategory("Sejarah");
     else if (tabParam === "berita") setSelectedCategory("Berita");
@@ -509,6 +513,7 @@ export default function Newsview() {
   const isGalleryTab = selectedCategory === "Galeri";
   const isUMKMTab = selectedCategory === "Tempat Makan dan Nongkrong";
   const isHotelTab = selectedCategory === "Hotel dan Penginapan";
+  const isWisataTab = selectedCategory === "Pariwisata";
 
   const liveMappedArticles: DisplayArticle[] = useMemo(() => {
     if (mmcArticles.length > 0) {
@@ -648,6 +653,18 @@ export default function Newsview() {
     [normalizedQuery],
   );
 
+  const visibleWisata = useMemo(
+    () =>
+      wisataKobarData.filter(
+        (wisata) =>
+          !normalizedQuery ||
+          `${wisata.name} ${wisata.category} ${wisata.district} ${wisata.description} ${wisata.highlights} ${wisata.openInfo}`
+            .toLocaleLowerCase("id")
+            .includes(normalizedQuery),
+      ),
+    [normalizedQuery],
+  );
+
   const searchPlaceholder = isGalleryTab
     ? "Cari foto galeri..."
     : isSejarahTab
@@ -656,7 +673,9 @@ export default function Newsview() {
         ? "Cari nama tempat makan, kedai kopi, menu masakan, atau alamat di Kobar..."
         : isHotelTab
           ? "Cari nama hotel, wisma, atau lokasi..."
-          : "Cari berita...";
+          : isWisataTab
+            ? "Cari destinasi wisata, pantai, cagar budaya, atau lokasi..."
+            : "Cari berita...";
 
   return (
     <>
@@ -676,7 +695,9 @@ export default function Newsview() {
                     ? "Tempat Makan & Nongkrong"
                     : isHotelTab
                       ? "Hotel & Penginapan"
-                      : "Informasi"}
+                      : isWisataTab
+                        ? "Pariwisata"
+                        : "Informasi"}
             </span>
           </div>
           <p className="schedule-eyebrow">
@@ -689,7 +710,9 @@ export default function Newsview() {
                   ? "DIREKTORI RESMI TEMPAT MAKAN & NONGKRONG KOTAWARINGIN BARAT • PORPROV XIII"
                   : isHotelTab
                     ? "AKOMODASI PORPROV XIII KALIMANTAN TENGAH"
-                    : "INFORMASI PORPROV XIII KALIMANTAN TENGAH 2026"}
+                    : isWisataTab
+                      ? "DESTINASI WISATA RESMI KOTAWARINGIN BARAT • PORPROV XIII"
+                      : "INFORMASI PORPROV XIII KALIMANTAN TENGAH 2026"}
           </p>
           <h1>
             {isGalleryTab ? (
@@ -708,6 +731,10 @@ export default function Newsview() {
               <>
                 Hotel & <span>Penginapan</span>
               </>
+            ) : isWisataTab ? (
+              <>
+                Pesona <span>Pariwisata Kobar</span>
+              </>
             ) : (
               <>
                 Pusat <span>Informasi</span>
@@ -720,10 +747,12 @@ export default function Newsview() {
               : isSejarahTab
                 ? "Mengenal lebih dekat perjalanan sejarah, visi penyelenggaraan, filosofi Isen Mulang, serta profil 14 Kontingen Kabupaten/Kota dalam perhelatan Pekan Olahraga Provinsi XIII Kalimantan Tengah Tahun 2026."
                 : isUMKMTab
-                  ? "Panduan 352 tempat makan, warung makan, kedai kopi, restoran, dan bakery di Kabupaten Kotawaringin Barat hasil crawl Google Maps untuk kontingen & penonton PORPROV XIII."
+                  ? `Panduan ${kobarUMKMData.length} tempat makan, kedai kopi, restoran, warung makan, dan street food di Kabupaten Kotawaringin Barat untuk kontingen & penonton PORPROV XIII.`
                   : isHotelTab
                     ? "Temukan rekomendasi hotel dan penginapan nyaman di sekitar lokasi pertandingan PORPROV XIII."
-                    : "Informasi terkini seputar PORPROV XIII Kalimantan Tengah"}
+                    : isWisataTab
+                      ? "Panduan destinasi wisata unggulan di Kabupaten Kotawaringin Barat — mulai dari habitat orangutan Taman Nasional Tanjung Puting, Pantai Kubu, cagar budaya Istana Kuning, hingga susur Sungai Arut."
+                      : "Informasi terkini seputar PORPROV XIII Kalimantan Tengah"}
           </p>
           <img
             className="news-hero-illustration"
@@ -732,8 +761,7 @@ export default function Newsview() {
           />
           {!isSejarahTab && (
             <p className="news-demo-note" role="note">
-              Konten ini masih contoh. Foto galeri menggunakan gambar acak dan
-              belum merupakan dokumentasi resmi PORPROV.
+              Jelajahi informasi resmi seputar PORPROV XIII Kalimantan Tengah 2026
             </p>
           )}
         </section>
@@ -741,11 +769,17 @@ export default function Newsview() {
         <section
           className="news-content section-wrap"
           aria-label={
-            isGalleryTab
-              ? "Galeri foto"
-              : isSejarahTab
-                ? "Profil dan sejarah PORPROV Kalimantan Tengah"
-                : "Daftar berita"
+            isHotelTab
+              ? "Akomodasi hotel dan penginapan"
+              : isWisataTab
+                ? "Destinasi pariwisata Kotawaringin Barat"
+                : isUMKMTab
+                  ? "Direktori Tempat Makan dan Nongkrong Kotawaringin Barat"
+                  : isGalleryTab
+                    ? "Galeri foto"
+                    : isSejarahTab
+                      ? "Profil dan sejarah PORPROV Kalimantan Tengah"
+                      : "Daftar berita"
           }
         >
           <div className="news-toolbar">
@@ -1363,6 +1397,103 @@ export default function Newsview() {
               ) : (
                 <p className="news-empty" role="status">
                   Data hotel dan penginapan tidak ditemukan. Coba kata kunci lain.
+                </p>
+              )}
+            </div>
+          ) : isWisataTab ? (
+            <div className="space-y-8" aria-live="polite">
+              {/* Hero Banner: Pariwisata Kotawaringin Barat */}
+              <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-r from-emerald-950 via-[#0e3a2f] to-[#124d3e] text-white shadow-lg">
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 p-6 sm:p-8">
+                  <div className="max-w-2xl space-y-3">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-emerald-400/20 border border-emerald-400/30 px-3.5 py-1 text-xs font-bold text-emerald-300">
+                      <Compass className="h-3.5 w-3.5" />
+                      <span>DESTINASI WISATA RESMI KOTAWARINGIN BARAT • PORPROV XIII</span>
+                    </div>
+
+                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+                      Pesona Alam, Budaya &amp; Cagar Biosfer Dunia
+                    </h2>
+
+                    <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
+                      Jelajahi keindahan bumi Marunting Batu Aji — mulai dari habitat orangutan liar di Taman Nasional Tanjung Puting, pesisir pantai Laut Jawa, cagar budaya Istana Kuning Kesultanan Kutaringin, hingga kearifan rumah adat Betang Dayak Tomun.
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-4 pt-2 text-xs font-semibold text-emerald-200">
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="h-4 w-4 text-emerald-300" />
+                        <span>{wisataKobarData.length} Destinasi Populer Terkurasi</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Sparkles className="h-4 w-4 text-amber-300" />
+                        <span>Ekowisata &amp; Budaya Lokal</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Grid Destinasi Wisata */}
+              {visibleWisata.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {visibleWisata.map((item) => (
+                    <Card
+                      key={item.id}
+                      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-emerald-400"
+                    >
+                      <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          loading="lazy"
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-emerald-300 backdrop-blur-xs">
+                          <Compass className="h-3 w-3" />
+                          <span>{item.category}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-1 flex-col justify-between p-5 space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
+                            <MapPin className="h-3.5 w-3.5 shrink-0" />
+                            <span>{item.district}</span>
+                          </div>
+                          <h3 className="text-lg font-extrabold text-slate-900 group-hover:text-emerald-900 transition-colors">
+                            {item.name}
+                          </h3>
+                          <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
+                            {item.description}
+                          </p>
+                        </div>
+
+                        <div className="space-y-3 pt-2 border-t border-slate-100">
+                          <div className="rounded-lg bg-emerald-50/70 p-2.5 text-[11px] text-emerald-950 font-medium leading-snug">
+                            ✨ <strong>Highlight:</strong> {item.highlights}
+                          </div>
+                          <div className="flex items-center justify-between text-xs pt-1">
+                            <span className="text-[11px] text-slate-500 font-medium">
+                              {item.openInfo}
+                            </span>
+                            <a
+                              href={item.mapsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3 py-1.5 transition-colors shadow-xs"
+                            >
+                              <span>Rute Maps</span>
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <p className="news-empty" role="status">
+                  Destinasi wisata tidak ditemukan. Coba kata kunci lain.
                 </p>
               )}
             </div>

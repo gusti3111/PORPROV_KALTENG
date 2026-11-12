@@ -840,10 +840,10 @@ export default function HomeView() {
             </div>
             <div className="flex items-center gap-3">
               <Link
-                to="/informasi"
+                to="/informasi?tab=wisata"
                 className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-950 hover:underline"
               >
-                Informasi Wisata
+                Semua Wisata
                 <ArrowIcon diagonal />
               </Link>
               <div className="home-stadium-controls" aria-label="Kontrol carousel wisata">
@@ -927,10 +927,10 @@ export default function HomeView() {
               </div>
               <div className="pt-6 mt-auto">
                 <Link
-                  to="/informasi"
+                  to="/informasi?tab=wisata"
                   className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm py-3.5 px-4 shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <span>Buka Informasi Wisata</span>
+                  <span>Buka Direktori Pariwisata</span>
                   <ArrowIcon diagonal />
                 </Link>
               </div>
