@@ -469,6 +469,7 @@ export default function Newsview() {
   const [selectedCulinaryTheme, setSelectedCulinaryTheme] =
     useState<string>("Semua");
   const [onlyRecommended, setOnlyRecommended] = useState<boolean>(false);
+  const [onlyRealPhoto, setOnlyRealPhoto] = useState<boolean>(false);
   const [umkmPage, setUmkmPage] = useState<number>(1);
   const [selectedUMKMDetail, setSelectedUMKMDetail] =
     useState<KobarUMKMItem | null>(null);
@@ -601,7 +602,7 @@ export default function Newsview() {
     : visibleGalleryPhotos.slice(0, 6);
 
   const visibleUMKM = useMemo(() => {
-    return kobarUMKMData.filter((item) => {
+    const filtered = kobarUMKMData.filter((item) => {
       const matchesType =
         selectedUMKMType === "Semua" || item.tipe === selectedUMKMType;
       const matchesDistrict =
@@ -612,6 +613,8 @@ export default function Newsview() {
         selectedCulinaryTheme === "Semua" ||
         item.culinaryThemeKey === selectedCulinaryTheme;
       const matchesRecommended = !onlyRecommended || item.recommended;
+      const matchesRealPhoto =
+        !onlyRealPhoto || item.image.startsWith("/kuliner-real/");
       const matchesQuery =
         !normalizedQuery ||
         `${item.nama} ${item.kategori_google} ${item.culinaryTheme} ${item.signatureDish} ${item.alamat} ${item.kecamatanFull}`
@@ -623,8 +626,20 @@ export default function Newsview() {
         matchesDistrict &&
         matchesTheme &&
         matchesRecommended &&
+        matchesRealPhoto &&
         matchesQuery
       );
+    });
+
+    // Tempat dengan foto nyata (/kuliner-real/) selalu diletakkan paling atas (halaman 1),
+    // kemudian diikuti oleh tempat dengan jumlah ulasan & rating tertinggi
+    return [...filtered].sort((a, b) => {
+      const aIsReal = a.image.startsWith("/kuliner-real/") ? 1 : 0;
+      const bIsReal = b.image.startsWith("/kuliner-real/") ? 1 : 0;
+      if (aIsReal !== bIsReal) {
+        return bIsReal - aIsReal;
+      }
+      return (b.jumlah_ulasan || 0) - (a.jumlah_ulasan || 0);
     });
   }, [
     normalizedQuery,
@@ -632,6 +647,7 @@ export default function Newsview() {
     selectedDistrict,
     selectedCulinaryTheme,
     onlyRecommended,
+    onlyRealPhoto,
   ]);
 
   const umkmItemsPerPage = 12;
@@ -1701,11 +1717,33 @@ export default function Newsview() {
                       Rating Tinggi (4.8+)
                     </button>
 
+                    {/* Foto Nyata Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOnlyRealPhoto(!onlyRealPhoto);
+                        setUmkmPage(1);
+                      }}
+                      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${onlyRealPhoto
+                        ? "bg-emerald-600 text-white font-black shadow-xs ring-1 ring-emerald-700"
+                        : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                        }`}
+                    >
+                      <Camera
+                        className={`h-3.5 w-3.5 ${onlyRealPhoto
+                          ? "text-white"
+                          : "text-emerald-600"
+                          }`}
+                      />
+                      Foto Nyata Tempat (2)
+                    </button>
+
                     {/* Reset All Filters */}
                     {(selectedUMKMType !== "Semua" ||
                       selectedDistrict !== "Semua Kecamatan" ||
                       selectedCulinaryTheme !== "Semua" ||
-                      onlyRecommended) && (
+                      onlyRecommended ||
+                      onlyRealPhoto) && (
                         <button
                           type="button"
                           onClick={() => {
@@ -1713,6 +1751,7 @@ export default function Newsview() {
                             setSelectedDistrict("Semua Kecamatan");
                             setSelectedCulinaryTheme("Semua");
                             setOnlyRecommended(false);
+                            setOnlyRealPhoto(false);
                             setUmkmPage(1);
                           }}
                           className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-700 underline underline-offset-2 ml-1"
