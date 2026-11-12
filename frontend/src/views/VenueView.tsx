@@ -150,7 +150,7 @@ export default function VenueView() {
                       className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                       loading="lazy"
                       onError={(e) => {
-                        e.currentTarget.src = "/venues/sport-center.webp";
+                        e.currentTarget.src = "/venues/GORSportCenter.jpeg";
                       }}
                     />
                     <span className="absolute top-2 left-2 text-[10px] font-bold text-white bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded">

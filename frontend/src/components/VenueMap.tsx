@@ -76,7 +76,7 @@ export default function VenueMap({
                   alt={venue.name}
                   style={{ width: "100%", height: 105, objectFit: "cover", borderRadius: 6, marginBottom: 8 }}
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = "/venues/sport-center.webp";
+                    (e.currentTarget as HTMLImageElement).src = "/venues/GORSportCenter.jpeg";
                   }}
                 />
                 <strong style={{ fontSize: 13, display: "block", marginBottom: 2 }}>{venue.name}</strong>

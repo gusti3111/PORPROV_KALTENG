@@ -26,6 +26,8 @@ const venuePhotoMap: Record<string, string> = {
   "kiyai gede": "/venues/kotawaringin-lama.jpg",
   "kotawaringin lama": "/venues/kotawaringin-lama.jpg",
   "antakusuma": "/venues/kotawaringin-lama.jpg",
+  "sega": "/venues/kampung-sega.jpeg",
+  "lintasan": "/venues/lintasanAtletik.jpeg",
 };
 
 export function getVenuePhotoUrl(venueName?: string): string {
