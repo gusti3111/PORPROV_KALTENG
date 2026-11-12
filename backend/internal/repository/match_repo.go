@@ -421,25 +421,41 @@ func (r *MatchRepository) UpdateMatchWithWinner(
 				break
 			}
 		}
-	} else if len(participants) >= 2 && participants[0].hasNum && participants[1].hasNum {
-		if participants[0].numVal == participants[1].numVal {
-			isDraw = true
-		} else if lowerIsBetter {
-			if participants[0].numVal < participants[1].numVal {
-				winnerContingentID = participants[0].contingentID
-				loserContingentID = participants[1].contingentID
-			} else {
-				winnerContingentID = participants[1].contingentID
-				loserContingentID = participants[0].contingentID
+	} else if len(participants) >= 2 {
+		numericCount := 0
+		bestIdx := -1
+		tieAtTop := false
+		for i, p := range participants {
+			if !p.hasNum {
+				continue
 			}
-		} else {
-			if participants[0].numVal > participants[1].numVal {
-				winnerContingentID = participants[0].contingentID
-				loserContingentID = participants[1].contingentID
-			} else {
-				winnerContingentID = participants[1].contingentID
-				loserContingentID = participants[0].contingentID
+			numericCount++
+			if bestIdx == -1 {
+				bestIdx = i
+				continue
 			}
+			bestVal := participants[bestIdx].numVal
+			if p.numVal == bestVal {
+				tieAtTop = true
+			} else if (lowerIsBetter && p.numVal < bestVal) || (!lowerIsBetter && p.numVal > bestVal) {
+				bestIdx = i
+				tieAtTop = false
+			}
+		}
+		if numericCount >= 2 {
+			if tieAtTop {
+				isDraw = true
+			} else if bestIdx >= 0 {
+				winnerContingentID = participants[bestIdx].contingentID
+				for i, p := range participants {
+					if i != bestIdx {
+						loserContingentID = p.contingentID
+						break
+					}
+				}
+			}
+		} else if numericCount == 1 && bestIdx >= 0 {
+			winnerContingentID = participants[bestIdx].contingentID
 		}
 	} else if len(participants) == 1 && participants[0].hasNum {
 		winnerContingentID = participants[0].contingentID
@@ -556,13 +572,18 @@ func (r *MatchRepository) UpdateMatchParticipants(ctx context.Context, matchID s
 	if r.db == nil || r.db.Pool == nil {
 		return ErrDatabaseUnavailable
 	}
-	if len(contingentIDs) != 2 ||
-		contingentIDs[0] < 1 || contingentIDs[0] > 2147483647 ||
-		contingentIDs[1] < 1 || contingentIDs[1] > 2147483647 ||
-		contingentIDs[0] == contingentIDs[1] {
+	if len(contingentIDs) < 2 {
 		return ErrInvalidContingents
 	}
-	contingentIDs32 := []int32{int32(contingentIDs[0]), int32(contingentIDs[1])}
+	seen := make(map[int]bool, len(contingentIDs))
+	contingentIDs32 := make([]int32, 0, len(contingentIDs))
+	for _, cid := range contingentIDs {
+		if cid < 1 || cid > 2147483647 || seen[cid] {
+			return ErrInvalidContingents
+		}
+		seen[cid] = true
+		contingentIDs32 = append(contingentIDs32, int32(cid))
+	}
 
 	tx, err := r.db.Pool.Begin(ctx)
 	if err != nil {
@@ -662,7 +683,7 @@ func (r *MatchRepository) UpdateMatchParticipants(ctx context.Context, matchID s
 		}
 	}
 
-	if sportID > 0 {
+	if sportID > 0 && len(contingentIDs) == 2 {
 		syncScheduledMatchToTournamentTx(ctx, tx, sportID, roundName, title, contingentIDs[0], contingentIDs[1])
 	}
 

@@ -18,6 +18,7 @@ import AdminNav from "../../components/AdminNav";
 import {
   ArrowLeft,
   CheckCircle2,
+  Plus,
   Save,
   Trash2,
   Trophy,
@@ -28,8 +29,8 @@ import type { ScheduleMatch } from "../../api/types";
 
 interface ScoreFormState {
   status: string;
-  scores: [string, string];
-  contingent_ids: [number, number];
+  scores: string[];
+  contingent_ids: number[];
   winner_contingent_id: number;
 }
 
@@ -71,13 +72,18 @@ export default function HasilPage() {
   const openScoreForm = (match: ScheduleMatch) => {
     setFeedbackMsg("");
     setSelectedMatch(match);
-    const p0 = match.participants[0];
-    const p1 = match.participants[1];
-    const winner = match.participants.find((p) => p.is_winner);
+    const parts = match.participants || [];
+    const winner = parts.find((p) => p.is_winner);
     setForm({
       status: "FINISHED",
-      scores: [p0?.score || "", p1?.score || ""],
-      contingent_ids: [p0?.contingent_id || 0, p1?.contingent_id || 0],
+      scores:
+        parts.length >= 2
+          ? parts.map((p) => p.score || "")
+          : [parts[0]?.score || "", parts[1]?.score || ""],
+      contingent_ids:
+        parts.length >= 2
+          ? parts.map((p) => p.contingent_id || 0)
+          : [parts[0]?.contingent_id || 0, parts[1]?.contingent_id || 0],
       winner_contingent_id: winner?.contingent_id || 0,
     });
     setShowScoreForm(true);
@@ -90,22 +96,30 @@ export default function HasilPage() {
 
   const handleSave = async () => {
     if (!selectedMatch) return;
+    const filledPairs = form.contingent_ids
+      .map((cid, idx) => ({ cid, score: (form.scores[idx] ?? "").trim() }))
+      .filter((item) => item.cid > 0);
+    const uniqueIds = new Set(filledPairs.map((item) => item.cid));
+    if (filledPairs.length < 2 || uniqueIds.size !== filledPairs.length) {
+      alert("Pilih minimal 2 kontingen yang berbeda (tidak boleh ada kontingen ganda).");
+      return;
+    }
+
+    const nextContingentIds = filledPairs.map((item) => item.cid);
+    const nextScores = filledPairs.map((item) => item.score);
+    const origContingentIds = (selectedMatch.participants || []).map((p) => p.contingent_id);
+    const contingentsChanged =
+      origContingentIds.length !== nextContingentIds.length ||
+      origContingentIds.some((cid, idx) => cid !== nextContingentIds[idx]);
+
     try {
-      if (
-        form.contingent_ids[0] > 0 &&
-        form.contingent_ids[1] > 0 &&
-        form.contingent_ids[0] !== form.contingent_ids[1]
-      ) {
-        const orig0 = selectedMatch.participants[0]?.contingent_id || 0;
-        const orig1 = selectedMatch.participants[1]?.contingent_id || 0;
-        if (orig0 !== form.contingent_ids[0] || orig1 !== form.contingent_ids[1]) {
-          await updateMatchContingents(selectedMatch.id, form.contingent_ids);
-        }
+      if (contingentsChanged) {
+        await updateMatchContingents(selectedMatch.id, nextContingentIds);
       }
 
       await updateMatch(selectedMatch.id, {
         status: form.status,
-        scores: [form.scores[0].trim(), form.scores[1].trim()],
+        scores: nextScores,
         winner_contingent_id: form.winner_contingent_id,
       });
 
@@ -136,14 +150,10 @@ export default function HasilPage() {
     CANCELLED: "Dibatalkan",
   };
 
-  const cont0Name =
-    contingents.find((c) => c.id === form.contingent_ids[0])?.name ||
-    selectedMatch?.participants[0]?.contingent_name ||
-    "Kontingen 1";
-  const cont1Name =
-    contingents.find((c) => c.id === form.contingent_ids[1])?.name ||
-    selectedMatch?.participants[1]?.contingent_name ||
-    "Kontingen 2";
+  const getContingentName = (cid: number, idx: number) =>
+    contingents.find((c) => c.id === cid)?.name ||
+    selectedMatch?.participants[idx]?.contingent_name ||
+    `Kontingen ${idx + 1}`;
 
   return (
     <>
@@ -199,89 +209,91 @@ export default function HasilPage() {
 
             <div className="grid gap-4 mb-6 border-y py-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                {/* Participant 1 */}
-                <div className="rounded-lg border p-4 space-y-3 bg-muted/10">
-                  <Label className="font-semibold">Kontingen 1 (Tim Rumah)</Label>
-                  <Select
-                    value={
-                      form.contingent_ids[0] ? String(form.contingent_ids[0]) : ""
-                    }
-                    onValueChange={(v) =>
-                      setForm({
-                        ...form,
-                        contingent_ids: [Number(v), form.contingent_ids[1]],
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih Kontingen 1" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {contingents.map((c) => (
-                        <SelectItem key={c.id} value={String(c.id)}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="flex items-center justify-between gap-3">
-                    <Label>Skor / Catatan Waktu:</Label>
-                    <Input
-                      type="text"
-                      placeholder="Contoh: 2 atau 21-18"
-                      className="w-40 text-center font-bold text-base"
-                      value={form.scores[0]}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          scores: [e.target.value, form.scores[1]],
-                        })
-                      }
-                    />
+                {form.contingent_ids.map((cid, idx) => (
+                  <div key={idx} className="rounded-lg border p-4 space-y-3 bg-muted/10">
+                    <div className="flex items-center justify-between gap-2">
+                      <Label className="font-semibold">
+                        Kontingen {idx + 1}
+                        {form.contingent_ids.length === 2
+                          ? idx === 0
+                            ? " (Tim Rumah)"
+                            : " (Tim Lawan)"
+                          : ""}
+                      </Label>
+                      {form.contingent_ids.length > 2 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-destructive hover:text-destructive"
+                          onClick={() =>
+                            setForm({
+                              ...form,
+                              contingent_ids: form.contingent_ids.filter((_, i) => i !== idx),
+                              scores: form.scores.filter((_, i) => i !== idx),
+                              winner_contingent_id:
+                                form.winner_contingent_id === cid ? 0 : form.winner_contingent_id,
+                            })
+                          }
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                    <Select
+                      value={cid ? String(cid) : ""}
+                      onValueChange={(v) => {
+                        const nextIds = [...form.contingent_ids];
+                        nextIds[idx] = Number(v);
+                        setForm({ ...form, contingent_ids: nextIds });
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={`Pilih Kontingen ${idx + 1}`} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {contingents.map((c) => (
+                          <SelectItem key={c.id} value={String(c.id)}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="flex items-center justify-between gap-3">
+                      <Label>Skor / Catatan Waktu:</Label>
+                      <Input
+                        type="text"
+                        placeholder={idx === 0 ? "Contoh: 2 atau 21-18" : "Contoh: 1 atau 18-21"}
+                        className="w-40 text-center font-bold text-base"
+                        value={form.scores[idx] ?? ""}
+                        onChange={(e) => {
+                          const nextScores = [...form.scores];
+                          nextScores[idx] = e.target.value;
+                          setForm({ ...form, scores: nextScores });
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
+                ))}
+              </div>
 
-                {/* Participant 2 */}
-                <div className="rounded-lg border p-4 space-y-3 bg-muted/10">
-                  <Label className="font-semibold">Kontingen 2 (Tim Lawan)</Label>
-                  <Select
-                    value={
-                      form.contingent_ids[1] ? String(form.contingent_ids[1]) : ""
-                    }
-                    onValueChange={(v) =>
-                      setForm({
-                        ...form,
-                        contingent_ids: [form.contingent_ids[0], Number(v)],
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih Kontingen 2" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {contingents.map((c) => (
-                        <SelectItem key={c.id} value={String(c.id)}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="flex items-center justify-between gap-3">
-                    <Label>Skor / Catatan Waktu:</Label>
-                    <Input
-                      type="text"
-                      placeholder="Contoh: 1 atau 18-21"
-                      className="w-40 text-center font-bold text-base"
-                      value={form.scores[1]}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          scores: [form.scores[0], e.target.value],
-                        })
-                      }
-                    />
-                  </div>
-                </div>
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      contingent_ids: [...form.contingent_ids, 0],
+                      scores: [...form.scores, ""],
+                    })
+                  }
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Tambah Kontingen
+                </Button>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2 pt-2">
@@ -300,15 +312,13 @@ export default function HasilPage() {
                       <SelectItem value="0">
                         Otomatis dari Skor (atau Seri jika skor sama)
                       </SelectItem>
-                      {form.contingent_ids[0] > 0 && (
-                        <SelectItem value={String(form.contingent_ids[0])}>
-                          🏆 Pemenang: {cont0Name}
-                        </SelectItem>
-                      )}
-                      {form.contingent_ids[1] > 0 && (
-                        <SelectItem value={String(form.contingent_ids[1])}>
-                          🏆 Pemenang: {cont1Name}
-                        </SelectItem>
+                      {form.contingent_ids.map(
+                        (cid, idx) =>
+                          cid > 0 && (
+                            <SelectItem key={`${cid}-${idx}`} value={String(cid)}>
+                              🏆 Pemenang: {getContingentName(cid, idx)}
+                            </SelectItem>
+                          ),
                       )}
                     </SelectContent>
                   </Select>
@@ -433,8 +443,7 @@ export default function HasilPage() {
                 </thead>
                 <tbody>
                   {filteredMatches.map((match: ScheduleMatch) => {
-                    const home = match.participants?.[0];
-                    const away = match.participants?.[1];
+                    const parts = match.participants || [];
                     return (
                       <tr key={match.id} className="border-b hover:bg-muted/20">
                         <td className="p-2 font-medium whitespace-nowrap">
@@ -451,34 +460,23 @@ export default function HasilPage() {
                           <Badge variant="outline">{match.round_name || "Penyisihan"}</Badge>
                         </td>
                         <td className="p-2">
-                          {home || away ? (
+                          {parts.length > 0 ? (
                             <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <span className={home?.is_winner ? "font-bold text-emerald-700" : ""}>
-                                  {home?.contingent_name || "TBA"}
-                                </span>
-                                <Badge variant="secondary" className="text-xs">
-                                  {home?.score || "–"}
-                                </Badge>
-                                {home?.is_winner && (
-                                  <Badge className="bg-emerald-600 text-white text-[10px] px-1.5 py-0">
-                                    Pemenang
+                              {parts.map((p, idx) => (
+                                <div key={`${p.contingent_id}-${idx}`} className="flex items-center gap-2">
+                                  <span className={p.is_winner ? "font-bold text-emerald-700" : ""}>
+                                    {p.contingent_name || "TBA"}
+                                  </span>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {p.score || "–"}
                                   </Badge>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className={away?.is_winner ? "font-bold text-emerald-700" : ""}>
-                                  {away?.contingent_name || "TBA"}
-                                </span>
-                                <Badge variant="secondary" className="text-xs">
-                                  {away?.score || "–"}
-                                </Badge>
-                                {away?.is_winner && (
-                                  <Badge className="bg-emerald-600 text-white text-[10px] px-1.5 py-0">
-                                    Pemenang
-                                  </Badge>
-                                )}
-                              </div>
+                                  {p.is_winner && (
+                                    <Badge className="bg-emerald-600 text-white text-[10px] px-1.5 py-0">
+                                      Pemenang
+                                    </Badge>
+                                  )}
+                                </div>
+                              ))}
                             </div>
                           ) : (
                             <span className="text-xs text-muted-foreground">Belum diatur</span>

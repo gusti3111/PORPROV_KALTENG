@@ -43,8 +43,8 @@ interface MatchFormState {
   end_date: string;
   end_time: string;
   status: string;
-  contingent_ids: [number, number];
-  scores: [string, string];
+  contingent_ids: number[];
+  scores: string[];
   winner_contingent_id: number;
 }
 
@@ -223,14 +223,20 @@ export default function JadwalPage() {
       end_date: startDateTime.date,
       end_time: startDateTime.time,
       status: match.status,
-      contingent_ids: [
-        match.participants[0]?.contingent_id ?? 0,
-        match.participants[1]?.contingent_id ?? 0,
-      ],
-      scores: [
-        match.participants[0]?.score ?? "",
-        match.participants[1]?.score ?? "",
-      ],
+      contingent_ids:
+        match.participants.length >= 2
+          ? match.participants.map((p) => p.contingent_id)
+          : [
+              match.participants[0]?.contingent_id ?? 0,
+              match.participants[1]?.contingent_id ?? 0,
+            ],
+      scores:
+        match.participants.length >= 2
+          ? match.participants.map((p) => p.score ?? "")
+          : [
+              match.participants[0]?.score ?? "",
+              match.participants[1]?.score ?? "",
+            ],
       winner_contingent_id: winnerPart?.contingent_id ?? 0,
     };
     setUseCustomEvent(false);
@@ -286,19 +292,25 @@ export default function JadwalPage() {
       alert("Silakan pilih tanggal mulai dan selesai.");
       return;
     }
-    if (
-      !form.contingent_ids[0] ||
-      !form.contingent_ids[1] ||
-      form.contingent_ids[0] === form.contingent_ids[1]
-    ) {
-      alert("Pilih dua kontingen berbeda yang bertanding.");
+    const filledPairs = form.contingent_ids
+      .map((cid, idx) => ({ cid, score: form.scores[idx] ?? "" }))
+      .filter((item) => item.cid > 0);
+    const uniqueIds = new Set(filledPairs.map((item) => item.cid));
+    if (filledPairs.length < 2 || uniqueIds.size !== filledPairs.length) {
+      alert("Pilih minimal 2 kontingen yang berbeda (tidak boleh ada kontingen ganda).");
       return;
     }
 
-    const cont1 = contingents.find((c) => c.id === form.contingent_ids[0])?.name || "Kontingen 1";
-    const cont2 = contingents.find((c) => c.id === form.contingent_ids[1])?.name || "Kontingen 2";
-    const computedTitle =
-      form.title.trim() || `${cont1} vs ${cont2} (${form.round_name})`;
+    const selectedContingentIds = filledPairs.map((item) => item.cid);
+    const selectedScores = filledPairs.map((item) => item.score);
+    const selectedNames = selectedContingentIds.map(
+      (cid, idx) => contingents.find((c) => c.id === cid)?.name || `Kontingen ${idx + 1}`,
+    );
+    const defaultTitle =
+      selectedNames.length === 2
+        ? `${selectedNames[0]} vs ${selectedNames[1]} (${form.round_name})`
+        : `${selectedNames.slice(0, 2).join(", ")} +${selectedNames.length - 2} Kontingen (${form.round_name})`;
+    const computedTitle = form.title.trim() || defaultTitle;
 
     try {
       const payload = {
@@ -312,8 +324,8 @@ export default function JadwalPage() {
         start_time: toApiDateTime(form.start_date, form.start_time),
         end_time: toApiDateTime(form.end_date, form.end_time),
         status: form.status,
-        contingent_ids: form.contingent_ids,
-        scores: form.scores,
+        contingent_ids: selectedContingentIds,
+        scores: selectedScores,
         winner_contingent_id: form.winner_contingent_id,
       };
       const url = editing?.match_id
@@ -331,8 +343,7 @@ export default function JadwalPage() {
 
       if (editing?.match_id) {
         const hasScores =
-          form.scores[0].trim() !== "" ||
-          form.scores[1].trim() !== "" ||
+          selectedScores.some((s) => s.trim() !== "") ||
           form.status === "FINISHED";
         if (hasScores) {
           await fetch(`${API_BASE_URL}/matches/${editing.match_id}/result`, {
@@ -340,7 +351,7 @@ export default function JadwalPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               status: form.status,
-              scores: form.scores,
+              scores: selectedScores,
               winner_contingent_id: form.winner_contingent_id,
             }),
           });
@@ -609,109 +620,99 @@ export default function JadwalPage() {
                 )}
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="grid gap-2 rounded-lg border bg-background p-3">
-                    <Label htmlFor="match-contingent-one" className="font-semibold">
-                      Kontingen 1 (Tim Rumah)
-                    </Label>
-                    <div className="flex gap-2">
-                      <div className="flex-1">
-                        <Select
-                          value={
-                            form.contingent_ids[0]
-                              ? String(form.contingent_ids[0])
-                              : ""
-                          }
-                          onValueChange={(value) =>
-                            setForm({
-                              ...form,
-                              contingent_ids: [
-                                Number(value),
-                                form.contingent_ids[1],
-                              ],
-                            })
-                          }
-                        >
-                          <SelectTrigger id="match-contingent-one">
-                            <SelectValue placeholder="Pilih kontingen pertama" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {contingents.map((contingent) => (
-                              <SelectItem
-                                key={contingent.id}
-                                value={String(contingent.id)}
-                              >
-                                {contingent.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                  {form.contingent_ids.map((cid, idx) => (
+                    <div key={idx} className="grid gap-2 rounded-lg border bg-background p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <Label htmlFor={`match-contingent-${idx}`} className="font-semibold">
+                          Kontingen {idx + 1}
+                          {form.contingent_ids.length === 2
+                            ? idx === 0
+                              ? " (Tim Rumah)"
+                              : " (Tim Lawan)"
+                            : ""}
+                        </Label>
+                        {form.contingent_ids.length > 2 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-destructive hover:text-destructive"
+                            onClick={() =>
+                              setForm({
+                                ...form,
+                                contingent_ids: form.contingent_ids.filter((_, i) => i !== idx),
+                                scores: form.scores.filter((_, i) => i !== idx),
+                              })
+                            }
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                       </div>
-                      <Input
-                        type="text"
-                        placeholder={scoringRule.scorePlaceholderHome}
-                        className="w-36 text-center font-bold"
-                        value={form.scores[0]}
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            scores: [e.target.value, form.scores[1]],
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid gap-2 rounded-lg border bg-background p-3">
-                    <Label htmlFor="match-contingent-two" className="font-semibold">
-                      Kontingen 2 (Tim Lawan)
-                    </Label>
-                    <div className="flex gap-2">
-                      <div className="flex-1">
-                        <Select
-                          value={
-                            form.contingent_ids[1]
-                              ? String(form.contingent_ids[1])
-                              : ""
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <Select
+                            value={cid ? String(cid) : ""}
+                            onValueChange={(value) => {
+                              const nextIds = [...form.contingent_ids];
+                              nextIds[idx] = Number(value);
+                              setForm({ ...form, contingent_ids: nextIds });
+                            }}
+                          >
+                            <SelectTrigger id={`match-contingent-${idx}`}>
+                              <SelectValue placeholder={`Pilih kontingen ${idx + 1}`} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {contingents.map((contingent) => (
+                                <SelectItem
+                                  key={contingent.id}
+                                  value={String(contingent.id)}
+                                >
+                                  {contingent.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Input
+                          type="text"
+                          placeholder={
+                            idx === 0
+                              ? scoringRule.scorePlaceholderHome
+                              : scoringRule.scorePlaceholderAway
                           }
-                          onValueChange={(value) =>
-                            setForm({
-                              ...form,
-                              contingent_ids: [
-                                form.contingent_ids[0],
-                                Number(value),
-                              ],
-                            })
-                          }
-                        >
-                          <SelectTrigger id="match-contingent-two">
-                            <SelectValue placeholder="Pilih kontingen kedua" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {contingents.map((contingent) => (
-                              <SelectItem
-                                key={contingent.id}
-                                value={String(contingent.id)}
-                              >
-                                {contingent.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          className="w-36 text-center font-bold"
+                          value={form.scores[idx] ?? ""}
+                          onChange={(e) => {
+                            const nextScores = [...form.scores];
+                            nextScores[idx] = e.target.value;
+                            setForm({ ...form, scores: nextScores });
+                          }}
+                        />
                       </div>
-                      <Input
-                        type="text"
-                        placeholder={scoringRule.scorePlaceholderAway}
-                        className="w-36 text-center font-bold"
-                        value={form.scores[1]}
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            scores: [form.scores[0], e.target.value],
-                          })
-                        }
-                      />
                     </div>
-                  </div>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <p className="text-xs text-muted-foreground">
+                    Bisa lebih dari 2 kontingen untuk nomor perlombaan / seri / heat (mis. Atletik, Renang, Balap Sepeda).
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 shrink-0"
+                    onClick={() =>
+                      setForm({
+                        ...form,
+                        contingent_ids: [...form.contingent_ids, 0],
+                        scores: [...form.scores, ""],
+                      })
+                    }
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Tambah Kontingen
+                  </Button>
                 </div>
               </div>
 
@@ -931,8 +932,7 @@ export default function JadwalPage() {
                 </thead>
                 <tbody>
                   {filteredMatches.map((match) => {
-                    const home = match.participants?.[0];
-                    const away = match.participants?.[1];
+                    const parts = match.participants || [];
                     return (
                       <tr key={match.id} className="border-b hover:bg-muted/20">
                         <td className="p-2 font-medium whitespace-nowrap">
@@ -949,18 +949,19 @@ export default function JadwalPage() {
                           <Badge variant="outline">{match.round_name}</Badge>
                         </td>
                         <td className="p-2">
-                          {home || away ? (
+                          {parts.length > 0 ? (
                             <div className="text-xs space-y-0.5">
-                              <div className={home?.is_winner ? "font-bold text-emerald-700" : ""}>
-                                {home?.contingent_name || "TBA"}{" "}
-                                {home?.score ? `(${home.score})` : ""}
-                                {home?.is_winner ? " 🏆" : ""}
-                              </div>
-                              <div className={away?.is_winner ? "font-bold text-emerald-700" : ""}>
-                                vs {away?.contingent_name || "TBA"}{" "}
-                                {away?.score ? `(${away.score})` : ""}
-                                {away?.is_winner ? " 🏆" : ""}
-                              </div>
+                              {parts.map((p, idx) => (
+                                <div
+                                  key={`${p.contingent_id}-${idx}`}
+                                  className={p.is_winner ? "font-bold text-emerald-700" : ""}
+                                >
+                                  {parts.length === 2 && idx === 1 ? "vs " : ""}
+                                  {p.contingent_name || "TBA"}{" "}
+                                  {p.score ? `(${p.score})` : ""}
+                                  {p.is_winner ? " 🏆" : ""}
+                                </div>
+                              ))}
                             </div>
                           ) : (
                             <span className="text-xs text-muted-foreground">Belum diatur</span>
