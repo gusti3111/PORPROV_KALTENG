@@ -1757,9 +1757,16 @@ export default function Newsview() {
 
                             {/* Theme Pill Overlay & Foto Asli Pill */}
                             <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
-                              <span className="rounded-full bg-[#102b49]/90 px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-white uppercase backdrop-blur-xs">
-                                {item.culinaryTheme}
-                              </span>
+                              {item.image.startsWith("/kuliner-real/") ? (
+                                <span className="rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-white shadow-xs backdrop-blur-xs flex items-center gap-1">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  <span>Foto Nyata Tempat</span>
+                                </span>
+                              ) : (
+                                <span className="rounded-full bg-[#102b49]/90 px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-white uppercase backdrop-blur-xs">
+                                  {item.culinaryTheme}
+                                </span>
+                              )}
                               <a
                                 href={item.google_maps_url}
                                 target="_blank"
@@ -1768,7 +1775,7 @@ export default function Newsview() {
                                 className="inline-flex items-center gap-1 rounded-full bg-slate-950/80 hover:bg-slate-950 px-2 py-1 text-[10px] font-bold text-amber-300 backdrop-blur-xs transition-colors shadow-xs"
                               >
                                 <Camera className="h-3 w-3 text-amber-300" />
-                                <span>Foto Asli ↗</span>
+                                <span>Maps ↗</span>
                               </a>
                             </div>
 
