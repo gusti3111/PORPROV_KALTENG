@@ -1567,25 +1567,25 @@ export default function Newsview() {
                     </div>
 
                     <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
-                      Jelajahi Cita Rasa & Tempat Makan Kotawaringin Barat
+                      Direktori 31 Cafe &amp; Tempat Nongkrong Pangkalan Bun
                     </h2>
 
                     <p className="text-xs sm:text-sm text-sky-100/90 leading-relaxed">
-                      Menampilkan <strong>352 tempat makan</strong> hasil penelusuran publik Google Maps di seluruh kecamatan Kotawaringin Barat — mulai dari kopi liberika & kafe modern, restoran seafood pesisir Kumai, warung makan tradisional, masakan Padang, hingga bakery & es krim.
+                      Menampilkan <strong>{kobarUMKMData.length} kafe, coffee roastery, kopitiam, dan bakery pilihan</strong> di Pangkalan Bun (Kotawaringin Barat) lengkap dengan foto asli tempat, keunggulan menu, jam operasional, harga, Instagram resmi, dan info reservasi.
                     </p>
 
                     <div className="flex flex-wrap items-center gap-4 pt-2 text-xs font-semibold text-slate-200">
                       <div className="flex items-center gap-1.5">
                         <Coffee className="h-4 w-4 text-amber-300" />
-                        <span>171 Kafe & Kedai Kopi</span>
+                        <span>{kobarUMKMData.length} Kafe Terkurasi</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Store className="h-4 w-4 text-emerald-300" />
-                        <span>122 Restoran & Rumah Makan</span>
+                        <Camera className="h-4 w-4 text-emerald-300" />
+                        <span>{kobarUMKMData.filter((x) => x.image.startsWith("/kuliner-real/")).length} Foto Asli Lokasi</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Tag className="h-4 w-4 text-sky-300" />
-                        <span>31 Warung & Dessert</span>
+                        <span>Jam Buka &amp; Reservasi Lengkap</span>
                       </div>
                     </div>
                   </div>
@@ -1766,7 +1766,7 @@ export default function Newsview() {
                           : "text-emerald-600"
                           }`}
                       />
-                      Foto Nyata Tempat (2)
+                      Foto Nyata Tempat ({kobarUMKMData.filter((x) => x.image.startsWith("/kuliner-real/")).length})
                     </button>
 
                     {/* Reset All Filters */}
@@ -1818,19 +1818,27 @@ export default function Newsview() {
                         <div>
                           {/* Card Food Image Header */}
                           <div className="relative h-48 w-full overflow-hidden bg-slate-100 group">
-                            <img
-                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              src={item.image}
-                              alt={item.nama}
-                              loading="lazy"
-                            />
+                            {item.image ? (
+                              <img
+                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                src={item.image}
+                                alt={item.nama}
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[#102b49] to-[#174a72] text-white/80 p-4 text-center">
+                                <Coffee className="h-9 w-9 text-amber-300 mb-2" />
+                                <span className="text-xs font-bold">{item.nama}</span>
+                                <span className="text-[10px] text-sky-200/80 mt-0.5">Lihat galeri di Google Maps</span>
+                              </div>
+                            )}
 
                             {/* Theme Pill Overlay & Foto Asli Pill */}
                             <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
                               {item.image.startsWith("/kuliner-real/") ? (
                                 <span className="rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-white shadow-xs backdrop-blur-xs flex items-center gap-1">
                                   <CheckCircle2 className="h-3 w-3" />
-                                  <span>Foto Nyata Tempat</span>
+                                  <span>Foto Asli</span>
                                 </span>
                               ) : (
                                 <span className="rounded-full bg-[#102b49]/90 px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-white uppercase backdrop-blur-xs">
@@ -1876,14 +1884,25 @@ export default function Newsview() {
                               {item.nama}
                             </h3>
 
-                            <p className="mt-1 text-xs font-bold text-[#174a72]">
-                              Kategori: {item.kategori_google}
-                            </p>
+                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-bold text-[#174a72]">
+                              <span>{item.kategori_google}</span>
+                              {item.instagram && (
+                                <span className="text-[11px] font-semibold text-pink-600">
+                                  • {item.instagram}
+                                </span>
+                              )}
+                            </div>
+
+                            {item.deskripsi && (
+                              <p className="mt-2 text-xs text-slate-600 leading-relaxed line-clamp-3">
+                                {item.deskripsi}
+                              </p>
+                            )}
 
                             {/* Signature Dish Pill */}
                             <div className="mt-2.5 rounded-lg border border-amber-200/80 bg-amber-50/70 p-2 text-xs">
                               <span className="font-extrabold text-amber-900 text-[11px] block">
-                                🍽️ Menu & Sajian:
+                                🍽️ Keunggulan &amp; Menu:
                               </span>
                               <p className="text-[11px] font-medium text-amber-950/80 mt-0.5 leading-snug">
                                 {item.signatureDish}
