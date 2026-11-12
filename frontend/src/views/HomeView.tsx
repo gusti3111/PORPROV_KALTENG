@@ -46,14 +46,14 @@ const featuredStadiums = [
     venue: "Stadion Sepak Bola Sport Center",
     city: "Madurejo, Kotawaringin Barat",
     cabor: "Cabang Olahraga Sepak Bola",
-    image: "/venues/sport-center.webp",
+    image: "/venues/StadionSportCenter.jpeg",
   },
   {
     category: "GELANGGANG OLAHRAGA",
     venue: "GOR Sport Center Ratu Alamsyah",
     city: "Madurejo, Kotawaringin Barat",
     cabor: "Bola Voli Indoor & Futsal",
-    image: "/venues/sport-center.webp",
+    image: "/venues/GORSportCenter.jpeg",
   },
   {
     category: "GELANGGANG OLAHRAGA",
@@ -82,6 +82,27 @@ const featuredStadiums = [
     city: "Pasir Panjang, Arut Selatan",
     cabor: "Sumpitan, Balogo & Cabor Tradisional",
     image: "/venues/pasir-panjang.jpg",
+  },
+  {
+    category: "STADION & FASILITAS OLAHRAGA",
+    venue: "Lapangan Tenis Pasir Panjang",
+    city: "Pasir Panjang, Arut Selatan",
+    cabor: "Cabang Olahraga Tenis Lapangan",
+    image: "/venues/LapanganTennisPasirPanjang.webp",
+  },
+  {
+    category: "AULA & GEDUNG PERTEMUAN",
+    venue: "Aula Disdikbud",
+    city: "Pasir Panjang, Arut Selatan",
+    cabor: "Cabang Olahraga Tenis Meja",
+    image: "/venues/aulaDISDIKBUD.webp",
+  },
+  {
+    category: "ARENA INDOOR & KOMERSIAL",
+    venue: "Juvenza Futsal",
+    city: "Madurejo, Pangkalan Bun",
+    cabor: "Cabang Olahraga Tinju",
+    image: "/venues/juvenza.webp",
   },
   {
     category: "ARENA SEPAK BOLA MINI",
@@ -116,7 +137,7 @@ const featuredStadiums = [
     venue: "Kolam Renang Isen Mulang",
     city: "Jekan Raya, Palangka Raya",
     cabor: "Cabang Olahraga Akuatik / Renang",
-    image: "/venues/kolamRenangIsenMulang.jpeg",
+    image: "/venues/kolamRenang.webp",
   },
 ];
 
@@ -710,7 +731,7 @@ export default function HomeView() {
           <div className="home-stadium-heading">
             <div>
               <p className="home-stadium-kicker"><span>05</span> HOTEL &amp; PENGINAPAN</p>
-              <h2 id="home-hotel-title">Akomodasi Tamu &amp; Atlet</h2>
+              <h2 id="home-hotel-title">Akomodasi Penginapan</h2>
               <p className="home-stadium-description">Pilihan hotel berbintang, wisma, dan penginapan nyaman strategis di Pangkalan Bun.</p>
             </div>
             <div className="flex items-center gap-3">
