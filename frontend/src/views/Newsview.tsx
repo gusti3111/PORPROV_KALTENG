@@ -1299,6 +1299,37 @@ export default function Newsview() {
             )
           ) : isHotelTab ? (
             <div className="space-y-6" aria-live="polite">
+              {/* Hero Banner: Akomodasi & Penginapan Kotawaringin Barat */}
+              <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-r from-[#0d2238] via-[#102b49] to-[#174a72] text-white shadow-lg">
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 p-6 sm:p-8">
+                  <div className="max-w-2xl space-y-3">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-amber-400/20 border border-amber-400/30 px-3.5 py-1 text-xs font-bold text-amber-300">
+                      <MapPin className="h-3.5 w-3.5" />
+                      <span>AKOMODASI &amp; PENGINAPAN RESMI • PORPROV XIII</span>
+                    </div>
+
+                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+                      Istirahat Nyaman di Jantung Pangkalan Bun
+                    </h2>
+
+                    <p className="text-xs sm:text-sm text-sky-100/90 leading-relaxed">
+                      Temukan <strong>{visibleHotels.length} rekomendasi hotel, resort, dan penginapan strategis</strong> di sekitar arena pertandingan PORPROV XIII Kalimantan Tengah 2026 — lengkap dengan estimasi tarif, fasilitas, dan akses reservasi langsung.
+                    </p>
+                  </div>
+
+                  <div className="w-full md:w-auto shrink-0 flex items-center justify-center">
+                    <div className="relative flex flex-col items-center justify-center border-none shadow-none">
+                      <img
+                        src="/monyet_tidur.png"
+                        alt="Maskot Monyet Tidur Hotel dan Penginapan"
+                        className="w-auto h-auto max-h-36 sm:max-h-48 md:max-h-56 max-w-[240px] sm:max-w-[300px] md:max-w-xs object-contain drop-shadow-lg transition-transform duration-500 hover:scale-105"
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-xs text-slate-600 shadow-xs">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-[#174a72]" />
