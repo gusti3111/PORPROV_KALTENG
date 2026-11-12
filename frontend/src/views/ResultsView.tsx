@@ -202,7 +202,7 @@ export default function ResultsView() {
           </p>
           <img
             className="results-hero-illustration"
-            src="/hasilBurung.png"
+            src="/keraWak.png"
             alt="Maskot PORPROV menunjukkan medali"
           />
           <Card className="results-total flex-row" aria-label={`${totalMedals} medali`}>
