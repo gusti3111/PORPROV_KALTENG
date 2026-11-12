@@ -1414,7 +1414,6 @@ export default function Newsview() {
                     <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
                       Pesona Alam, Budaya &amp; Cagar Biosfer Dunia
                     </h2>
-
                     <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
                       Jelajahi keindahan bumi Marunting Batu Aji — mulai dari habitat orangutan liar di Taman Nasional Tanjung Puting, pesisir pantai Laut Jawa, cagar budaya Istana Kuning Kesultanan Kutaringin, hingga kearifan rumah adat Betang Dayak Tomun.
                     </p>
@@ -1428,6 +1427,18 @@ export default function Newsview() {
                         <Sparkles className="h-4 w-4 text-amber-300" />
                         <span>Ekowisata &amp; Budaya Lokal</span>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Maskot Pariwisata di sisi kanan */}
+                  <div className="w-full md:w-auto shrink-0 flex items-center justify-center">
+                    <div className="relative flex flex-col items-center justify-center border-none shadow-none">
+                      <img
+                        src="/KeraWis2.png"
+                        alt="Maskot Wisata Kotawaringin Barat"
+                        className="w-auto h-auto max-h-36 sm:max-h-48 md:max-h-56 max-w-[240px] sm:max-w-[300px] md:max-w-xs object-contain drop-shadow-lg transition-transform duration-500 hover:scale-105"
+                        loading="lazy"
+                      />
                     </div>
                   </div>
                 </div>
