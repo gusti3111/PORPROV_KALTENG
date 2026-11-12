@@ -52,7 +52,7 @@ import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { getContingentLogoUrl } from "../utils/contingentLogo";
 
-type NewsCategory = "Berita" | "Sejarah" | "Galeri" | "Tempat Makan dan Nongkrong" | "Hotel dan Penginapan" | "Pariwisata";
+type NewsCategory = "Berita" | "Galeri" | "Tempat Makan dan Nongkrong" | "Hotel dan Penginapan" | "Pariwisata" | "About Us";
 type CategoryFilter = NewsCategory;
 
 type NewsArticle = {
@@ -173,7 +173,7 @@ const articles: NewsArticle[] = [
   },
   {
     id: 2,
-    category: "Sejarah",
+    category: "About Us",
     date: "2026-11-18",
     title: "Sejarah PORPROV XIII Kalimantan Tengah",
     excerpt:
@@ -264,9 +264,9 @@ const categories: CategoryFilter[] = [
   "Tempat Makan dan Nongkrong",
   "Hotel dan Penginapan",
   "Pariwisata",
-  "Sejarah",
   "Galeri",
   "Berita",
+  "About Us",
 ];
 
 type HistoryMilestone = {
@@ -449,7 +449,7 @@ export default function Newsview() {
     if (tabParam === "hotel" || tabParam === "penginapan") return "Hotel dan Penginapan";
     if (tabParam === "wisata" || tabParam === "pariwisata" || tabParam === "tourism") return "Pariwisata";
     if (tabParam === "galeri" || tabParam === "gallery") return "Galeri";
-    if (tabParam === "sejarah" || tabParam === "history" || tabParam === "about") return "Sejarah";
+    if (tabParam === "about" || tabParam === "about-us" || tabParam === "about_us" || tabParam === "sejarah" || tabParam === "history") return "About Us";
     return "Berita";
   });
 
@@ -459,7 +459,7 @@ export default function Newsview() {
     else if (tabParam === "hotel" || tabParam === "penginapan") setSelectedCategory("Hotel dan Penginapan");
     else if (tabParam === "wisata" || tabParam === "pariwisata" || tabParam === "tourism") setSelectedCategory("Pariwisata");
     else if (tabParam === "galeri" || tabParam === "gallery") setSelectedCategory("Galeri");
-    else if (tabParam === "sejarah" || tabParam === "history" || tabParam === "about") setSelectedCategory("Sejarah");
+    else if (tabParam === "about" || tabParam === "about-us" || tabParam === "about_us" || tabParam === "sejarah" || tabParam === "history") setSelectedCategory("About Us");
     else if (tabParam === "berita") setSelectedCategory("Berita");
   }, [searchParams]);
   const [selectedUMKMType, setSelectedUMKMType] =
@@ -509,7 +509,7 @@ export default function Newsview() {
   }, []);
 
   const normalizedQuery = query.trim().toLocaleLowerCase("id");
-  const isSejarahTab = selectedCategory === "Sejarah";
+  const isAboutUsTab = selectedCategory === "About Us";
   const isGalleryTab = selectedCategory === "Galeri";
   const isUMKMTab = selectedCategory === "Tempat Makan dan Nongkrong";
   const isHotelTab = selectedCategory === "Hotel dan Penginapan";
@@ -667,8 +667,8 @@ export default function Newsview() {
 
   const searchPlaceholder = isGalleryTab
     ? "Cari foto galeri..."
-    : isSejarahTab
-      ? "Cari sejarah edisi PORPROV, tuan rumah, atau kontingen daerah..."
+    : isAboutUsTab
+      ? "Cari profil PORPROV, sejarah tuan rumah, atau kontingen daerah..."
       : isUMKMTab
         ? "Cari nama tempat makan, kedai kopi, menu masakan, atau alamat di Kobar..."
         : isHotelTab
@@ -689,8 +689,8 @@ export default function Newsview() {
             <span>
               {isGalleryTab
                 ? "Galeri"
-                : isSejarahTab
-                  ? "Profil & Sejarah"
+                : isAboutUsTab
+                  ? "About Us"
                   : isUMKMTab
                     ? "Tempat Makan & Nongkrong"
                     : isHotelTab
@@ -704,8 +704,8 @@ export default function Newsview() {
             <span aria-hidden="true" />
             {isGalleryTab
               ? "GALERI PORPROV XIII KALIMANTAN TENGAH 2026"
-              : isSejarahTab
-                ? "SEJARAH • PROFIL & PERJALANAN PORPROV KALIMANTAN TENGAH"
+              : isAboutUsTab
+                ? "ABOUT US • PROFIL & SEJARAH PORPROV KALIMANTAN TENGAH"
                 : isUMKMTab
                   ? "DIREKTORI RESMI TEMPAT MAKAN & NONGKRONG KOTAWARINGIN BARAT • PORPROV XIII"
                   : isHotelTab
@@ -719,9 +719,9 @@ export default function Newsview() {
               <>
                 Galeri <span>PORPROV XIII.</span>
               </>
-            ) : isSejarahTab ? (
+            ) : isAboutUsTab ? (
               <>
-                Profil &amp; <span>Sejarah</span>
+                About <span>PORPROV XIII</span>
               </>
             ) : isUMKMTab ? (
               <>
@@ -744,8 +744,8 @@ export default function Newsview() {
           <p className="schedule-description">
             {isGalleryTab
               ? "Lihat momen dan semangat olahraga PORPROV XIII Kalimantan Tengah."
-              : isSejarahTab
-                ? "Mengenal lebih dekat perjalanan sejarah, visi penyelenggaraan, filosofi Isen Mulang, serta profil 14 Kontingen Kabupaten/Kota dalam perhelatan Pekan Olahraga Provinsi XIII Kalimantan Tengah Tahun 2026."
+              : isAboutUsTab
+                ? "Mengenal lebih dekat visi penyelenggaraan, profil organisasi, perjalanan sejarah, filosofi Isen Mulang & Huma Betang, serta profil 14 Kontingen Kabupaten/Kota dalam perhelatan PORPROV XIII Kalimantan Tengah 2026."
                 : isUMKMTab
                   ? `Panduan ${kobarUMKMData.length} tempat makan, kedai kopi, restoran, warung makan, dan street food di Kabupaten Kotawaringin Barat untuk kontingen & penonton PORPROV XIII.`
                   : isHotelTab
@@ -759,7 +759,7 @@ export default function Newsview() {
             src="/keraBerita.png"
             alt="Maskot PORPROV memegang kamera"
           />
-          {!isSejarahTab && (
+          {!isAboutUsTab && (
             <p className="news-demo-note" role="note">
               Jelajahi informasi resmi seputar PORPROV XIII Kalimantan Tengah 2026
             </p>
@@ -777,8 +777,8 @@ export default function Newsview() {
                   ? "Direktori Tempat Makan dan Nongkrong Kotawaringin Barat"
                   : isGalleryTab
                     ? "Galeri foto"
-                    : isSejarahTab
-                      ? "Profil dan sejarah PORPROV Kalimantan Tengah"
+                    : isAboutUsTab
+                      ? "Tentang kami dan sejarah PORPROV Kalimantan Tengah"
                       : "Daftar berita"
           }
         >
@@ -810,7 +810,7 @@ export default function Newsview() {
             </div>
           </div>
 
-          {isSejarahTab ? (
+          {isAboutUsTab ? (
             <div className="space-y-10" aria-live="polite">
               {/* 1. Hero Sejarah / Profil Singkat */}
               <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-[#0e2742] via-[#174a72] to-[#216396] p-6 text-white shadow-lg sm:p-10">
