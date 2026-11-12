@@ -725,7 +725,7 @@ export default function Newsview() {
               </>
             ) : isUMKMTab ? (
               <>
-                Katalog Tempat Makan &amp; Nongkrong <span>Kotawaringin Barat</span>
+                Sentra Kuliner dan Restoran di <span>Kotawaringin Barat</span>
               </>
             ) : isHotelTab ? (
               <>
@@ -1532,17 +1532,14 @@ export default function Newsview() {
                     </div>
                   </div>
 
-                  <div className="w-full md:w-72 shrink-0">
-                    <div className="relative h-44 sm:h-52 w-full overflow-hidden rounded-xl border border-white/20 shadow-md">
+                  <div className="w-full md:w-auto shrink-0 flex items-center justify-center">
+                    <div className="relative flex flex-col items-center justify-center border-none shadow-none">
                       <img
-                        src="/kobar-kuliner-banner.jpg"
-                        alt="Sajian Kuliner Kotawaringin Barat"
-                        className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                        src="/keraMakan.png"
+                        alt="Maskot Kuliner Kotawaringin Barat"
+                        className="w-auto h-auto max-h-36 sm:max-h-48 md:max-h-56 max-w-[240px] sm:max-w-[300px] md:max-w-xs object-contain drop-shadow-lg transition-transform duration-500 hover:scale-105"
+                        loading="lazy"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                      <span className="absolute bottom-2.5 left-3 right-3 text-[11px] font-bold text-amber-200">
-                        Kuliner Khas & Tempat Makan Kobar 2026
-                      </span>
                     </div>
                   </div>
                 </div>
