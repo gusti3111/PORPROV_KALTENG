@@ -19,6 +19,9 @@ import MatchUpdateForm from "./views/admin/MatchUpdateForm";
 import JadwalPage from "./views/admin/JadwalPage";
 import HasilPage from "./views/admin/HasilPage";
 import BaganPage from "./views/admin/BaganPage";
+import AdminLoginPage from "./views/admin/AdminLoginPage";
+import AdminRegisterPage from "./views/admin/AdminRegisterPage";
+import AdminGuard from "./components/AdminGuard";
 
 function RouteEffects() {
   const { pathname, hash } = useLocation();
@@ -94,11 +97,15 @@ export default function App() {
         <Route path="/jadwal" element={<ScheduleView />} />
         <Route path="/hasil" element={<ResultsView />} />
         <Route path="/informasi" element={<Newsview />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/jadwal" element={<JadwalPage />} />
-        <Route path="/admin/hasil" element={<HasilPage />} />
-        <Route path="/admin/bagan" element={<BaganPage />} />
-        <Route path="/admin/update/:id" element={<MatchUpdateForm />} />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin/register" element={<AdminRegisterPage />} />
+        <Route element={<AdminGuard />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/jadwal" element={<JadwalPage />} />
+          <Route path="/admin/hasil" element={<HasilPage />} />
+          <Route path="/admin/bagan" element={<BaganPage />} />
+          <Route path="/admin/update/:id" element={<MatchUpdateForm />} />
+        </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

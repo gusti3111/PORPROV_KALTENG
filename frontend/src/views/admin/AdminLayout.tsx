@@ -1,5 +1,6 @@
-import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Calendar, Trophy, Hash } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { LayoutDashboard, Calendar, Trophy, Hash, LogOut } from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
 
 const navItems = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
@@ -10,6 +11,20 @@ const navItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuthStore();
+
+  const initials = (user?.name || "Panitia")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || "")
+    .join("");
+
+  const handleLogout = () => {
+    logout();
+    navigate("/admin/login", { replace: true });
+  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -44,17 +59,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
         <div className="p-3 border-t border-border">
           <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-sidebar-accent">
-            <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
-              BP
+            <div className="h-8 w-8 shrink-0 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
+              {initials || "AD"}
             </div>
-            <div className="text-sm text-foreground">
-              <p className="font-medium">Panitia</p>
-              <p className="text-xs text-muted-foreground">admin@porprov.kalteng</p>
+            <div className="min-w-0 text-sm text-foreground">
+              <p className="font-medium truncate">{user?.name || "Panitia"}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email || "admin@porprov.kalteng"}</p>
             </div>
-            <button className="ml-auto text-muted-foreground hover:text-foreground">
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V6.75a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 3.75 6.75v5.25m13.5-4.5a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm10.5 7.5a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-              </svg>
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Keluar"
+              aria-label="Keluar"
+              className="ml-auto shrink-0 text-muted-foreground hover:text-destructive transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
             </button>
           </div>
         </div>

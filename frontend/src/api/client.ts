@@ -18,6 +18,18 @@ export const apiClient = axios.create({
   },
 });
 
+apiClient.interceptors.request.use((config) => {
+  try {
+    const token = localStorage.getItem("porprov_admin_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch {
+    // Ignore storage errors
+  }
+  return config;
+});
+
 export async function getAPIData<T>(path: string): Promise<T> {
   const response = await apiClient.get<APIResponse<T>>(path);
   if (!response.data.success || response.data.data === undefined) {

@@ -43,10 +43,12 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 	sportTournamentRepo := repository.NewSportTournamentRepository(db)
 	eventRepo := repository.NewEventRepository(db)
 	bracketRepo := repository.NewBracketRepository(db)
+	authRepo := repository.NewAuthRepository(db)
 
 	if db != nil && db.Pool != nil {
 		cleanupCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		_ = matchRepo.PurgeDummySeedDataAndSyncAll(cleanupCtx)
+		_ = authRepo.EnsureSchema(cleanupCtx)
 		cancel()
 	}
 
@@ -61,6 +63,7 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 	sportTournamentHandler := NewSportTournamentHandler(sportTournamentRepo)
 	bracketHandler := NewBracketHandler(bracketRepo)
 	eventHandler := NewEventHandler(eventRepo)
+	authHandler := NewAuthHandler(authRepo)
 
 	// Base health check
 	r.Get("/healthz", healthHandler.Health)
@@ -111,6 +114,12 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 			br.Post("/", bracketHandler.Create)
 			br.Put("/{id}", bracketHandler.Update)
 			br.Delete("/{id}", bracketHandler.Delete)
+		})
+
+		api.Route("/auth", func(ar chi.Router) {
+			ar.Post("/register", authHandler.Register)
+			ar.Post("/login", authHandler.Login)
+			ar.Get("/me", authHandler.Me)
 		})
 	})
 
