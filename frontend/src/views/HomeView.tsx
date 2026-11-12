@@ -60,7 +60,7 @@ const featuredStadiums = [
     venue: "GOR KONI Kotawaringin Barat",
     city: "Sidorejo, Pangkalan Bun",
     cabor: "Cabang Olahraga Bulutangkis",
-    image: "/venues/gor-koni.jpg",
+    image: "/venues/GORKoni.jpg",
   },
   {
     category: "ARENA PERAIRAN",
