@@ -1567,17 +1567,17 @@ export default function Newsview() {
                     </div>
 
                     <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
-                      Direktori 31 Cafe &amp; Tempat Nongkrong Pangkalan Bun
+                      Direktori Kuliner, Restoran &amp; Kafe Pangkalan Bun
                     </h2>
 
                     <p className="text-xs sm:text-sm text-sky-100/90 leading-relaxed">
-                      Menampilkan <strong>{kobarUMKMData.length} kafe, coffee roastery, kopitiam, dan bakery pilihan</strong> di Pangkalan Bun (Kotawaringin Barat) lengkap dengan foto asli tempat, keunggulan menu, jam operasional, harga, Instagram resmi, dan info reservasi.
+                      Menampilkan <strong>{kobarUMKMData.length} tempat makan, restoran khas sungai, warung tradisional, food court, dan kafe pilihan</strong> di Pangkalan Bun (Kotawaringin Barat) lengkap dengan foto asli tempat, keunggulan menu, jam operasional, dan info reservasi.
                     </p>
 
                     <div className="flex flex-wrap items-center gap-4 pt-2 text-xs font-semibold text-slate-200">
                       <div className="flex items-center gap-1.5">
-                        <Coffee className="h-4 w-4 text-amber-300" />
-                        <span>{kobarUMKMData.length} Kafe Terkurasi</span>
+                        <Utensils className="h-4 w-4 text-amber-300" />
+                        <span>{kobarUMKMData.length} Destinasi Kuliner</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Camera className="h-4 w-4 text-emerald-300" />
