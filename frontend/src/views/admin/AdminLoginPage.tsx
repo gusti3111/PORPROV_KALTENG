@@ -2,6 +2,7 @@ import { useState, useEffect, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail, ArrowLeft, ShieldCheck } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { validateAdminEmail, validateLoginPassword } from "@/utils/authValidation";
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
@@ -30,9 +31,16 @@ export default function AdminLoginPage() {
     setLocalError(null);
     clearError();
 
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail || !password) {
-      setLocalError("Email dan password wajib diisi.");
+    const trimmedEmail = email.trim().toLowerCase();
+    const emailErr = validateAdminEmail(trimmedEmail);
+    if (emailErr) {
+      setLocalError(emailErr);
+      return;
+    }
+
+    const passwordErr = validateLoginPassword(password);
+    if (passwordErr) {
+      setLocalError(passwordErr);
       return;
     }
 
@@ -80,7 +88,7 @@ export default function AdminLoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">
                 Email Panitia
@@ -91,6 +99,7 @@ export default function AdminLoginPage() {
                   id="email"
                   type="email"
                   autoComplete="email"
+                  maxLength={120}
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -110,6 +119,7 @@ export default function AdminLoginPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
+                  maxLength={72}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

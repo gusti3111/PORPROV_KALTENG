@@ -8,17 +8,34 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"net"
 	"net/http"
+	"net/mail"
 	"os"
+	"regexp"
 	"strings"
+	"sync"
 	"time"
+	"unicode"
 
 	"porprov-backend/internal/repository"
 )
 
+var (
+	namePattern  = regexp.MustCompile(`^[a-zA-Z\s.'-]+$`)
+	emailPattern = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$`)
+)
+
+type loginAttempt struct {
+	count       int
+	windowStart time.Time
+}
+
 type AuthHandler struct {
-	repo   *repository.AuthRepository
-	secret []byte
+	repo     *repository.AuthRepository
+	secret   []byte
+	mu       sync.Mutex
+	attempts map[string]loginAttempt
 }
 
 func NewAuthHandler(repo *repository.AuthRepository) *AuthHandler {
@@ -27,8 +44,9 @@ func NewAuthHandler(repo *repository.AuthRepository) *AuthHandler {
 		secret = "porprov-kalteng-2026-admin-secret"
 	}
 	return &AuthHandler{
-		repo:   repo,
-		secret: []byte(secret),
+		repo:     repo,
+		secret:   []byte(secret),
+		attempts: make(map[string]loginAttempt),
 	}
 }
 
@@ -57,8 +75,11 @@ type tokenClaims struct {
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
 	var req registerRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&req); err != nil {
 		Error(w, http.StatusBadRequest, "Format JSON tidak valid")
 		return
 	}
@@ -67,16 +88,16 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	password := req.Password
 
-	if name == "" || email == "" || password == "" {
-		Error(w, http.StatusBadRequest, "Nama, email, dan password wajib diisi")
+	if errMsg := validateName(name); errMsg != "" {
+		Error(w, http.StatusBadRequest, errMsg)
 		return
 	}
-	if !strings.Contains(email, "@") {
-		Error(w, http.StatusBadRequest, "Format email tidak valid")
+	if errMsg := validateEmail(email); errMsg != "" {
+		Error(w, http.StatusBadRequest, errMsg)
 		return
 	}
-	if len(password) < 6 {
-		Error(w, http.StatusBadRequest, "Password minimal 6 karakter")
+	if errMsg := validateStrongPassword(password); errMsg != "" {
+		Error(w, http.StatusBadRequest, errMsg)
 		return
 	}
 
@@ -109,8 +130,11 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
 	var req loginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&req); err != nil {
 		Error(w, http.StatusBadRequest, "Format JSON tidak valid")
 		return
 	}
@@ -118,14 +142,25 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	password := req.Password
 
-	if email == "" || password == "" {
-		Error(w, http.StatusBadRequest, "Email dan password wajib diisi")
+	if errMsg := validateEmail(email); errMsg != "" {
+		Error(w, http.StatusBadRequest, errMsg)
+		return
+	}
+	if password == "" || len(password) > 72 || containsControlChars(password) {
+		Error(w, http.StatusBadRequest, "Format password tidak valid")
+		return
+	}
+
+	rateKey := clientIP(r) + ":" + email
+	if h.isRateLimited(rateKey) {
+		Error(w, http.StatusTooManyRequests, "Terlalu banyak percobaan login gagal. Coba lagi dalam 5 menit.")
 		return
 	}
 
 	user, err := h.repo.FindByEmail(r.Context(), email)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
+			h.recordFailedAttempt(rateKey)
 			Error(w, http.StatusUnauthorized, "Email atau password salah")
 			return
 		}
@@ -134,9 +169,12 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !verifyPassword(password, user.PasswordHash) {
+		h.recordFailedAttempt(rateKey)
 		Error(w, http.StatusUnauthorized, "Email atau password salah")
 		return
 	}
+
+	h.clearFailedAttempts(rateKey)
 
 	token, err := signToken(user, h.secret)
 	if err != nil {
@@ -177,6 +215,121 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	JSON(w, http.StatusOK, map[string]any{
 		"user": user,
 	})
+}
+
+func validateName(name string) string {
+	if len(name) < 3 || len(name) > 80 {
+		return "Nama lengkap harus 3 hingga 80 karakter"
+	}
+	if !namePattern.MatchString(name) {
+		return "Nama hanya boleh mengandung huruf, spasi, titik, tanda hubung, dan apostrof"
+	}
+	return ""
+}
+
+func validateEmail(email string) string {
+	if email == "" || len(email) > 120 {
+		return "Email wajib diisi (maksimal 120 karakter)"
+	}
+	if containsSQLMetaChars(email) || containsControlChars(email) {
+		return "Email mengandung karakter yang tidak diizinkan"
+	}
+	if _, err := mail.ParseAddress(email); err != nil || !emailPattern.MatchString(email) {
+		return "Format email tidak valid"
+	}
+	return ""
+}
+
+func validateStrongPassword(password string) string {
+	if len(password) < 8 || len(password) > 72 {
+		return "Password harus 8 hingga 72 karakter"
+	}
+	if containsControlChars(password) {
+		return "Password mengandung karakter kontrol yang tidak valid"
+	}
+	var hasUpper, hasLower, hasDigit, hasSpecial bool
+	for _, r := range password {
+		switch {
+		case unicode.IsUpper(r):
+			hasUpper = true
+		case unicode.IsLower(r):
+			hasLower = true
+		case unicode.IsDigit(r):
+			hasDigit = true
+		case unicode.IsPunct(r) || unicode.IsSymbol(r):
+			hasSpecial = true
+		case unicode.IsSpace(r):
+			return "Password tidak boleh mengandung spasi"
+		}
+	}
+	if !hasUpper || !hasLower || !hasDigit || !hasSpecial {
+		return "Password harus mengandung huruf besar, huruf kecil, angka, dan karakter spesial"
+	}
+	return ""
+}
+
+func containsSQLMetaChars(s string) bool {
+	return strings.ContainsAny(s, `'";<>`) ||
+		strings.Contains(s, "--") ||
+		strings.Contains(s, "/*") ||
+		strings.Contains(s, "*/")
+}
+
+func containsControlChars(s string) bool {
+	for _, r := range s {
+		if r < 32 || r == 127 {
+			return true
+		}
+	}
+	return false
+}
+
+func clientIP(r *http.Request) string {
+	if fwd := strings.TrimSpace(r.Header.Get("X-Forwarded-For")); fwd != "" {
+		parts := strings.Split(fwd, ",")
+		if len(parts) > 0 {
+			return strings.TrimSpace(parts[0])
+		}
+	}
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err == nil && host != "" {
+		return host
+	}
+	return r.RemoteAddr
+}
+
+func (h *AuthHandler) isRateLimited(key string) bool {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	entry, ok := h.attempts[key]
+	if !ok {
+		return false
+	}
+	if time.Since(entry.windowStart) > 5*time.Minute {
+		delete(h.attempts, key)
+		return false
+	}
+	return entry.count >= 5
+}
+
+func (h *AuthHandler) recordFailedAttempt(key string) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	entry, ok := h.attempts[key]
+	if !ok || time.Since(entry.windowStart) > 5*time.Minute {
+		h.attempts[key] = loginAttempt{count: 1, windowStart: time.Now()}
+		return
+	}
+	entry.count++
+	h.attempts[key] = entry
+}
+
+func (h *AuthHandler) clearFailedAttempts(key string) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	delete(h.attempts, key)
 }
 
 func hashPassword(password string) (string, error) {

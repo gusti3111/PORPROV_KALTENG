@@ -1,7 +1,22 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Lock, Mail, User, ArrowLeft, UserPlus } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  User,
+  ArrowLeft,
+  UserPlus,
+  Check,
+  X,
+} from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import {
+  evaluatePasswordStrength,
+  validateAdminEmail,
+  validateAdminName,
+} from "@/utils/authValidation";
 
 export default function AdminRegisterPage() {
   const navigate = useNavigate();
@@ -13,6 +28,8 @@ export default function AdminRegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+
+  const strength = evaluatePasswordStrength(password);
 
   useEffect(() => {
     clearError();
@@ -30,16 +47,27 @@ export default function AdminRegisterPage() {
     clearError();
 
     const trimmedName = name.trim();
-    const trimmedEmail = email.trim();
+    const trimmedEmail = email.trim().toLowerCase();
 
-    if (!trimmedName || !trimmedEmail || !password || !confirmPassword) {
-      setLocalError("Semua kolom wajib diisi.");
+    const nameErr = validateAdminName(trimmedName);
+    if (nameErr) {
+      setLocalError(nameErr);
       return;
     }
-    if (password.length < 6) {
-      setLocalError("Password minimal 6 karakter.");
+
+    const emailErr = validateAdminEmail(trimmedEmail);
+    if (emailErr) {
+      setLocalError(emailErr);
       return;
     }
+
+    if (!strength.isValid) {
+      setLocalError(
+        "Password belum memenuhi kriteria Strong Password (minimal 8 karakter, huruf besar, huruf kecil, angka, karakter spesial, tanpa spasi).",
+      );
+      return;
+    }
+
     if (password !== confirmPassword) {
       setLocalError("Konfirmasi password tidak cocok.");
       return;
@@ -54,6 +82,15 @@ export default function AdminRegisterPage() {
   };
 
   const displayError = localError || error;
+
+  const strengthItems = [
+    { label: "Minimal 8 karakter (maks. 72)", met: strength.checks.minLength },
+    { label: "Huruf besar (A-Z)", met: strength.checks.hasUpper },
+    { label: "Huruf kecil (a-z)", met: strength.checks.hasLower },
+    { label: "Angka (0-9)", met: strength.checks.hasNumber },
+    { label: "Karakter spesial (!@#$%^&*...)", met: strength.checks.hasSpecial },
+    { label: "Tanpa spasi", met: strength.checks.noSpace },
+  ];
 
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -89,7 +126,7 @@ export default function AdminRegisterPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">
                 Nama Lengkap
@@ -100,6 +137,7 @@ export default function AdminRegisterPage() {
                   id="name"
                   type="text"
                   autoComplete="name"
+                  maxLength={80}
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -107,6 +145,9 @@ export default function AdminRegisterPage() {
                   className="w-full rounded-lg border border-border bg-background pl-10 pr-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                 />
               </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                3–80 karakter, hanya huruf, spasi, titik, tanda hubung, atau apostrof.
+              </p>
             </div>
 
             <div>
@@ -119,6 +160,7 @@ export default function AdminRegisterPage() {
                   id="email"
                   type="email"
                   autoComplete="email"
+                  maxLength={120}
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -138,11 +180,11 @@ export default function AdminRegisterPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
+                  maxLength={72}
                   required
-                  minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Minimal 6 karakter"
+                  placeholder="Buat password yang kuat"
                   className="w-full rounded-lg border border-border bg-background pl-10 pr-10 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                 />
                 <button
@@ -154,6 +196,42 @@ export default function AdminRegisterPage() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+
+              {password.length > 0 && (
+                <div className="mt-2.5 space-y-2 rounded-lg border border-border bg-muted/20 p-3">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Kekuatan Password:</span>
+                    <span className="font-semibold text-foreground">{strength.label}</span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-1">
+                    {[1, 2, 3, 4, 5].map((level) => (
+                      <div
+                        key={level}
+                        className={`h-1.5 rounded-full transition-colors ${
+                          strength.score >= level ? strength.barColor : "bg-muted"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1 pt-1">
+                    {strengthItems.map((item) => (
+                      <li
+                        key={item.label}
+                        className={`flex items-center gap-1.5 text-[11px] ${
+                          item.met ? "text-emerald-600 font-medium" : "text-muted-foreground"
+                        }`}
+                      >
+                        {item.met ? (
+                          <Check className="h-3 w-3 shrink-0" />
+                        ) : (
+                          <X className="h-3 w-3 shrink-0" />
+                        )}
+                        <span>{item.label}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             <div>
@@ -166,8 +244,8 @@ export default function AdminRegisterPage() {
                   id="confirmPassword"
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
+                  maxLength={72}
                   required
-                  minLength={6}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Ulangi password"
