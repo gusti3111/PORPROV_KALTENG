@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -101,10 +101,21 @@ export default function ResultsView() {
   const fetchSportMedalStandings = useCompetitionStore(
     (state) => state.fetchSportMedalStandings,
   );
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<ResultsTab>("matches");
   const [selectedDate, setSelectedDate] = useState("");
-  const [selectedSport, setSelectedSport] = useState("");
+  const [selectedSport, setSelectedSport] = useState(
+    () => searchParams.get("cabor") || "",
+  );
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    const caborParam = searchParams.get("cabor") || "";
+    if (caborParam) {
+      setSelectedSport(caborParam);
+      setActiveTab("matches");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     void fetchMatches();

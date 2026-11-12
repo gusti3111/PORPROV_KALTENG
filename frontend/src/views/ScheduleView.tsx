@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -72,6 +72,7 @@ export default function ScheduleView() {
   const fetchMatches = useCompetitionStore((state) => state.fetchMatches);
   const fetchSports = useCompetitionStore((state) => state.fetchSports);
   const fetchVenues = useCompetitionStore((state) => state.fetchVenues);
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -179,7 +180,7 @@ export default function ScheduleView() {
           </p>
           <img
             className="schedule-hero-illustration"
-            src="/burungStopwatch.png"
+            src="/keraWak.png"
             alt="Maskot PORPROV memegang stopwatch"
           />
           <div className="schedule-source-note" role="note">
@@ -192,7 +193,7 @@ export default function ScheduleView() {
         </section>
 
         <section className="schedule-content section-wrap" aria-label="Jadwal">
-<div className="schedule-toolbar">
+          <div className="schedule-toolbar">
             <Button
               variant="outline"
               size="lg"
@@ -288,11 +289,11 @@ export default function ScheduleView() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Semua cabang olahraga</SelectItem>
-                  {sports.map((sport) => (
-                    <SelectItem key={sport.name} value={sport.name}>
-                      {sport.name}
-                    </SelectItem>
-                  ))}
+                    {sports.map((sport) => (
+                      <SelectItem key={sport.name} value={sport.name}>
+                        {sport.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </label>
@@ -309,11 +310,11 @@ export default function ScheduleView() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Semua tempat</SelectItem>
-                  {venues.map((venue) => (
-                    <SelectItem key={venue.name} value={venue.name}>
-                      {venue.name}
-                    </SelectItem>
-                  ))}
+                    {venues.map((venue) => (
+                      <SelectItem key={venue.name} value={venue.name}>
+                        {venue.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </label>
@@ -321,69 +322,90 @@ export default function ScheduleView() {
           )}
 
           <Card className="schedule-results gap-0 p-0" aria-live="polite">
-              <div className="schedule-results-heading">
-                <div>
-                  <p>SEMUA PERTANDINGAN</p>
-                  <h2>
-                    {formatDate(selectedDate, {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                  </h2>
-                </div>
-                <span>
-                  {visibleEvents.length} pertandingan
-                </span>
+            <div className="schedule-results-heading">
+              <div>
+                <p>SEMUA PERTANDINGAN</p>
+                <h2>
+                  {formatDate(selectedDate, {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </h2>
               </div>
-              {visibleEvents.length > 0 ? (
-                <div className="schedule-event-list">
-                  {visibleEvents.map((event) => (
-                    <article
-                      className="schedule-event-card"
-                      key={event.id}
-                      role={event.liveStreamUrl ? "link" : undefined}
-                      tabIndex={event.liveStreamUrl ? 0 : undefined}
-                      aria-label={event.liveStreamUrl ? `Tonton live: ${event.title}` : undefined}
-                      onClick={() => {
-                        if (event.liveStreamUrl) {
-                          window.open(event.liveStreamUrl, "_blank", "noopener,noreferrer");
-                        }
-                      }}
-                    >
-                      <time>{event.time}</time>
-                      <div>
-                        <strong>
-                          {event.sport}
-                          {event.roundName ? ` · ${event.roundName}` : ""}
-                        </strong>
-                        <span className="schedule-event-title">
-                          {event.eventName ? `${event.eventName} — ` : ""}
-                          {event.title}
+              <span>
+                {visibleEvents.length} pertandingan
+              </span>
+            </div>
+            {visibleEvents.length > 0 ? (
+              <div className="schedule-event-list">
+                {visibleEvents.map((event) => {
+                  const hasLiveStream =
+                    event.status === "ONGOING" && Boolean(event.liveStreamUrl?.trim());
+                  const handleCardActivate = () => {
+                    if (hasLiveStream && event.liveStreamUrl) {
+                      window.open(event.liveStreamUrl, "_blank", "noopener,noreferrer");
+                    } else {
+                      navigate(`/hasil?cabor=${encodeURIComponent(event.sport)}`);
+                    }
+                  };
+                  return (
+                  <article
+                    className="schedule-event-card cursor-pointer"
+                    key={event.id}
+                    role="link"
+                    tabIndex={0}
+                    aria-label={
+                      hasLiveStream
+                        ? `Tonton live YouTube: ${event.title}`
+                        : `Lihat hasil pertandingan ${event.sport}: ${event.title}`
+                    }
+                    onClick={handleCardActivate}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleCardActivate();
+                      }
+                    }}
+                  >
+                    <time>{event.time}</time>
+                    <div>
+                      <strong>
+                        {event.sport}
+                        {event.roundName ? ` · ${event.roundName}` : ""}
+                      </strong>
+                      <span className="schedule-event-title">
+                        {event.eventName ? `${event.eventName} — ` : ""}
+                        {event.title}
+                      </span>
+                      {event.participantsSummary && (
+                        <small className="font-semibold text-foreground">
+                          {event.participantsSummary}
+                        </small>
+                      )}
+                      <small>{event.venue}</small>
+                      {hasLiveStream ? (
+                        <span className="schedule-live-link" aria-hidden="true">
+                          Tonton live di YouTube
                         </span>
-                        {event.participantsSummary && (
-                          <small className="font-semibold text-foreground">
-                            {event.participantsSummary}
-                          </small>
-                        )}
-                        <small>{event.venue}</small>
-                        {event.status === "ONGOING" && event.liveStreamUrl && (
-                          <span className="schedule-live-link" aria-hidden="true">
-                            Tonton live di YouTube (demo)
-                          </span>
-                        )}
-                      </div>
-                      <Badge variant="secondary" className={`schedule-event-badge schedule-status-${event.status.toLowerCase()}`}>
-                        {statusLabel(event.status)}
-                      </Badge>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <ScheduleEmptyState />
-              )}
-            </Card>
+                      ) : (
+                        <span className="text-xs text-primary font-medium mt-0.5 inline-block" aria-hidden="true">
+                          Lihat hasil pertandingan {event.sport} →
+                        </span>
+                      )}
+                    </div>
+                    <Badge variant="secondary" className={`schedule-event-badge schedule-status-${event.status.toLowerCase()}`}>
+                      {statusLabel(event.status)}
+                    </Badge>
+                  </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <ScheduleEmptyState />
+            )}
+          </Card>
         </section>
       </main>
 
