@@ -16,7 +16,7 @@ const venuePhotoMap: Record<string, string> = {
   "ratu alamsyah": "/venues/GORSportCenter.jpeg",
   "basket": "/venues/sport-center.webp",
   "karanganyar": "/venues/karanganyar.jpg",
-  "koni": "/venues/gor-koni.jpg",
+  "koni": "/venues/GORKoni.webp",
   "billiard": "/venues/OnixBilliard.webp",
   "sungai arut": "/venues/sungai-arut.jpg",
   "pangkalan bun park": "/venues/pangkalan-bun-park.jpg",
@@ -28,6 +28,11 @@ const venuePhotoMap: Record<string, string> = {
   "antakusuma": "/venues/kotawaringin-lama.jpg",
   "sega": "/venues/kampung-sega.jpeg",
   "lintasan": "/venues/lintasanAtletik.jpeg",
+  "minisoccer": "/venues/minisoccer88.jpeg",
+  "r88": "/venues/minisoccer88.jpeg",
+  "mini soccer": "/venues/minisoccer88.jpeg",
+  "mini88": "/venues/minisoccer88.jpeg",
+  "sepak bola mini": "/venues/minisoccer88.jpeg",
 
 };
 

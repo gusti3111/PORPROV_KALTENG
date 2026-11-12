@@ -84,6 +84,13 @@ const featuredStadiums = [
     image: "/venues/pasir-panjang.jpg",
   },
   {
+    category: "ARENA SEPAK BOLA MINI",
+    venue: "Minisoccer R88",
+    city: "Pasir Panjang, Arut Selatan",
+    cabor: "Sepak Bola Mini (KSMI)",
+    image: "/venues/minisoccer88.jpeg",
+  },
+  {
     category: "ARENA TERBUKA & DIRGANTARA",
     venue: "Karanganyar Pangkalan Bun",
     city: "Karang Anyar, Arut Selatan",
