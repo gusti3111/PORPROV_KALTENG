@@ -204,6 +204,36 @@ const articles: NewsArticle[] = [
 
 const galleryPhotos: GalleryPhoto[] = [
   {
+    id: 10,
+    category: "Venue",
+    title: "GOR Basket Indoor Pangkalan Bun",
+    src: "/galeri/gor-basket-indoor.jpg",
+  },
+  {
+    id: 11,
+    category: "Venue",
+    title: "Lapangan Tenis Kota Manis",
+    src: "/galeri/lapangan-tenis-kota-manis.jpg",
+  },
+  {
+    id: 12,
+    category: "Venue",
+    title: "Stadion & Lintasan Atletik Sport Center",
+    src: "/galeri/stadion-lintasan-atletik.jpg",
+  },
+  {
+    id: 13,
+    category: "Venue",
+    title: "Arena Panjat Tebing PORPROV XIII",
+    src: "/galeri/arena-panjat-tebing.jpg",
+  },
+  {
+    id: 14,
+    category: "Venue",
+    title: "Lapangan Tenis Pasir Panjang",
+    src: "/galeri/lapangan-tenis-pasir-panjang.jpg",
+  },
+  {
     id: 1,
     category: "Atlet",
     title: "Semangat para atlet",
