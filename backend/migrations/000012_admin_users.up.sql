@@ -6,3 +6,4 @@ CREATE TABLE IF NOT EXISTS admin_users (
   role TEXT NOT NULL DEFAULT 'Panitia',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+

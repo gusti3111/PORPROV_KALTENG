@@ -14,7 +14,7 @@ type Config struct {
 
 func Load() *Config {
 	port := getEnv("PORT", "8080")
-	dbURL := getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/porprov_kalteng?sslmode=disable")
+	dbURL := getEnv("DATABASE_URL", "")
 	env := getEnv("APP_ENV", "development")
 
 	rawOrigins := getEnv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000")

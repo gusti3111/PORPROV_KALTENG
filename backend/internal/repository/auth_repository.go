@@ -94,3 +94,4 @@ func (r *AuthRepository) FindByEmail(ctx context.Context, email string) (*AdminU
 	}
 	return &u, nil
 }
+

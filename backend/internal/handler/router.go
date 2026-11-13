@@ -5,12 +5,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
 	"porprov-backend/internal/config"
 	"porprov-backend/internal/database"
 	"porprov-backend/internal/repository"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
 func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
@@ -71,7 +72,7 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 
 	// API v1 group
 	r.Route("/api/v1", func(api chi.Router) {
-		api.Get("/healthz", healthHandler.Health)
+		//api.Get("/healthz", healthHandler.Health)
 
 		api.Route("/sports", func(sr chi.Router) {
 			sr.Get("/", sportHandler.GetAll)
