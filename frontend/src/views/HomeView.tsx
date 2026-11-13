@@ -151,7 +151,7 @@ const featuredStadiums = [
     venue: "Jalan Raya Pangkalan Bun",
     city: "Pangkalan Bun, Kotawaringin Barat",
     cabor: "Balap Sepeda (Road Bike & Mountain Bike)",
-    image: "",
+    image: "/venues2/jalanRaya.jpg",
   },
 ];
 

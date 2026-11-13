@@ -1,20 +1,20 @@
 /**
  * Mapping foto resmi dokumentasi venue PORPROV XIII Kalimantan Tengah di Kotawaringin Barat
  * Menggunakan aset real dari /venues2/
- * Catatan: Jalan Raya & Aula Kiyai Gede dibiarkan kosong ("") sesuai permintaan.
+ * Catatan: Aula Kiyai Gede dibiarkan kosong ("") sesuai permintaan.
  */
 
 const venuePhotoMap: Array<[string, string]> = [
   // 1. Dibiarkan kosong dulu
-  ["jalan raya", ""],
-  ["balap sepeda", ""],
-  ["koridor", ""],
   ["kiyai gede", ""],
   ["binaraga", ""],
   ["dancesport", ""],
   ["gimnastik", ""],
 
   // 2. Venue spesifik dengan foto di /venues2/ (prioritas sebelum keyword umum seperti 'futsal' atau 'sport center')
+  ["jalan raya", "/venues2/jalanRaya.jpg"],
+  ["balap sepeda", "/venues2/jalanRaya.jpg"],
+  ["koridor", "/venues2/jalanRaya.jpg"],
   ["lapangan tenis", "/venues2/LapanganTenisPasirPanjang.jpeg"],
   ["tenis pasir panjang", "/venues2/LapanganTenisPasirPanjang.jpeg"],
   ["tenis lapangan", "/venues2/LapanganTenisPasirPanjang.jpeg"],
