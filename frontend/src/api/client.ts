@@ -20,7 +20,7 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
   try {
-    const token = localStorage.getItem("porprov_admin_token");
+    const token = sessionStorage.getItem("porprov_admin_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -30,10 +30,31 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      const url = error.config?.url || "";
+      if (!url.includes("/auth/login") && !url.includes("/auth/register")) {
+        try {
+          sessionStorage.removeItem("porprov_admin_token");
+          sessionStorage.removeItem("porprov_admin_user");
+        } catch {
+          // Ignore storage errors
+        }
+        if (window.location.pathname.startsWith("/admin") && window.location.pathname !== "/admin/login") {
+          window.location.replace("/admin/login");
+        }
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
 export function getAuthHeaders(extra?: Record<string, string>): Record<string, string> {
   const headers: Record<string, string> = { ...(extra ?? {}) };
   try {
-    const token = localStorage.getItem("porprov_admin_token");
+    const token = sessionStorage.getItem("porprov_admin_token");
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }

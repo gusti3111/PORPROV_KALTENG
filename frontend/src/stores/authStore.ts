@@ -25,7 +25,8 @@ const USER_STORAGE_KEY = "porprov_admin_user";
 
 function loadStoredToken(): string | null {
   try {
-    return localStorage.getItem(TOKEN_STORAGE_KEY);
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    return sessionStorage.getItem(TOKEN_STORAGE_KEY);
   } catch {
     return null;
   }
@@ -33,7 +34,8 @@ function loadStoredToken(): string | null {
 
 function loadStoredUser(): AdminUser | null {
   try {
-    const raw = localStorage.getItem(USER_STORAGE_KEY);
+    localStorage.removeItem(USER_STORAGE_KEY);
+    const raw = sessionStorage.getItem(USER_STORAGE_KEY);
     if (!raw) return null;
     return JSON.parse(raw) as AdminUser;
   } catch {
@@ -43,12 +45,14 @@ function loadStoredUser(): AdminUser | null {
 
 function persistAuth(token: string | null, user: AdminUser | null) {
   try {
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    localStorage.removeItem(USER_STORAGE_KEY);
     if (token && user) {
-      localStorage.setItem(TOKEN_STORAGE_KEY, token);
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
+      sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
     } else {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
-      localStorage.removeItem(USER_STORAGE_KEY);
+      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+      sessionStorage.removeItem(USER_STORAGE_KEY);
     }
   } catch {
     // Ignore storage errors in restricted environments
