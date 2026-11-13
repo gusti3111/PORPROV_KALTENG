@@ -78,7 +78,7 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
       errors: { ...state.errors, sports: undefined },
     }));
     try {
-      const sports = await getAPIData<Sport[]>("/sports/");
+      const sports = await getAPIData<Sport[]>("/sports");
       set({ sports });
     } catch (error) {
       set((state) => ({
@@ -98,7 +98,7 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
       errors: { ...state.errors, venues: undefined },
     }));
     try {
-      const venues = await getAPIData<Venue[]>("/venues/");
+      const venues = await getAPIData<Venue[]>("/venues");
       set({ venues });
     } catch (error) {
       set((state) => ({
@@ -181,7 +181,7 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
       errors: { ...state.errors, events: undefined },
     }));
     try {
-      const events = await getAPIData<Event[]>("/events/");
+      const events = await getAPIData<Event[]>("/events");
       set({ events });
     } catch (error) {
       set((state) => ({
@@ -201,7 +201,7 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
       errors: { ...state.errors, contingents: undefined },
     }));
     try {
-      const contingents = await getAPIData<Contingent[]>("/contingents/");
+      const contingents = await getAPIData<Contingent[]>("/contingents");
       set({ contingents });
     } catch (error) {
       set((state) => ({

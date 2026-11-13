@@ -59,7 +59,7 @@ export default function BaganView() {
     setLoading(true);
     setError("");
 
-    void getAPIData<Sport[]>("/sports/")
+    void getAPIData<Sport[]>("/sports")
       .then((sports) =>
         Promise.all(
           sports.map(async (sport) => {

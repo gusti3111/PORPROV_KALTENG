@@ -1,10 +1,30 @@
 import axios from "axios";
 
+type APIErrorPayload = string | { code?: number | string; message?: string };
+
 type APIResponse<T> = {
   success: boolean;
   data?: T;
-  error?: string;
+  error?: APIErrorPayload;
 };
+
+function extractAPIErrorText(err: unknown): string | undefined {
+  if (typeof err === "string") {
+    return err.trim() || undefined;
+  }
+  if (err && typeof err === "object") {
+    const maybeMessage = (err as { message?: unknown }).message;
+    if (typeof maybeMessage === "string" && maybeMessage.trim()) {
+      return maybeMessage.trim();
+    }
+    try {
+      return JSON.stringify(err);
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}
 
 export const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL || "/api/v1"
@@ -67,15 +87,18 @@ export function getAuthHeaders(extra?: Record<string, string>): Record<string, s
 export async function getAPIData<T>(path: string): Promise<T> {
   const response = await apiClient.get<APIResponse<T>>(path);
   if (!response.data.success || response.data.data === undefined) {
-    throw new Error(response.data.error || "API mengembalikan respons yang tidak valid.");
+    throw new Error(
+      extractAPIErrorText(response.data.error) || "API mengembalikan respons yang tidak valid.",
+    );
   }
   return response.data.data;
 }
 
 export function getAPIErrorMessage(error: unknown): string {
-  if (axios.isAxiosError<{ error?: string }>(error)) {
+  if (axios.isAxiosError<{ error?: APIErrorPayload; message?: string }>(error)) {
     return (
-      error.response?.data?.error ||
+      extractAPIErrorText(error.response?.data?.error) ||
+      extractAPIErrorText(error.response?.data?.message) ||
       error.message ||
       "Tidak dapat menghubungi server."
     );
