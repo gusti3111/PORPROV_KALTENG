@@ -32,7 +32,7 @@ const featuredStadiums = [
     venue: "GOR Sport Center Ratu Alamsyah",
     city: "Madurejo, Kotawaringin Barat",
     cabor: "Bola Voli Indoor, Futsal & Basket",
-    image: "/venues2/gorSportCenter.jpg",
+    image: "/venues2/gorSportCenter.jpeg",
   },
   {
     category: "GELANGGANG OLAHRAGA",

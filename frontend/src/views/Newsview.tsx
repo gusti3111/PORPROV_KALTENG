@@ -102,15 +102,14 @@ const officialArticleImages: Record<string, string> = {
 };
 
 const venueImageFallbacks: string[] = [
-  "/venues/sport-center.webp",
-  "/venues/gor-koni.jpg",
-  "/venues/pangkalan-bun-park.jpg",
-  "/venues/sungai-arut.jpg",
-  "/venues/kotawaringin-lama.jpg",
-  "/venues/pasir-panjang.jpg",
-  "/venues/pelabuhan-kumai.jpg",
-  "/venues/karanganyar.jpg",
-  "/venues/koridor-trans-kalimantan.jpg",
+  "/venues2/sportCenter.jpg",
+  "/venues2/GORKoni.jpg",
+  "/venues2/pangakalnbunpark.jpg",
+  "/venues2/kampungSega.jpg",
+  "/venues2/LapanganTenisPasirPanjang.jpeg",
+  "/venues2/jalanRaya.jpg",
+  "/venues2/stadion.jpeg",
+  "/venues2/gorSportCenter.jpeg",
   "/sportcenter.webp",
 ];
 
@@ -169,7 +168,7 @@ const articles: NewsArticle[] = [
     excerpt:
       "Ikuti perkembangan berita dan pengumuman resmi menjelang penyelenggaraan PORPROV XIII.",
     theme: "green",
-    image: "/venues/sport-center.webp",
+    image: "/venues2/sportCenter.jpg",
   },
   {
     id: 2,
@@ -179,7 +178,7 @@ const articles: NewsArticle[] = [
     excerpt:
       "Jelajahi sejarah panjang dan prestasi yang telah dicapai dalam penyelenggaraan PORPROV XIII.",
     theme: "orange",
-    image: "/venues/gor-koni.jpg",
+    image: "/venues2/GORKoni.jpg",
   },
   {
     id: 3,
@@ -189,7 +188,7 @@ const articles: NewsArticle[] = [
     excerpt:
       "Atlet dari berbagai kabupaten dan kota bersiap untuk bertanding dengan menjunjung sportivitas.",
     theme: "lime",
-    image: "/venues/pangkalan-bun-park.jpg",
+    image: "/venues2/pangakalnbunpark.jpg",
   },
   {
     id: 4,
@@ -199,7 +198,7 @@ const articles: NewsArticle[] = [
     excerpt:
       "Cari tahu cabang olahraga dan informasi pertandingan dalam agenda PORPROV XIII.",
     theme: "green",
-    image: "/venues/sungai-arut.jpg",
+    image: "/venues2/kampungSega.jpg",
   },
 ];
 
@@ -873,7 +872,7 @@ export default function Newsview() {
 
                   <div className="flex flex-col items-center justify-center rounded-2xl border border-white/15 bg-white/10 p-6 text-center backdrop-blur-xs lg:col-span-4">
                     <img
-                      src="/Logo.png"
+                      src="/iconporKalteng-removebg-preview.png"
                       alt="Logo PORPROV XIII Kalimantan Tengah"
                       className="h-28 w-auto object-contain drop-shadow-md"
                     />
@@ -2241,13 +2240,13 @@ export default function Newsview() {
                         onClick={() => setSelectedDetailArticle(article)}
                       >
                         <img
-                          src={article.image || "/venues/sport-center.webp"}
+                          src={article.image || "/venues2/sportCenter.jpg"}
                           alt={article.title}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           onError={(e) => {
                             const target = e.currentTarget;
-                            if (!target.src.includes("sport-center.webp")) {
-                              target.src = "/venues/sport-center.webp";
+                            if (!target.src.includes("sportCenter.jpg")) {
+                              target.src = "/venues2/sportCenter.jpg";
                             }
                           }}
                         />
@@ -2404,8 +2403,8 @@ export default function Newsview() {
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const target = e.currentTarget;
-                      if (!target.src.includes("sport-center.webp")) {
-                        target.src = "/venues/sport-center.webp";
+                      if (!target.src.includes("sportCenter.jpg")) {
+                        target.src = "/venues2/sportCenter.jpg";
                       }
                     }}
                   />
