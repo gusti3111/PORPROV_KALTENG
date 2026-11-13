@@ -72,7 +72,7 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 
 	// API v1 group
 	r.Route("/api/v1", func(api chi.Router) {
-		//api.Get("/healthz", healthHandler.Health)
+		api.Get("/healthz", healthHandler.Health)
 
 		api.Route("/sports", func(sr chi.Router) {
 			sr.Get("/", sportHandler.GetAll)
@@ -87,6 +87,7 @@ func NewRouter(cfg *config.Config, db *database.DB) http.Handler {
 			er.Get("/", eventHandler.List)
 			er.With(authHandler.RequireAdmin).Post("/", eventHandler.Create)
 		})
+		api.Get("/events", eventHandler.List)
 		api.With(authHandler.RequireAdmin).Post("/events", eventHandler.Create)
 
 		api.Route("/venues", func(vr chi.Router) {

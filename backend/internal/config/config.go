@@ -14,10 +14,10 @@ type Config struct {
 
 func Load() *Config {
 	port := getEnv("PORT", "8080")
-	dbURL := getEnv("DATABASE_URL", "")
+	dbURL := getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/porprov_kalteng?sslmode=disable")
 	env := getEnv("APP_ENV", "development")
 
-	rawOrigins := getEnv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000")
+	rawOrigins := getEnv("ALLOWED_ORIGINS", "https://porprov.apikobar.id,http://localhost:3000,http://localhost:3001,http://localhost:5173,http://127.0.0.1:3000")
 	var origins []string
 	for _, o := range strings.Split(rawOrigins, ",") {
 		trimmed := strings.TrimSpace(o)
