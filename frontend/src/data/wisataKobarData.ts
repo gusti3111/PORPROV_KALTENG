@@ -18,7 +18,7 @@ export const wisataKobarData: WisataItem[] = [
     district: "Kecamatan Kumai",
     description: "Cagar biosfer dunia dan habitat alami orangutan liar terbesar di bumi, menyuguhkan petualangan susur Sungai Sekonyer dengan kapal klotok tradisional.",
     highlights: "Camp Leakey, Feeding Orangutan, Hutan Hujan Tropis Basah & Kunang-kunang Malam",
-    image: "/venues/pelabuhan-kumai.jpg",
+    image: "/wisata_real/tanjungputing.jpg",
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=Taman+Nasional+Tanjung+Puting",
     openInfo: "Akses via Pelabuhan Kumai (Pintu Masuk Utama)",
   },
