@@ -77,19 +77,22 @@ const venuePhotoMap: Array<[string, string]> = [
   ["soccer88", "/venues2/soccer88.jpeg"],
   ["sepak bola mini", "/venues2/soccer88.jpeg"],
 
-  // 3. GOR Sport Center -> menggunakan /venues2/gorSportCenter.jpg
+  // 3. Stadion -> menggunakan /venues2/stadion.jpeg
+  ["stadion", "/venues2/stadion.jpeg"],
+  ["sepak bola", "/venues2/stadion.jpeg"],
+
+  // 4. GOR Sport Center -> menggunakan /venues2/gorSportCenter.jpg
   ["gor sport center", "/venues2/gorSportCenter.jpg"],
   ["gor sportcenter", "/venues2/gorSportCenter.jpg"],
   ["ratu alamsyah", "/venues2/gorSportCenter.jpg"],
   ["gor indoor", "/venues2/gorSportCenter.jpg"],
 
-  // 4. Sport Center (Kompleks/Stadion), Basket, Futsal, Voli, Indoor -> menggunakan /venues2/sportCenter.jpg
+  // 5. Sport Center (Kompleks), Basket, Futsal, Voli, Indoor -> menggunakan /venues2/sportCenter.jpg
   ["basket", "/venues2/sportCenter.jpg"],
   ["futsal", "/venues2/sportCenter.jpg"],
   ["voli", "/venues2/sportCenter.jpg"],
   ["indoor", "/venues2/sportCenter.jpg"],
   ["sport center", "/venues2/sportCenter.jpg"],
-  ["stadion", "/venues2/sportCenter.jpg"],
   ["sepak takraw", "/venues2/sportCenter.jpg"],
 ];
 
