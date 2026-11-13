@@ -40,7 +40,7 @@ export const wisataKobarData: WisataItem[] = [
     district: "Desa Teluk Bogam, Kecamatan Kumai",
     description: "Destinasi pantai yang tenang dengan hamparan pasir landai, deretan pohon cemara laut yang teduh, serta suasana kampung nelayan khas pesisir Kumai.",
     highlights: "Hamparan Pasir Tenang, Cemara Laut Rindang, Panorama Laut Jawa & Wisata Keluarga",
-    image: "/venues/pasir-panjang.jpg",
+    image: "/wisata_real/bogamRaya.jpg",
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=Pantai+Teluk+Bogam+Kumai+Kotawaringin+Barat",
     openInfo: "± 40 Menit dari Pusat Kota / Buka Setiap Hari",
   },
