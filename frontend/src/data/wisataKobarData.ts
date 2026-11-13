@@ -73,7 +73,7 @@ export const wisataKobarData: WisataItem[] = [
     district: "Kecamatan Kotawaringin Lama",
     description: "Pusat peradaban Islam tertua di Kalimantan Tengah dengan Masjid Kyai Gede berkonstruksi kayu belian berusia ratusan tahun dan Astana Al-Nursari.",
     highlights: "Masjid Tertua Kalteng (>300 Tahun), Tiang Soko Guru Kayu Ulin Asli & Makam Ulama",
-    image: "/venues/kotawaringin-lama.jpg",
+    image: "/wisata_real/Masjid_Kiai_Gede.jpg",
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=Masjid+Kyai+Gede+Kotawaringin+Lama",
     openInfo: "Cagar Budaya Nasional / Terhubung Jalur Trans",
   },
