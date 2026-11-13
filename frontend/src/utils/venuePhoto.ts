@@ -77,8 +77,13 @@ const venuePhotoMap: Array<[string, string]> = [
   ["soccer88", "/venues2/soccer88.jpeg"],
   ["sepak bola mini", "/venues2/soccer88.jpeg"],
 
-  // 3. Sport Center, Basket, Futsal, Voli, Indoor, Stadion -> menggunakan /venues2/sportCenter.jpg
-  ["ratu alamsyah", "/venues2/sportCenter.jpg"],
+  // 3. GOR Sport Center -> menggunakan /venues2/gorSportCenter.jpg
+  ["gor sport center", "/venues2/gorSportCenter.jpg"],
+  ["gor sportcenter", "/venues2/gorSportCenter.jpg"],
+  ["ratu alamsyah", "/venues2/gorSportCenter.jpg"],
+  ["gor indoor", "/venues2/gorSportCenter.jpg"],
+
+  // 4. Sport Center (Kompleks/Stadion), Basket, Futsal, Voli, Indoor -> menggunakan /venues2/sportCenter.jpg
   ["basket", "/venues2/sportCenter.jpg"],
   ["futsal", "/venues2/sportCenter.jpg"],
   ["voli", "/venues2/sportCenter.jpg"],
@@ -91,6 +96,14 @@ const venuePhotoMap: Array<[string, string]> = [
 export function getVenuePhotoUrl(venueName?: string, additionalText?: string): string {
   if (!venueName) return "/venues2/sportCenter.jpg";
   const normalized = `${venueName} ${additionalText || ""}`.toLowerCase();
+
+  if (
+    normalized.includes("gor") &&
+    !normalized.includes("koni") &&
+    (normalized.includes("sport center") || normalized.includes("sportcenter"))
+  ) {
+    return "/venues2/gorSportCenter.jpg";
+  }
 
   for (const [key, url] of venuePhotoMap) {
     if (normalized.includes(key)) {
