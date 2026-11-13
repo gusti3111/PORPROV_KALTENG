@@ -10,7 +10,6 @@ import {
   UserPlus,
   Check,
   X,
-  KeyRound,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import {
@@ -27,7 +26,6 @@ export default function AdminRegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [inviteCode, setInviteCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -75,13 +73,8 @@ export default function AdminRegisterPage() {
       return;
     }
 
-    if (!inviteCode.trim()) {
-      setLocalError("Kode undangan panitia wajib diisi.");
-      return;
-    }
-
     try {
-      await register(trimmedName, trimmedEmail, password, inviteCode.trim());
+      await register(trimmedName, trimmedEmail, password);
       navigate("/admin", { replace: true });
     } catch {
       // Error message already stored in useAuthStore
@@ -259,29 +252,6 @@ export default function AdminRegisterPage() {
                   className="w-full rounded-lg border border-border bg-background pl-10 pr-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                 />
               </div>
-            </div>
-
-            <div>
-              <label htmlFor="inviteCode" className="block text-sm font-medium text-foreground mb-1.5">
-                Kode Undangan Panitia
-              </label>
-              <div className="relative">
-                <KeyRound className="h-4 w-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  id="inviteCode"
-                  type="text"
-                  autoComplete="off"
-                  maxLength={64}
-                  required
-                  value={inviteCode}
-                  onChange={(e) => setInviteCode(e.target.value)}
-                  placeholder="Masukkan kode panitia PORPROV"
-                  className="w-full rounded-lg border border-border bg-background pl-10 pr-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
-                />
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Diperlukan kode resmi panitia untuk membuat akun admin baru.
-              </p>
             </div>
 
             <button
