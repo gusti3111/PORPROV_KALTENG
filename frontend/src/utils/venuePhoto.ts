@@ -1,7 +1,7 @@
 /**
  * Mapping foto resmi dokumentasi venue PORPROV XIII Kalimantan Tengah di Kotawaringin Barat
  * Menggunakan aset real dari /venues2/
- * Catatan: Aula Kiyai Gede dibiarkan kosong ("") sesuai permintaan.
+ * Catatan: Aula Kiyai Gede & Karanganyar dibiarkan kosong ("") sesuai permintaan.
  */
 
 const venuePhotoMap: Array<[string, string]> = [
@@ -10,6 +10,8 @@ const venuePhotoMap: Array<[string, string]> = [
   ["binaraga", ""],
   ["dancesport", ""],
   ["gimnastik", ""],
+  ["karanganyar", ""],
+  ["karang anyar", ""],
 
   // 2. Venue spesifik dengan foto di /venues2/ (prioritas sebelum keyword umum seperti 'futsal' atau 'sport center')
   ["jalan raya", "/venues2/jalanRaya.jpg"],
