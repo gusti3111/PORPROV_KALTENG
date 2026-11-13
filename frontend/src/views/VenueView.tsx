@@ -144,15 +144,30 @@ export default function VenueView() {
                   }}
                 >
                   <div className="relative h-28 w-full overflow-hidden rounded-md mb-3 bg-slate-100 shrink-0">
-                    <img
-                      src={getVenuePhotoUrl(venue.name, `${venue.category} ${venue.note || ""}`)}
-                      alt={venue.name}
-                      className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.src = "/venues/GORSportCenter.jpeg";
-                      }}
-                    />
+                    {(() => {
+                      const photoUrl = getVenuePhotoUrl(
+                        venue.name,
+                        `${venue.category} ${venue.note || ""}`,
+                      );
+                      if (!photoUrl) {
+                        return (
+                          <div className="flex h-full w-full items-center justify-center bg-slate-100 text-xs font-medium text-slate-400">
+                            Foto belum tersedia
+                          </div>
+                        );
+                      }
+                      return (
+                        <img
+                          src={photoUrl}
+                          alt={venue.name}
+                          className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.src = "/venues2/sportCenter.jpg";
+                          }}
+                        />
+                      );
+                    })()}
                     <span className="absolute top-2 left-2 text-[10px] font-bold text-white bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded">
                       {String(index + 1).padStart(2, "0")}
                     </span>

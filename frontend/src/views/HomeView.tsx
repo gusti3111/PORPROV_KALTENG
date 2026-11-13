@@ -18,105 +18,140 @@ const featuredStadiums = [
     venue: "Sport Center Pangkalan Bun",
     city: "Madurejo, Kotawaringin Barat",
     cabor: "Upacara Pembukaan & Penutupan, Grass Track, Voli Pantai, Drumband, Korfball, Panahan, Sepatu Roda & Skateboard",
-    image: "/venues/sport-center.webp",
+    image: "/venues2/sportCenter.jpg",
   },
   {
-    category: "STADION SEPAK BOLA",
-    venue: "Stadion Sepak Bola Sport Center",
+    category: "STADION & LINTASAN",
+    venue: "Lintasan Atletik Sport Center",
     city: "Madurejo, Kotawaringin Barat",
-    cabor: "Cabang Olahraga Sepak Bola",
-    image: "/venues/StadionSportCenter.jpeg",
+    cabor: "Cabang Olahraga Atletik",
+    image: "/venues2/LintasanAtletik.jpeg",
   },
   {
     category: "GELANGGANG OLAHRAGA",
     venue: "GOR Sport Center Ratu Alamsyah",
     city: "Madurejo, Kotawaringin Barat",
-    cabor: "Bola Voli Indoor & Futsal",
-    image: "/venues/GORSportCenter.jpeg",
+    cabor: "Bola Voli Indoor, Futsal & Basket",
+    image: "/venues2/sportCenter.jpg",
   },
   {
     category: "GELANGGANG OLAHRAGA",
     venue: "GOR KONI Kotawaringin Barat",
     city: "Sidorejo, Pangkalan Bun",
     cabor: "Cabang Olahraga Bulutangkis",
-    image: "/venues/GORKoni.jpg",
+    image: "/venues2/GORKoni.jpg",
   },
   {
     category: "ARENA PERAIRAN",
     venue: "Kampung Sega Sungai Arut",
     city: "Mendawai, Pangkalan Bun",
-    cabor: "Dayung (Canoeing, Traditional Boat Race, & Ergometer)",
-    image: "/venues/sungai-arut.jpg",
+    cabor: "Dayung (Canoeing, Traditional Boat Race, & Argometer)",
+    image: "/venues2/kampungSega.jpg",
   },
   {
     category: "ARENA TERBUKA",
     venue: "Pangkalan Bun Park",
     city: "Madurejo, Pangkalan Bun",
     cabor: "MMA & Panjat Tebing",
-    image: "/venues/pangkalan-bun-park.jpg",
-  },
-  {
-    category: "CAGAR BUDAYA & TRADISIONAL",
-    venue: "Desa Adat Pasir Panjang",
-    city: "Pasir Panjang, Arut Selatan",
-    cabor: "Sumpitan, Balogo & Cabor Tradisional",
-    image: "/venues/pasir-panjang.jpg",
+    image: "/venues2/pangakalnbunpark.jpg",
   },
   {
     category: "STADION & FASILITAS OLAHRAGA",
     venue: "Lapangan Tenis Pasir Panjang",
     city: "Pasir Panjang, Arut Selatan",
     cabor: "Cabang Olahraga Tenis Lapangan",
-    image: "/venues/LapanganTennisPasirPanjang.webp",
+    image: "/venues2/LapanganTenisPasirPanjang.jpeg",
   },
   {
     category: "AULA & GEDUNG PERTEMUAN",
     venue: "Aula Disdikbud",
     city: "Pasir Panjang, Arut Selatan",
     cabor: "Cabang Olahraga Tenis Meja",
-    image: "/venues/aulaDISDIKBUD.webp",
+    image: "/venues2/aulaDISKDIKBUD.jpg",
+  },
+  {
+    category: "AULA & GEDUNG PERTEMUAN",
+    venue: "Aula Antakusuma",
+    city: "Pangkalan Bun, Kotawaringin Barat",
+    cabor: "Pencak Silat & Taekwondo",
+    image: "/venues2/aulaAntakusuma.jpeg",
+  },
+  {
+    category: "AULA & GEDUNG PERTEMUAN",
+    venue: "Aula Dispora",
+    city: "Pangkalan Bun, Kotawaringin Barat",
+    cabor: "Cabang Olahraga Bridge",
+    image: "/venues2/aulaDisipora.jpeg",
+  },
+  {
+    category: "AULA & GEDUNG PERTEMUAN",
+    venue: "Aula Bapperida",
+    city: "Pangkalan Bun, Kotawaringin Barat",
+    cabor: "Cabang Olahraga Catur",
+    image: "/venues2/bapperida.jpg",
+  },
+  {
+    category: "AULA & GEDUNG PERTEMUAN",
+    venue: "Aula Mapolres Kobar",
+    city: "Pangkalan Bun, Kotawaringin Barat",
+    cabor: "Cabang Olahraga Judo",
+    image: "/venues2/mapolres.jpg",
+  },
+  {
+    category: "ARENA INDOOR",
+    venue: "Samari Futsal",
+    city: "Pangkalan Bun, Kotawaringin Barat",
+    cabor: "Cabang Olahraga Karate",
+    image: "/venues2/samari.jpg",
   },
   {
     category: "ARENA INDOOR & KOMERSIAL",
     venue: "Juvenza Futsal",
     city: "Madurejo, Pangkalan Bun",
     cabor: "Cabang Olahraga Tinju",
-    image: "/venues/juvenza.webp",
+    image: "/venues2/juvenza.png",
+  },
+  {
+    category: "ARENA BILLIARD",
+    venue: "Onix Billiard",
+    city: "Pangkalan Bun, Kotawaringin Barat",
+    cabor: "Cabang Olahraga Billiard",
+    image: "/venues2/Onix.jpg",
   },
   {
     category: "ARENA SEPAK BOLA MINI",
     venue: "Minisoccer R88",
     city: "Pasir Panjang, Arut Selatan",
     cabor: "Sepak Bola Mini (KSMI)",
-    image: "/venues/minisoccer88.jpeg",
-  },
-  {
-    category: "ARENA TERBUKA & DIRGANTARA",
-    venue: "Karanganyar Pangkalan Bun",
-    city: "Karang Anyar, Arut Selatan",
-    cabor: "Aerosport (Paramotor & Paralayang)",
-    image: "/venues/karanganyar.jpg",
-  },
-  {
-    category: "ARENA JALAN RAYA",
-    venue: "Koridor Jalan Utama Pangkalan Bun",
-    city: "Pangkalan Bun, Kotawaringin Barat",
-    cabor: "Balap Sepeda (Road Bike & Mountain Bike)",
-    image: "/venues/koridor-trans-kalimantan.jpg",
+    image: "/venues2/soccer88.jpeg",
   },
   {
     category: "ARENA BALAP MOTOR",
     venue: "Sirkuit Sabaru Palangka Raya",
     city: "Sabaru, Sebangau, Palangka Raya",
     cabor: "Bermotor / Balap Motor (Motoprix)",
-    image: "/venues/sirkuitsabarupalangka.jpeg",
+    image: "/venues2/sirkuitsabaru.jpg",
   },
   {
     category: "AKUATIK & PERAIRAN",
     venue: "Kolam Renang Isen Mulang",
     city: "Jekan Raya, Palangka Raya",
     cabor: "Cabang Olahraga Akuatik / Renang",
-    image: "/venues/kolamRenang.webp",
+    image: "/venues2/kolamIsenMulang.jpg",
+  },
+  {
+    category: "AULA & GEDUNG PERTEMUAN",
+    venue: "Aula Kiyai Gede",
+    city: "Kotawaringin Lama, Kotawaringin Barat",
+    cabor: "Binaraga Fitnes, Dancesport & Gimnastik",
+    image: "",
+  },
+  {
+    category: "ARENA JALAN RAYA",
+    venue: "Jalan Raya Pangkalan Bun",
+    city: "Pangkalan Bun, Kotawaringin Barat",
+    cabor: "Balap Sepeda (Road Bike & Mountain Bike)",
+    image: "",
   },
 ];
 
@@ -283,19 +318,25 @@ export default function HomeView() {
                   to="/venue"
                   aria-label={`Lihat detail ${item.venue} di halaman Venue`}
                 >
-                  <img
-                    className="home-stadium-image"
-                    src={item.image}
-                    alt={item.venue}
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      if (!target.src.includes("sport-center.webp") && !target.src.includes("sportcenter.webp")) {
-                        target.src = "/venues/sport-center.webp";
-                      }
-                    }}
-                  />
+                  {item.image ? (
+                    <img
+                      className="home-stadium-image"
+                      src={item.image}
+                      alt={item.venue}
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        if (!target.src.includes("sportCenter.jpg")) {
+                          target.src = "/venues2/sportCenter.jpg";
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="home-stadium-image flex items-center justify-center bg-slate-100 text-xs font-medium text-slate-400">
+                      Foto belum tersedia
+                    </div>
+                  )}
                   <span className="home-stadium-index">{String(index + 1).padStart(2, "0")}</span>
                 </Link>
                 <div className="home-stadium-copy">

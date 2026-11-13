@@ -71,14 +71,23 @@ export default function VenueMap({
           >
             <Popup>
               <div style={{ maxWidth: 220 }}>
-                <img
-                  src={getVenuePhotoUrl(venue.name, `${venue.category} ${venue.note || ""}`)}
-                  alt={venue.name}
-                  style={{ width: "100%", height: 105, objectFit: "cover", borderRadius: 6, marginBottom: 8 }}
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = "/venues/GORSportCenter.jpeg";
-                  }}
-                />
+                {(() => {
+                  const photoUrl = getVenuePhotoUrl(
+                    venue.name,
+                    `${venue.category} ${venue.note || ""}`,
+                  );
+                  if (!photoUrl) return null;
+                  return (
+                    <img
+                      src={photoUrl}
+                      alt={venue.name}
+                      style={{ width: "100%", height: 105, objectFit: "cover", borderRadius: 6, marginBottom: 8 }}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = "/venues2/sportCenter.jpg";
+                      }}
+                    />
+                  );
+                })()}
                 <strong style={{ fontSize: 13, display: "block", marginBottom: 2 }}>{venue.name}</strong>
                 {venue.category && (
                   <small style={{ color: "#174a72", fontWeight: 700, display: "block" }}>

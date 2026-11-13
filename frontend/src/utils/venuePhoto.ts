@@ -1,98 +1,101 @@
 /**
  * Mapping foto resmi dokumentasi venue PORPROV XIII Kalimantan Tengah di Kotawaringin Barat
+ * Menggunakan aset real dari /venues2/
+ * Catatan: Jalan Raya & Aula Kiyai Gede dibiarkan kosong ("") sesuai permintaan.
  */
 
-const venuePhotoMap: Record<string, string> = {
-  // 1. Tenis Lapangan (Diprioritaskan sebelum 'pasir panjang' agar tidak tertimpa)
-  "lapangan tenis": "/venues/LapanganTennisPasirPanjang.webp",
-  "tenis pasir panjang": "/venues/LapanganTennisPasirPanjang.webp",
-  "tenis lapangan": "/venues/LapanganTennisPasirPanjang.webp",
+const venuePhotoMap: Array<[string, string]> = [
+  // 1. Dibiarkan kosong dulu
+  ["jalan raya", ""],
+  ["balap sepeda", ""],
+  ["koridor", ""],
+  ["kiyai gede", ""],
+  ["binaraga", ""],
+  ["dancesport", ""],
+  ["gimnastik", ""],
 
-  // 2. Stadion Sepak Bola (Diprioritaskan sebelum 'sport center')
-  "stadion sepak bola": "/venues/StadionSportCenter.jpeg",
-  "stadion sport center": "/venues/StadionSportCenter.jpeg",
-  "stadion": "/venues/StadionSportCenter.jpeg",
+  // 2. Venue spesifik dengan foto di /venues2/ (prioritas sebelum keyword umum seperti 'futsal' atau 'sport center')
+  ["lapangan tenis", "/venues2/LapanganTenisPasirPanjang.jpeg"],
+  ["tenis pasir panjang", "/venues2/LapanganTenisPasirPanjang.jpeg"],
+  ["tenis lapangan", "/venues2/LapanganTenisPasirPanjang.jpeg"],
 
-  // 3. Tinju / Juvenza Futsal
-  "juvenza": "/venues/juvenza.webp",
-  "tinju": "/venues/juvenza.webp",
+  ["lintasan", "/venues2/LintasanAtletik.jpeg"],
+  ["atletik", "/venues2/LintasanAtletik.jpeg"],
 
-  // 4. Tenis Meja / Aula Disdikbud
-  "disdikbud": "/venues/aulaDISDIKBUD.webp",
-  "disdik": "/venues/aulaDISDIKBUD.webp",
-  "tenis meja": "/venues/aulaDISDIKBUD.webp",
+  ["juvenza", "/venues2/juvenza.png"],
+  ["tinju", "/venues2/juvenza.png"],
 
-  // 5. Sirkuit Sabaru / Balap Motor
-  "sabaru": "/venues/sirkuitsabarupalangka.jpeg",
-  "sirkuit": "/venues/sirkuitsabarupalangka.jpeg",
-  "balap motor": "/venues/sirkuitsabarupalangka.jpeg",
-  "motoprix": "/venues/sirkuitsabarupalangka.jpeg",
+  ["samari", "/venues2/samari.jpg"],
+  ["karate", "/venues2/samari.jpg"],
 
-  // 6. Kolam Renang / Akuatik
-  "isen mulang": "/venues/kolamRenang.webp",
-  "kolam renang": "/venues/kolamRenang.webp",
-  "akuatik": "/venues/kolamRenang.webp",
+  ["gor koni", "/venues2/GORKoni.jpg"],
+  ["koni", "/venues2/GORKoni.jpg"],
+  ["bulutangkis", "/venues2/GORKoni.jpg"],
 
-  // 7. Sport Center & GOR
-  "ratu alamsyah": "/venues/GORSportCenter.jpeg",
-  "sport center": "/venues/GORSportCenter.jpeg",
-  "basket": "/venues/sport-center.webp",
-  "atletik": "/venues/lintasanAtletik.jpeg",
-  "lintasan": "/venues/lintasanAtletik.jpeg",
-  "track": "/venues/trackLari.webp",
+  ["onix", "/venues2/Onix.jpg"],
+  ["billiard", "/venues2/Onix.jpg"],
 
-  // 8. GOR KONI
-  "gor koni": "/venues/GORKoni.jpg",
-  "koni": "/venues/GORKoni.jpg",
+  ["antakusuma", "/venues2/aulaAntakusuma.jpeg"],
+  ["pencak silat", "/venues2/aulaAntakusuma.jpeg"],
+  ["taekwondo", "/venues2/aulaAntakusuma.jpeg"],
 
-  // 9. Billiard
-  "billiard": "/venues/OnixBilliard.webp",
-  "onix": "/venues/OnixBilliard.webp",
+  ["disdikbud", "/venues2/aulaDISKDIKBUD.jpg"],
+  ["disdik", "/venues2/aulaDISKDIKBUD.jpg"],
+  ["tenis meja", "/venues2/aulaDISKDIKBUD.jpg"],
 
-  // 10. Minisoccer R88
-  "minisoccer": "/venues/minisoccer88.jpeg",
-  "r88": "/venues/minisoccer88.jpeg",
-  "mini soccer": "/venues/minisoccer88.jpeg",
-  "mini88": "/venues/minisoccer88.jpeg",
-  "sepak bola mini": "/venues/minisoccer88.jpeg",
+  ["dispora", "/venues2/aulaDisipora.jpeg"],
+  ["disipora", "/venues2/aulaDisipora.jpeg"],
+  ["bridge", "/venues2/aulaDisipora.jpeg"],
 
-  // 11. Dayung / Kampung Sega / Sungai Arut
-  "sega": "/venues/kampung-sega.jpeg",
-  "sungai arut": "/venues/sungai-arut.jpg",
-  "dayung": "/venues/sungai-arut.jpg",
+  ["bapperida", "/venues2/bapperida.jpg"],
+  ["catur", "/venues2/bapperida.jpg"],
 
-  // 12. Pangkalan Bun Park
-  "pangkalan bun park": "/venues/pangkalan-bun-park.jpg",
+  ["mapolres", "/venues2/mapolres.jpg"],
+  ["judo", "/venues2/mapolres.jpg"],
 
-  // 13. Desa Adat Pasir Panjang
-  "pasir panjang": "/venues/pasir-panjang.jpg",
+  ["kampung sega", "/venues2/kampungSega.jpg"],
+  ["sega", "/venues2/kampungSega.jpg"],
+  ["sungai arut", "/venues2/kampungSega.jpg"],
+  ["dayung", "/venues2/kampungSega.jpg"],
 
-  // 14. Balap Sepeda / Jalan Raya
-  "jalan raya": "/venues/jalanraya.jpg",
-  "balap sepeda": "/venues/jalanraya.jpg",
-  "koridor": "/venues/koridor-trans-kalimantan.jpg",
+  ["isen mulang", "/venues2/kolamIsenMulang.jpg"],
+  ["kolam renang", "/venues2/kolamIsenMulang.jpg"],
+  ["akuatik", "/venues2/kolamIsenMulang.jpg"],
 
-  // 15. Aerosport / Karanganyar
-  "karanganyar": "/venues/karanganyar.jpg",
-  "aerosport": "/venues/karanganyar.jpg",
+  ["pangkalan bun park", "/venues2/pangakalnbunpark.jpg"],
+  ["mma", "/venues2/pangakalnbunpark.jpg"],
+  ["panjat tebing", "/venues2/pangakalnbunpark.jpg"],
 
-  // 16. Pelabuhan Kumai
-  "kumai": "/venues/pelabuhan-kumai.jpg",
+  ["sabaru", "/venues2/sirkuitsabaru.jpg"],
+  ["sirkuit", "/venues2/sirkuitsabaru.jpg"],
+  ["balap motor", "/venues2/sirkuitsabaru.jpg"],
+  ["motoprix", "/venues2/sirkuitsabaru.jpg"],
 
-  // 17. Aula Kiyai Gede & Antakusuma
-  "kiyai gede": "/venues/kotawaringin-lama.jpg",
-  "kotawaringin lama": "/venues/kotawaringin-lama.jpg",
-  "antakusuma": "/venues/kotawaringin-lama.jpg",
-};
+  ["minisoccer", "/venues2/soccer88.jpeg"],
+  ["mini soccer", "/venues2/soccer88.jpeg"],
+  ["r88", "/venues2/soccer88.jpeg"],
+  ["soccer88", "/venues2/soccer88.jpeg"],
+  ["sepak bola mini", "/venues2/soccer88.jpeg"],
+
+  // 3. Sport Center, Basket, Futsal, Voli, Indoor, Stadion -> menggunakan /venues2/sportCenter.jpg
+  ["ratu alamsyah", "/venues2/sportCenter.jpg"],
+  ["basket", "/venues2/sportCenter.jpg"],
+  ["futsal", "/venues2/sportCenter.jpg"],
+  ["voli", "/venues2/sportCenter.jpg"],
+  ["indoor", "/venues2/sportCenter.jpg"],
+  ["sport center", "/venues2/sportCenter.jpg"],
+  ["stadion", "/venues2/sportCenter.jpg"],
+  ["sepak takraw", "/venues2/sportCenter.jpg"],
+];
 
 export function getVenuePhotoUrl(venueName?: string, additionalText?: string): string {
-  if (!venueName) return "/venues/GORSportCenter.jpeg";
+  if (!venueName) return "/venues2/sportCenter.jpg";
   const normalized = `${venueName} ${additionalText || ""}`.toLowerCase();
 
-  for (const [key, url] of Object.entries(venuePhotoMap)) {
+  for (const [key, url] of venuePhotoMap) {
     if (normalized.includes(key)) {
       return url;
     }
   }
-  return "/venues/GORSportCenter.jpeg";
+  return "/venues2/sportCenter.jpg";
 }
