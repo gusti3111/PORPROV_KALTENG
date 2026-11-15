@@ -176,7 +176,7 @@ export default function VenueView() {
                         <img
                           src={photoUrl}
                           alt={venue.name}
-                          className="h-full w-full object-contain transition-transform duration-300 hover:scale-105"
+                          className="block h-full w-full object-cover object-center transition-transform duration-300 hover:scale-105"
                           loading="lazy"
                           onError={(e) => {
                             e.currentTarget.src = "/venues2/sportCenter.jpg";

@@ -22,8 +22,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     .join("");
 
   const handleLogout = () => {
+    navigate("/admin/login", { replace: true, state: null });
     logout();
-    navigate("/admin/login", { replace: true });
   };
 
   return (

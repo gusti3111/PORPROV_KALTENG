@@ -14,6 +14,7 @@ import {
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { useCompetitionStore } from "../stores/competitionStore";
+import { isGroupPhaseNonHeadToHeadMatch } from "../utils/sportScoringConfig";
 import { SlidersHorizontal } from "lucide-react";
 
 type ScheduleEvent = {
@@ -86,10 +87,22 @@ export default function ScheduleView() {
   const scheduleEvents = useMemo(
     () =>
       matches.map((match) => {
-        const p0 = match.participants?.[0];
-        const p1 = match.participants?.[1];
-        const participantsSummary =
-          p0 && p1
+        const parts = match.participants ?? [];
+        const p0 = parts[0];
+        const p1 = parts[1];
+        const nonHeadToHead = isGroupPhaseNonHeadToHeadMatch(
+          match.sport_id,
+          match.sport_name,
+          match.round_name,
+          match.title,
+        );
+        const participantsSummary = nonHeadToHead
+          ? parts.length > 0
+            ? parts
+                .map((p) => `${p.contingent_name}${p.score ? ` (${p.score})` : ""}`)
+                .join(" • ")
+            : undefined
+          : p0 && p1
             ? `${p0.contingent_name}${p0.score ? ` (${p0.score})` : ""} vs ${p1.contingent_name}${p1.score ? ` (${p1.score})` : ""}`
             : undefined;
         return {
@@ -341,11 +354,15 @@ export default function ScheduleView() {
             {visibleEvents.length > 0 ? (
               <div className="schedule-event-list">
                 {visibleEvents.map((event) => {
-                  const hasLiveStream =
-                    event.status === "ONGOING" && Boolean(event.liveStreamUrl?.trim());
+                  const isOngoing = event.status === "ONGOING";
+                  const liveStreamHref =
+                    event.liveStreamUrl?.trim() ||
+                    `https://www.youtube.com/results?search_query=${encodeURIComponent(
+                      `PORPROV XIII Kalimantan Tengah ${event.sport} Live`,
+                    )}`;
                   const handleCardActivate = () => {
-                    if (hasLiveStream && event.liveStreamUrl) {
-                      window.open(event.liveStreamUrl, "_blank", "noopener,noreferrer");
+                    if (isOngoing) {
+                      window.open(liveStreamHref, "_blank", "noopener,noreferrer");
                     } else {
                       navigate(`/hasil?cabor=${encodeURIComponent(event.sport)}`);
                     }
@@ -357,7 +374,7 @@ export default function ScheduleView() {
                     role="link"
                     tabIndex={0}
                     aria-label={
-                      hasLiveStream
+                      isOngoing
                         ? `Tonton live YouTube: ${event.title}`
                         : `Lihat hasil pertandingan ${event.sport}: ${event.title}`
                     }
@@ -377,7 +394,7 @@ export default function ScheduleView() {
                       </strong>
                       <span className="schedule-event-title">
                         {event.eventName ? `${event.eventName} — ` : ""}
-                        {event.title}
+                        {event.title || "-"}
                       </span>
                       {event.participantsSummary && (
                         <small className="font-semibold text-foreground">
@@ -385,7 +402,7 @@ export default function ScheduleView() {
                         </small>
                       )}
                       <small>{event.venue}</small>
-                      {hasLiveStream ? (
+                      {isOngoing ? (
                         <span className="schedule-live-link" aria-hidden="true">
                           Tonton live di YouTube
                         </span>

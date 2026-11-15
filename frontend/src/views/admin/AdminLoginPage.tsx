@@ -15,7 +15,7 @@ import { getAPIErrorMessage } from "@/api/client";
 import { useAuthStore } from "@/stores/authStore";
 import {
   validateAdminEmail,
-  validateAdminUsername,
+  validateLoginIdentifier,
   validateLoginPassword,
   validateStrongPassword,
 } from "@/utils/authValidation";
@@ -71,10 +71,10 @@ export default function AdminLoginPage() {
     setLoginSuccessNote(null);
     clearError();
 
-    const trimmedUsername = username.trim();
-    const usernameErr = validateAdminUsername(trimmedUsername);
-    if (usernameErr) {
-      setLocalError(usernameErr);
+    const trimmedIdentifier = username.trim();
+    const identifierErr = validateLoginIdentifier(trimmedIdentifier);
+    if (identifierErr) {
+      setLocalError(identifierErr);
       return;
     }
 
@@ -85,7 +85,7 @@ export default function AdminLoginPage() {
     }
 
     try {
-      await login(trimmedUsername, password);
+      await login(trimmedIdentifier, password);
       navigate(from, { replace: true });
     } catch {
       // Error message already stored in useAuthStore
@@ -127,12 +127,12 @@ export default function AdminLoginPage() {
         setResetToken(data.reset_token);
         setForgotInfo(
           data.message ||
-            "Token reset password berhasil dibuat (mode dev) dan otomatis diisikan di bawah.",
+          "Token reset password berhasil dibuat (mode dev) dan otomatis diisikan di bawah.",
         );
       } else {
         setForgotInfo(
           data.message ||
-            "Jika email terdaftar, token reset telah dikirim ke email Anda. Silakan masukkan token tersebut.",
+          "Jika email terdaftar, token reset telah dikirim ke email Anda. Silakan masukkan token tersebut.",
         );
       }
       setForgotStep(2);
@@ -219,7 +219,7 @@ export default function AdminLoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-foreground mb-1.5">
-                Username
+                Email atau Username
               </label>
               <div className="relative">
                 <User className="h-4 w-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -227,11 +227,11 @@ export default function AdminLoginPage() {
                   id="username"
                   type="text"
                   autoComplete="username"
-                  maxLength={50}
+                  maxLength={100}
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Masukkan username"
+                  placeholder="Masukkan email atau username"
                   className="w-full rounded-lg border border-border bg-background pl-10 pr-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                 />
               </div>
@@ -283,12 +283,12 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-border text-center text-sm text-muted-foreground">
+          {/* <div className="mt-6 pt-5 border-t border-border text-center text-sm text-muted-foreground">
             Belum punya akun admin?{" "}
             <Link to="/admin/register" className="font-semibold text-primary hover:underline">
               Daftar Sekarang
             </Link>
-          </div>
+          </div> */}
         </div>
       </div>
 

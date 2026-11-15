@@ -23,6 +23,23 @@ export function validateAdminEmail(email: string): string | null {
   return null;
 }
 
+export function validateLoginIdentifier(identifier: string): string | null {
+  const normalized = identifier.trim();
+  if (!normalized) {
+    return "Email atau username wajib diisi.";
+  }
+  if (normalized.includes("@")) {
+    if (!EMAIL_PATTERN.test(normalized.toLowerCase())) {
+      return "Format email tidak valid.";
+    }
+    return null;
+  }
+  if (!USERNAME_PATTERN.test(normalized)) {
+    return "Username harus 3–50 karakter (huruf, angka, '.', '_', '-') atau masukkan email yang valid.";
+  }
+  return null;
+}
+
 export function validateStrongPassword(password: string): string | null {
   if (!password) {
     return "Password wajib diisi.";

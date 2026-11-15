@@ -106,13 +106,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  login: async (username, password) => {
+  login: async (identifier, password) => {
     set({ isLoading: true, error: null });
+    const normalized = identifier.trim();
+    const isEmail = normalized.includes("@");
+    const primaryPayload = { username: normalized, password };
+
     try {
-      const res = await apiClient.post<MaybeEnvelope<AuthResponsePayload>>(
-        "/login",
-        { username, password },
-      );
+      let res;
+      try {
+        res = await apiClient.post<MaybeEnvelope<AuthResponsePayload>>(
+          "/login",
+          primaryPayload,
+        );
+      } catch (primaryErr) {
+        if (
+          isEmail &&
+          axios.isAxiosError(primaryErr) &&
+          primaryErr.response?.status === 400
+        ) {
+          res = await apiClient.post<MaybeEnvelope<AuthResponsePayload>>(
+            "/login",
+            { email: normalized.toLowerCase(), password },
+          );
+        } else {
+          throw primaryErr;
+        }
+      }
       const data = unwrapPayload(res.data);
       if (!data?.token || !data?.user) {
         throw new Error("Respons login tidak valid.");
@@ -166,6 +186,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const res = await apiClient.get<MaybeEnvelope<{ user?: AdminUser } | AdminUser>>("/me");
       const raw = unwrapPayload(res.data);
+      if (get().token !== token) {
+        return false;
+      }
       const meUser =
         raw && typeof raw === "object" && "user" in raw && raw.user
           ? raw.user

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { getAPIData, getAPIErrorMessage } from "../../api/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,18 +78,31 @@ export default function MatchUpdateForm() {
   }
 
   const handleSave = async () => {
+    if (!match.participants || match.participants.length === 0) {
+      alert(
+        "Pertandingan ini belum memiliki kontingen. Silakan isi kontingen di form Edit Jadwal terlebih dahulu sebelum input hasil.",
+      );
+      return;
+    }
     setIsSaving(true);
     try {
+      const nextStatus = status || "FINISHED";
       await updateMatch(id!, {
-        status,
-        scores: status === "SCHEDULED" ? scores.map(() => "0") : scores,
-        winner_contingent_id: status === "SCHEDULED" ? 0 : winnerContingentId,
+        status: nextStatus,
+        scores:
+          nextStatus === "SCHEDULED"
+            ? scores.map(() => "0")
+            : scores.map((s) => String(s ?? "")),
+        winner_contingent_id: nextStatus === "SCHEDULED" ? 0 : winnerContingentId,
       });
+      if ((match.sport_id ?? 0) > 0) {
+        await getAPIData(`/sports/${match.sport_id}/tournament`).catch(() => null);
+      }
       alert("✅ Sukses! Skor disimpan, bagan, klasemen, dan medali otomatis diperbarui.");
       navigate("/admin/hasil");
     } catch (error) {
       console.error("Failed to save:", error);
-      alert("❌ Gagal menyimpan data. Silakan coba lagi.");
+      alert(`❌ Gagal menyimpan data: ${getAPIErrorMessage(error)}`);
     } finally {
       setIsSaving(false);
     }

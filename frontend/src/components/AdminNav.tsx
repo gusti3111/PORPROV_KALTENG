@@ -22,8 +22,8 @@ export default function AdminNav() {
   const logout = useAuthStore((state) => state.logout);
 
   const handleLogout = () => {
+    navigate("/admin/login", { replace: true, state: null });
     logout();
-    navigate("/admin/login", { replace: true });
   };
 
   return (

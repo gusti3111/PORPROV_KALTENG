@@ -10,9 +10,10 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/jackc/pgx/v5"
 	"porprov-backend/internal/database"
 	"porprov-backend/internal/model"
+
+	"github.com/jackc/pgx/v5"
 )
 
 var ErrDatabaseUnavailable = errors.New("database unavailable")
@@ -235,7 +236,9 @@ func (r *MatchRepository) DeleteMatch(ctx context.Context, matchID string) error
 		return fmt.Errorf("delete match: %w", err)
 	}
 	if sportID > 0 {
-		_ = r.SyncSportTournamentAndMedals(ctx, sportID)
+		if err := r.SyncSportTournamentAndMedals(ctx, sportID); err != nil {
+			return fmt.Errorf("sync tournament and medals: %w", err)
+		}
 	}
 	return nil
 }
@@ -563,7 +566,9 @@ func (r *MatchRepository) UpdateMatchWithWinner(
 		return err
 	}
 	if sportID > 0 {
-		_ = r.SyncSportTournamentAndMedals(ctx, sportID)
+		if err := r.SyncSportTournamentAndMedals(ctx, sportID); err != nil {
+			return fmt.Errorf("sync tournament and medals: %w", err)
+		}
 	}
 	return nil
 }
@@ -571,9 +576,6 @@ func (r *MatchRepository) UpdateMatchWithWinner(
 func (r *MatchRepository) UpdateMatchParticipants(ctx context.Context, matchID string, contingentIDs []int) error {
 	if r.db == nil || r.db.Pool == nil {
 		return ErrDatabaseUnavailable
-	}
-	if len(contingentIDs) < 2 {
-		return ErrInvalidContingents
 	}
 	seen := make(map[int]bool, len(contingentIDs))
 	contingentIDs32 := make([]int32, 0, len(contingentIDs))
@@ -606,14 +608,16 @@ func (r *MatchRepository) UpdateMatchParticipants(ctx context.Context, matchID s
 		return fmt.Errorf("lock match: %w", err)
 	}
 
-	var validCount int
-	if err := tx.QueryRow(ctx, `
-		SELECT COUNT(*) FROM contingents WHERE id = ANY($1::int[])
-	`, contingentIDs32).Scan(&validCount); err != nil {
-		return fmt.Errorf("validate contingents: %w", err)
-	}
-	if validCount != len(contingentIDs) {
-		return ErrInvalidContingents
+	if len(contingentIDs) > 0 {
+		var validCount int
+		if err := tx.QueryRow(ctx, `
+			SELECT COUNT(*) FROM contingents WHERE id = ANY($1::int[])
+		`, contingentIDs32).Scan(&validCount); err != nil {
+			return fmt.Errorf("validate contingents: %w", err)
+		}
+		if validCount != len(contingentIDs) {
+			return ErrInvalidContingents
+		}
 	}
 
 	rows, err := tx.Query(ctx, `
@@ -691,7 +695,9 @@ func (r *MatchRepository) UpdateMatchParticipants(ctx context.Context, matchID s
 		return err
 	}
 	if sportID > 0 {
-		_ = r.SyncSportTournamentAndMedals(ctx, sportID)
+		if err := r.SyncSportTournamentAndMedals(ctx, sportID); err != nil {
+			return fmt.Errorf("sync tournament and medals: %w", err)
+		}
 	}
 	return nil
 }
@@ -880,11 +886,9 @@ func syncScheduledMatchToTournamentTx(
 		`, sportID, groupCode, groupName, sortOrder).Scan(&groupID)
 		if err == nil && groupID > 0 {
 			for _, cid := range []int{homeID, awayID} {
-				_, _ = tx.Exec(ctx, `
-					INSERT INTO sport_group_standings (group_id, contingent_id, rank, played, won, drawn, lost, points)
-					VALUES ($1, $2, 99, 0, 0, 0, 0, 0)
-					ON CONFLICT (group_id, contingent_id) DO NOTHING
-				`, groupID, cid)
+				if err := ensureGroupStandingTx(ctx, tx, groupID, cid); err != nil {
+					return
+				}
 			}
 			_ = recalculateGroupRanksTx(ctx, tx, groupID)
 		}
@@ -938,6 +942,23 @@ func isScoreLeaderboardSport(sportID int) bool {
 	}
 }
 
+func ensureGroupStandingTx(ctx context.Context, tx pgx.Tx, groupID, contingentID int) error {
+	if contingentID < 1 {
+		return nil
+	}
+	_, err := tx.Exec(ctx, `
+		INSERT INTO sport_group_standings (group_id, contingent_id, rank, played, won, drawn, lost, points)
+		VALUES (
+			$1,
+			$2,
+			COALESCE((SELECT MAX(rank) + 1 FROM sport_group_standings WHERE group_id = $1), 1),
+			0, 0, 0, 0, 0
+		)
+		ON CONFLICT (group_id, contingent_id) DO NOTHING
+	`, groupID, contingentID)
+	return err
+}
+
 func updateGroupStandingsFromMatchTx(
 	ctx context.Context,
 	tx pgx.Tx,
@@ -968,12 +989,7 @@ func updateGroupStandingsFromMatchTx(
 	}
 
 	for _, cid := range []int{contingentA, contingentB} {
-		_, err = tx.Exec(ctx, `
-			INSERT INTO sport_group_standings (group_id, contingent_id, rank, played, won, drawn, lost, points)
-			VALUES ($1, $2, 99, 0, 0, 0, 0, 0)
-			ON CONFLICT (group_id, contingent_id) DO NOTHING
-		`, groupID, cid)
-		if err != nil {
+		if err = ensureGroupStandingTx(ctx, tx, groupID, cid); err != nil {
 			return err
 		}
 	}
@@ -1159,10 +1175,12 @@ func (r *MatchRepository) SyncSportTournamentAndMedals(ctx context.Context, spor
 	defer tx.Rollback(ctx)
 
 	// 1. Ensure default group rows exist and reset group standings for sportID
-	_, _ = tx.Exec(ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM sport_group_standings
 		WHERE group_id IN (SELECT id FROM sport_groups WHERE sport_id = $1)
-	`, sportID)
+	`, sportID); err != nil {
+		return fmt.Errorf("reset group standings: %w", err)
+	}
 
 	for _, g := range []struct {
 		code  string
@@ -1172,11 +1190,13 @@ func (r *MatchRepository) SyncSportTournamentAndMedals(ctx context.Context, spor
 		{"A", "Grup A", 1},
 		{"B", "Grup B", 2},
 	} {
-		_, _ = tx.Exec(ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO sport_groups (sport_id, group_code, name, sort_order)
 			VALUES ($1, $2, $3, $4)
 			ON CONFLICT (sport_id, group_code) DO UPDATE SET name = EXCLUDED.name
-		`, sportID, g.code, g.name, g.order)
+		`, sportID, g.code, g.name, g.order); err != nil {
+			return fmt.Errorf("ensure group %s: %w", g.code, err)
+		}
 	}
 
 	// 2. Ensure default bracket template exists and reset bracket matches for sportID
@@ -1196,7 +1216,7 @@ func (r *MatchRepository) SyncSportTournamentAndMedals(ctx context.Context, spor
 		{"THIRD_PLACE", 2, 2, "Perebutan Perunggu"},
 	}
 	for _, slot := range defaultBracketSlots {
-		_, _ = tx.Exec(ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO sport_bracket_matches (
 				sport_id, round_name, round_order, match_order, label,
 				home_contingent_id, away_contingent_id, home_score, away_score, status
@@ -1207,14 +1227,18 @@ func (r *MatchRepository) SyncSportTournamentAndMedals(ctx context.Context, spor
 				home_score = NULL,
 				away_score = NULL,
 				status = 'SCHEDULED'
-		`, sportID, slot.roundName, slot.roundOrder, slot.matchOrder, slot.label)
+		`, sportID, slot.roundName, slot.roundOrder, slot.matchOrder, slot.label); err != nil {
+			return fmt.Errorf("ensure default bracket slot %s/%d: %w", slot.roundName, slot.matchOrder, err)
+		}
 	}
 
 	// 3. Clear medals for this sport's events before recomputing from finished matches
-	_, _ = tx.Exec(ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM medals
 		WHERE event_id IN (SELECT id FROM sport_events WHERE sport_id = $1)
-	`, sportID)
+	`, sportID); err != nil {
+		return fmt.Errorf("reset sport medals: %w", err)
+	}
 
 	type resolvedMatch struct {
 		match        model.ScheduleMatch
@@ -1241,16 +1265,46 @@ func (r *MatchRepository) SyncSportTournamentAndMedals(ctx context.Context, spor
 	}
 
 	for _, m := range matches {
-		if len(m.Participants) < 2 {
+		rType, defOrder := classifyRound(m.RoundName, m.Title)
+		if rType == "GROUP" {
+			groupCode := detectGroupCode(m.RoundName, m.Title)
+			groupName := "Grup " + groupCode
+			sortOrder := 1
+			if groupCode == "B" {
+				sortOrder = 2
+			}
+			var groupID int
+			err := tx.QueryRow(ctx, `
+				INSERT INTO sport_groups (sport_id, group_code, name, sort_order)
+				VALUES ($1, $2, $3, $4)
+				ON CONFLICT (sport_id, group_code) DO UPDATE SET name = EXCLUDED.name
+				RETURNING id
+			`, sportID, groupCode, groupName, sortOrder).Scan(&groupID)
+			if err == nil && groupID > 0 {
+				for _, p := range m.Participants {
+					if err := ensureGroupStandingTx(ctx, tx, groupID, p.ContingentID); err != nil {
+						return fmt.Errorf("ensure group standing (sport=%d group=%s contingent=%d): %w", sportID, groupCode, p.ContingentID, err)
+					}
+				}
+				if err := recalculateGroupRanksTx(ctx, tx, groupID); err != nil {
+					return err
+				}
+			}
+		}
+
+		if len(m.Participants) < 1 {
 			continue
 		}
 		p0 := m.Participants[0]
-		p1 := m.Participants[1]
-		if p0.ContingentID < 1 || p1.ContingentID < 1 {
+		if p0.ContingentID < 1 {
 			continue
 		}
+		var p1 model.MatchParticipant
+		hasP1 := len(m.Participants) >= 2 && m.Participants[1].ContingentID > 0
+		if hasP1 {
+			p1 = m.Participants[1]
+		}
 
-		rType, defOrder := classifyRound(m.RoundName, m.Title)
 		if rType != "GROUP" && rType != "" {
 			hasExplicitKnockout = true
 			if rType == "QUARTERFINAL" {
@@ -1278,7 +1332,11 @@ func (r *MatchRepository) SyncSportTournamentAndMedals(ctx context.Context, spor
 
 		var hScore, aScore *int
 		n0, ok0 := parsePrimaryScoreNumber(p0.Score)
-		n1, ok1 := parsePrimaryScoreNumber(p1.Score)
+		var n1 float64
+		var ok1 bool
+		if hasP1 {
+			n1, ok1 = parsePrimaryScoreNumber(p1.Score)
+		}
 		if ok0 {
 			v := int(n0)
 			hScore = &v
@@ -1350,7 +1408,7 @@ func (r *MatchRepository) SyncSportTournamentAndMedals(ctx context.Context, spor
 
 		if rm.roundType == "GROUP" {
 			groupCode := detectGroupCode(rm.match.RoundName, rm.match.Title)
-			if statusStr == "FINISHED" {
+			if statusStr == "FINISHED" && rm.homeID > 0 && rm.awayID > 0 {
 				_ = updateGroupStandingsFromMatchTx(
 					ctx,
 					tx,
@@ -1383,17 +1441,21 @@ func (r *MatchRepository) SyncSportTournamentAndMedals(ctx context.Context, spor
 			if !hasExplicitKnockout {
 				groupMatchSlot++
 				if groupMatchSlot <= 2 {
-					_, _ = tx.Exec(ctx, `
+					if _, err := tx.Exec(ctx, `
 						UPDATE sport_bracket_matches
-						SET home_contingent_id = $1,
-						    away_contingent_id = $2,
+						SET home_contingent_id = NULLIF($1, 0),
+						    away_contingent_id = NULLIF($2, 0),
 						    home_score = $3,
 						    away_score = $4,
 						    status = $5
 						WHERE sport_id = $6 AND round_name = 'SEMIFINAL' AND match_order = $7
-					`, rm.homeID, rm.awayID, rm.homeScore, rm.awayScore, statusStr, sportID, groupMatchSlot)
+					`, rm.homeID, rm.awayID, rm.homeScore, rm.awayScore, statusStr, sportID, groupMatchSlot); err != nil {
+						return fmt.Errorf("mirror group match to bracket: %w", err)
+					}
 					if statusStr == "FINISHED" && rm.winnerID > 0 {
-						_ = cascadeBracketProgressionTx(ctx, tx, sportID, "SEMIFINAL", groupMatchSlot, rm.winnerID, rm.loserID)
+						if err := cascadeBracketProgressionTx(ctx, tx, sportID, "SEMIFINAL", groupMatchSlot, rm.winnerID, rm.loserID); err != nil {
+							return err
+						}
 					}
 				}
 			}
@@ -1405,20 +1467,26 @@ func (r *MatchRepository) SyncSportTournamentAndMedals(ctx context.Context, spor
 		if order < 1 {
 			order = 1
 		}
-		_, _ = tx.Exec(ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE sport_bracket_matches
-			SET home_contingent_id = $1,
-			    away_contingent_id = $2,
+			SET home_contingent_id = NULLIF($1, 0),
+			    away_contingent_id = NULLIF($2, 0),
 			    home_score = $3,
 			    away_score = $4,
 			    status = $5
 			WHERE sport_id = $6 AND round_name = $7 AND match_order = $8
-		`, rm.homeID, rm.awayID, rm.homeScore, rm.awayScore, statusStr, sportID, rm.roundType, order)
+		`, rm.homeID, rm.awayID, rm.homeScore, rm.awayScore, statusStr, sportID, rm.roundType, order); err != nil {
+			return fmt.Errorf("update bracket match %s/%d: %w", rm.roundType, order, err)
+		}
 
 		if statusStr == "FINISHED" && rm.winnerID > 0 {
-			_ = cascadeBracketProgressionTx(ctx, tx, sportID, rm.roundType, order, rm.winnerID, rm.loserID)
+			if err := cascadeBracketProgressionTx(ctx, tx, sportID, rm.roundType, order, rm.winnerID, rm.loserID); err != nil {
+				return err
+			}
 			if rm.roundType == "FINAL" || rm.roundType == "THIRD_PLACE" {
-				_ = awardBracketMedalsTx(ctx, tx, rm.match.EventID, rm.roundType, rm.winnerID, rm.loserID)
+				if err := awardBracketMedalsTx(ctx, tx, rm.match.EventID, rm.roundType, rm.winnerID, rm.loserID); err != nil {
+					return err
+				}
 			}
 		}
 	}

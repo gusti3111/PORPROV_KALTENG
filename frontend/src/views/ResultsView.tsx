@@ -24,6 +24,13 @@ import { getContingentLogoUrl } from "../utils/contingentLogo";
 
 type ResultsTab = "matches" | "medals" | "sports";
 
+type MatchParticipantResult = {
+  id: string;
+  name: string;
+  score: string;
+  isWinner: boolean;
+};
+
 type MatchResult = {
   id: string;
   date: string;
@@ -32,12 +39,8 @@ type MatchResult = {
   title: string;
   roundName: string;
   venue: string;
-  home: string;
-  homeScore: string;
-  homeWinner: boolean;
-  away: string;
-  awayScore: string;
-  awayWinner: boolean;
+  status: string;
+  participants: MatchParticipantResult[];
 };
 
 type MedalType = "gold" | "silver" | "bronze";
@@ -132,31 +135,100 @@ export default function ResultsView() {
   const results = useMemo<MatchResult[]>(
     () =>
       matches
-        .filter(
-          (match) =>
-            match.status === "FINISHED" && match.participants.length > 0,
-        )
-        .map((match) => {
-          const home = match.participants[0];
-          const away = match.participants[1];
-          return {
-            id: match.id,
-            date: match.date,
-            sport: match.sport_name,
-            event: match.event_name,
-            title: match.title,
-            roundName: match.round_name || "Penyisihan",
-            venue: match.venue_name,
-            home: home.contingent_name,
-            homeScore: home.score || "–",
-            homeWinner: home.is_winner,
-            away: away?.contingent_name ?? "Belum ditentukan",
-            awayScore: away?.score || "–",
-            awayWinner: away?.is_winner ?? false,
-          };
-        }),
+        .filter((match) => {
+          if (match.participants.length > 0) {
+            return (
+              match.status === "FINISHED" ||
+              match.status === "ONGOING" ||
+              match.status === "SCHEDULED"
+            );
+          }
+          const isGroupStage =
+            /(grup|group|penyisihan|pool)/i.test(match.round_name || "") ||
+            /(grup|group|penyisihan|pool)/i.test(match.title || "");
+          return (
+            isGroupStage &&
+            (match.status === "SCHEDULED" || match.status === "ONGOING")
+          );
+        })
+        .map((match) => ({
+          id: match.id,
+          date: match.date,
+          sport: match.sport_name,
+          event: match.event_name,
+          title: match.title,
+          roundName: match.round_name || "Penyisihan",
+          venue: match.venue_name,
+          status: match.status,
+          participants:
+            match.participants.length > 0
+              ? match.participants.map((participant, idx) => ({
+                  id: `${match.id}-${participant.contingent_id ?? idx}-${idx}`,
+                  name: participant.contingent_name || "Belum ditentukan",
+                  score:
+                    match.status === "SCHEDULED"
+                      ? "–"
+                      : participant.score || "–",
+                  isWinner: Boolean(participant.is_winner),
+                }))
+              : [
+                  {
+                    id: `${match.id}-tba`,
+                    name: "Kontingen belum ditentukan (TBA)",
+                    score: "–",
+                    isWinner: false,
+                  },
+                ],
+        })),
     [matches],
   );
+
+  const visibleResults = useMemo(() => {
+    const normalizedQuery = query.trim().toLocaleLowerCase("id");
+    return results.filter((result) => {
+      const matchesDate = !selectedDate || result.date === selectedDate;
+      const matchesSport = !selectedSport || result.sport === selectedSport;
+      const participantNames = result.participants
+        .map((participant) => participant.name)
+        .join(" ");
+      const matchesQuery =
+        !normalizedQuery ||
+        `${result.sport} ${result.event} ${result.title} ${result.venue} ${participantNames}`
+          .toLocaleLowerCase("id")
+          .includes(normalizedQuery);
+      return matchesDate && matchesSport && matchesQuery;
+    });
+  }, [query, results, selectedDate, selectedSport]);
+
+  // const results = useMemo<MatchResult[]>(
+  //   () =>
+  //     matches
+  //       .filter(
+  //         (match) =>
+  //           match.status === "FINISHED" && match.participants.length > 0,
+  //       )
+  //       .map((match) => {
+  //         // hanya menampilkan 2
+  //         const home = match.participants[0];
+  //         const away = match.participants[1];
+  //         return {
+  //           id: match.id,
+  //           date: match.date,
+  //           sport: match.sport_name,
+  //           event: match.event_name,
+  //           title: match.title,
+  //           roundName: match.round_name || "Penyisihan",
+  //           venue: match.venue_name,
+  //           home: home.contingent_name,
+  //           homeScore: home.score || "–",
+  //           homeWinner: home.is_winner,
+  //           away: away?.contingent_name ?? "Belum ditentukan",
+  //           awayScore: away?.score || "–",
+  //           awayWinner: away?.is_winner ?? false,
+  //         };
+  //       }),
+  //   [matches],
+  // );
   const resultDates = useMemo(
     () => [...new Set(results.map((result) => result.date))].sort(),
     [results],
@@ -176,19 +248,20 @@ export default function ResultsView() {
   const totalMedals =
     medalTotals.gold + medalTotals.silver + medalTotals.bronze;
 
-  const visibleResults = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase("id");
-    return results.filter((result) => {
-      const matchesDate = !selectedDate || result.date === selectedDate;
-      const matchesSport = !selectedSport || result.sport === selectedSport;
-      const matchesQuery =
-        !normalizedQuery ||
-        `${result.sport} ${result.event} ${result.venue} ${result.home} ${result.away}`
-          .toLocaleLowerCase("id")
-          .includes(normalizedQuery);
-      return matchesDate && matchesSport && matchesQuery;
-    });
-  }, [query, results, selectedDate, selectedSport]);
+
+  // const visibleResults = useMemo(() => {
+  //   const normalizedQuery = query.trim().toLocaleLowerCase("id");
+  //   return results.filter((result) => {
+  //     const matchesDate = !selectedDate || result.date === selectedDate;
+  //     const matchesSport = !selectedSport || result.sport === selectedSport;
+  //     const matchesQuery =
+  //       !normalizedQuery ||
+  //       `${result.sport} ${result.event} ${result.venue} ${result.home} ${result.away}`
+  //         .toLocaleLowerCase("id")
+  //         .includes(normalizedQuery);
+  //     return matchesDate && matchesSport && matchesQuery;
+  //   });
+  // }, [query, results, selectedDate, selectedSport]);
 
   return (
     <>
@@ -224,9 +297,9 @@ export default function ResultsView() {
               <strong>{totalMedals}</strong>
               <span>medali tercatat</span>
             </div>
-            <Badge variant="secondary" className="results-simulation-badge">
+            {/* <Badge variant="secondary" className="results-simulation-badge">
               DARI BACKEND
-            </Badge>
+            </Badge> */}
           </Card>
         </section>
 
@@ -364,7 +437,7 @@ export default function ResultsView() {
                   </label>
                 </div>
 
-                <Card className="results-list gap-0 p-0" aria-live="polite">
+                {/* <Card className="results-list gap-0 p-0" aria-live="polite">
                   {loadingMatches ? (
                     <p role="status">Memuat hasil pertandingan...</p>
                   ) : visibleResults.length > 0 ? (
@@ -464,7 +537,98 @@ export default function ResultsView() {
                       Belum ada hasil yang sesuai dengan filter.
                     </div>
                   )}
+                </Card> */}
+                <Card className="results-list gap-0 p-0" aria-live="polite">
+                  {loadingMatches ? (
+                    <p role="status">Memuat hasil pertandingan...</p>
+                  ) : visibleResults.length > 0 ? (
+                    visibleResults.map((result) => (
+                      <Card
+                        className="gap-3 rounded-none border-x-0 border-t-0 border-b border-[var(--ui-border)] bg-transparent p-4 shadow-none ring-0 last:border-b-0 sm:gap-4 sm:px-5 sm:py-4"
+                        key={result.id}
+                        role="article"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="grid min-w-0 gap-1">
+                            <span className="text-[9px] font-extrabold uppercase tracking-[0.1em] text-[var(--green)]">
+                              {result.sport} · {result.roundName}
+                            </span>
+                            <h2 className="m-0 text-sm font-bold leading-snug text-[var(--ink)]">
+                              {result.event} ({result.title})
+                            </h2>
+                          </div>
+                          <time
+                            className="shrink-0 pt-0.5 text-right text-[10px] text-[var(--muted)]"
+                            dateTime={result.date}
+                          >
+                            {formatDate(result.date, {
+                              weekday: "short",
+                              day: "numeric",
+                              month: "short",
+                            })}
+                          </time>
+                        </div>
+
+                        <div
+                          className="grid w-full min-w-0 gap-1"
+                          aria-label="Skor pertandingan"
+                        >
+                          {result.participants.map((participant) => {
+                            const logoUrl = getContingentLogoUrl(participant.name);
+                            return (
+                              <div
+                                key={participant.id}
+                                className={`flex min-w-0 items-center justify-between gap-3 rounded-md px-2.5 py-2 ${participant.isWinner ? "winner-highlight" : ""
+                                  }`}
+                              >
+                                <strong className="inline-flex min-w-0 items-center gap-2.5 [overflow-wrap:anywhere] text-left text-[10px] font-semibold leading-tight text-[var(--ink)] sm:text-sm">
+                                  {logoUrl && (
+                                    <img
+                                      src={logoUrl}
+                                      alt={`Logo ${participant.name}`}
+                                      className="h-6 w-6 xl:h-7 xl:w-7 2xl:h-9 2xl:w-9 min-[2560px]:h-11 min-[2560px]:w-11 min-[3400px]:h-14 min-[3400px]:w-14 shrink-0 object-contain"
+                                      loading="lazy"
+                                    />
+                                  )}
+                                  <span>
+                                    {participant.name}
+                                    {participant.isWinner ? " 🏆" : ""}
+                                  </span>
+                                </strong>
+                                <span
+                                  className={`shrink-0 text-right text-sm font-bold tabular-nums sm:text-base ${participant.isWinner
+                                      ? "text-[var(--ink)]"
+                                      : "text-[var(--muted)]"
+                                    }`}
+                                >
+                                  {formatScore(participant.score)}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="min-w-0 text-[10px] leading-snug text-[var(--muted)]">
+                            {result.venue}
+                          </span>
+                          <Badge variant="secondary" className="result-simulation-badge">
+                            {result.status === "FINISHED"
+                              ? "SELESAI"
+                              : result.status === "ONGOING"
+                                ? "BERLANGSUNG"
+                                : "TERJADWAL"}
+                          </Badge>
+                        </div>
+                      </Card>
+                    ))
+                  ) : (
+                    <div className="results-no-data">
+                      Belum ada hasil yang sesuai dengan filter.
+                    </div>
+                  )}
                 </Card>
+
               </TabsContent>
             ) : activeTab === "medals" ? (
               <TabsContent

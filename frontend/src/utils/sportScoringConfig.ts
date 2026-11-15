@@ -416,3 +416,23 @@ export function formatGroupDisplayName(
   }
   return groupName;
 }
+
+const KNOCKOUT_ROUND_PATTERN =
+  /perempat|quarter|semifinal|semi\s*final|\bfinal\b|peringkat|juara\s*(3|tiga)|tempat\s*ke[-\s]?3|perunggu|bronze|third|3rd|eliminasi|aduan/i;
+
+export function isGroupPhaseNonHeadToHeadMatch(
+  sportId?: number,
+  sportName?: string,
+  roundName?: string,
+  title?: string,
+): boolean {
+  const rule = getSportScoringRule(sportId, sportName);
+  if (
+    rule.mode !== "LEADERBOARD_TIME" &&
+    rule.mode !== "LEADERBOARD_SCORE"
+  ) {
+    return false;
+  }
+  const combined = `${roundName || ""} ${title || ""}`.trim();
+  return !KNOCKOUT_ROUND_PATTERN.test(combined);
+}

@@ -255,6 +255,18 @@ export default function BaganPage() {
         throw new Error("Failed to update standing");
       }
       await loadSportTournamentData(selectedSportId);
+      setStandingForm((prev) => ({
+        ...prev,
+        contingent_id: 0,
+        won: 0,
+        drawn: 0,
+        lost: 0,
+        points: 0,
+      }));
+      setVolleyWon32(0);
+      setVolleyLost23(0);
+      setTimeInputSeconds("");
+      setScoreInputValue("");
       setFeedbackMsg(
         `${scoringRule.sectionTitle} (${scoringRule.groupLabel} ${standingForm.group_code}) berhasil diperbarui dan diurutkan otomatis di web utama!`,
       );
@@ -866,13 +878,12 @@ export default function BaganPage() {
                     className="rounded-xl border bg-muted/20 p-4 space-y-4"
                   >
                     <div
-                      className={`grid gap-4 sm:grid-cols-2 ${
-                        scoringRule.allowDraw
+                      className={`grid gap-4 sm:grid-cols-2 ${scoringRule.allowDraw
                           ? "lg:grid-cols-7"
                           : scoringRule.mode === "GROUP_RACKET_2_0"
                             ? "lg:grid-cols-5"
                             : "lg:grid-cols-6"
-                      } items-end`}
+                        } items-end`}
                     >
                       <div className="space-y-1.5">
                         <Label>{scoringRule.groupLabel}</Label>
@@ -1163,7 +1174,7 @@ export default function BaganPage() {
                             <table className="w-full text-sm">
                               <thead>
                                 {scoringRule.tableType === "TIME_LEADERBOARD" ||
-                                scoringRule.tableType === "SCORE_LEADERBOARD" ? (
+                                  scoringRule.tableType === "SCORE_LEADERBOARD" ? (
                                   <tr className="border-b text-xs text-muted-foreground">
                                     <th className="text-left p-2">#</th>
                                     <th className="text-left p-2">Kontingen</th>
@@ -1230,24 +1241,24 @@ export default function BaganPage() {
                                           row.contingent,
                                           row.contingent_id,
                                         ) && (
-                                          <img
-                                            src={
-                                              getContingentLogoUrl(
-                                                row.contingent,
-                                                row.contingent_id,
-                                              )!
-                                            }
-                                            alt={`Logo ${row.contingent}`}
-                                            className="h-5 w-5 shrink-0 object-contain"
-                                          />
-                                        )}
+                                            <img
+                                              src={
+                                                getContingentLogoUrl(
+                                                  row.contingent,
+                                                  row.contingent_id,
+                                                )!
+                                              }
+                                              alt={`Logo ${row.contingent}`}
+                                              className="h-5 w-5 shrink-0 object-contain"
+                                            />
+                                          )}
                                         <span>{row.contingent}</span>
                                       </span>
                                     </td>
 
                                     {scoringRule.tableType ===
                                       "TIME_LEADERBOARD" ||
-                                    scoringRule.tableType ===
+                                      scoringRule.tableType ===
                                       "SCORE_LEADERBOARD" ? (
                                       <td className="p-2 text-center font-extrabold text-primary">
                                         {formatStandingPrimaryMetric(

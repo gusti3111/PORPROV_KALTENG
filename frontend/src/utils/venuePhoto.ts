@@ -6,23 +6,24 @@
 
 const venuePhotoMap: Array<[string, string]> = [
   // 1. Dibiarkan kosong dulu
-  ["kiyai gede", ""],
-  ["binaraga", ""],
+  ["kiyai gede", "AulaKiyaiGede.JPG"],
+  ["binaraga", "AulaKiyaiGede.JPG"],
   ["dancesport", ""],
   ["gimnastik", ""],
-  ["karanganyar", ""],
+  ["karanganyar", "/venues2/KarangAnyar.JPG"],
   ["karang anyar", ""],
 
   // 2. Venue spesifik dengan foto di /venues2/ (prioritas sebelum keyword umum seperti 'futsal' atau 'sport center')
-  ["jalan raya", "/venues2/jalanRaya.jpg"],
-  ["balap sepeda", "/venues2/jalanRaya.jpg"],
-  ["koridor", "/venues2/jalanRaya.jpg"],
+  ["jalan raya", "/venues2/BalapSepeda.jpeg"],
+  ["balap sepeda", "/venues2/BalapSepeda.jpeg"],
+  // ["koridor", "/venues2/jalanRaya.jpg"],
   ["lapangan tenis", "/venues2/LapanganTenisPasirPanjang.jpeg"],
   ["tenis pasir panjang", "/venues2/LapanganTenisPasirPanjang.jpeg"],
   ["tenis lapangan", "/venues2/LapanganTenisPasirPanjang.jpeg"],
 
   ["lintasan", "/venues2/LintasanAtletik.jpeg"],
   ["atletik", "/venues2/LintasanAtletik.jpeg"],
+  ["Aerosport", "/venues2/KarangAnyar.JPG"],
 
   ["juvenza", "/venues2/juvenza.png"],
   ["tinju", "/venues2/juvenza.png"],
@@ -34,8 +35,8 @@ const venuePhotoMap: Array<[string, string]> = [
   ["koni", "/venues2/GORKoni.jpg"],
   ["bulutangkis", "/venues2/GORKoni.jpg"],
 
-  ["onix", "/venues2/Onix.jpg"],
-  ["billiard", "/venues2/Onix.jpg"],
+  ["onix", "/venues2/OnixBilliard.jpeg"],
+  // ["billiard", "/venues2/Onix.jpg"],
 
   ["antakusuma", "/venues2/aulaAntakusuma.jpeg"],
   ["pencak silat", "/venues2/aulaAntakusuma.jpeg"],
@@ -68,7 +69,7 @@ const venuePhotoMap: Array<[string, string]> = [
   ["mma", "/venues2/pangakalnbunpark.jpg"],
   ["panjat tebing", "/venues2/pangakalnbunpark.jpg"],
 
-  ["sabaru", "/venues2/sirkuitsabaru.jpg"],
+  ["sabaru", "/venues2/SportCenterMotorCross.jpeg"],
   ["sirkuit", "/venues2/sirkuitsabaru.jpg"],
   ["balap motor", "/venues2/sirkuitsabaru.jpg"],
   ["motoprix", "/venues2/sirkuitsabaru.jpg"],

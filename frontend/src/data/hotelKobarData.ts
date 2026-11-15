@@ -30,7 +30,7 @@ export const hotelData: HotelItem[] = [
   },
   {
     id: 2,
-    hotelName: "Swiss-Belinn Pangkalan Bun",
+    hotelName: "Brits Hotel Pangkalan Bun",
     type: "Hotel Bintang",
     address: "Jl. Ahmad Yani No. 50, Pasir Panjang, Kec. Arut Selatan, Pangkalan Bun, Kabupaten Kotawaringin Barat",
     district: "Arut Selatan",

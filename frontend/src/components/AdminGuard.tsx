@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -24,16 +24,21 @@ function isTokenExpired(token: string): boolean {
 export default function AdminGuard() {
   const { token, user, logout, checkSession } = useAuthStore();
   const location = useLocation();
+  const checkedTokenRef = useRef<string | null>(null);
   const isInvalid = !token || !user || isTokenExpired(token);
 
   useEffect(() => {
     if (isInvalid) {
+      checkedTokenRef.current = null;
       if (token || user) {
         logout();
       }
       return;
     }
-    void checkSession();
+    if (token && checkedTokenRef.current !== token) {
+      checkedTokenRef.current = token;
+      void checkSession();
+    }
   }, [isInvalid, token, user, logout, checkSession]);
 
   if (isInvalid) {

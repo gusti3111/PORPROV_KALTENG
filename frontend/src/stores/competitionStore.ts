@@ -235,10 +235,39 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
     const response = await fetch(`${API_BASE_URL}/matches/${id}/result`, {
       method: "PUT",
       headers: getAuthHeaders({ "Content-Type": "application/json" }),
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        status: data.status || "FINISHED",
+        scores: (data.scores || []).map((s) => String(s ?? "").trim()),
+        winner_contingent_id: data.winner_contingent_id ?? 0,
+      }),
     });
+    if (response.status === 401) {
+      try {
+        localStorage.removeItem("porprov_admin_token");
+        localStorage.removeItem("porprov_admin_user");
+      } catch {
+        // Ignore storage errors
+      }
+      if (
+        typeof window !== "undefined" &&
+        window.location.pathname.startsWith("/admin") &&
+        window.location.pathname !== "/admin/login"
+      ) {
+        window.location.replace("/admin/login");
+      }
+      throw new Error("Sesi login habis (401). Silakan login ulang.");
+    }
     if (!response.ok) {
-      throw new Error(`Failed to update match result (${response.status})`);
+      let detail = `Failed to update match result (${response.status})`;
+      try {
+        const body = (await response.json()) as { error?: string; message?: string };
+        if (body?.error || body?.message) {
+          detail = body.error || body.message || detail;
+        }
+      } catch {
+        // Ignore non-JSON error body
+      }
+      throw new Error(detail);
     }
     await Promise.all([
       get().fetchMatches(),

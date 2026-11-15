@@ -48,9 +48,22 @@ function matchCard(match: SportTournamentMatch) {
     <article className="sport-bracket-match" key={match.label}>
       <div className="sport-bracket-match-heading">
         <span>{match.label}</span>
-        <small className={match.status === "FINISHED" ? "is-finished" : "is-upcoming"}>
-          {statusLabel}
-        </small>
+        {match.status === "ONGOING" ? (
+          <a
+            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(
+              `PORPROV XIII Kalimantan Tengah ${match.home || ""} ${match.away || ""} Live`.trim(),
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-bold text-red-600 hover:underline"
+          >
+            ● Live YouTube
+          </a>
+        ) : (
+          <small className={match.status === "FINISHED" ? "is-finished" : "is-upcoming"}>
+            {statusLabel}
+          </small>
+        )}
       </div>
       <div className={`sport-bracket-team${homeWon ? " winner-highlight" : ""}`}>
         <strong className="inline-flex items-center gap-2 min-w-0">

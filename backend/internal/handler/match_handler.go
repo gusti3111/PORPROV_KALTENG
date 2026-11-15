@@ -66,8 +66,13 @@ func (h *MatchHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Error(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
-	if req.EventID < 1 && req.SportID > 0 && strings.TrimSpace(req.EventName) != "" && h.eventRepo != nil {
-		ev, err := h.eventRepo.FindOrCreate(r.Context(), req.SportID, req.EventName, req.EventGender)
+	if req.EventID < 1 && req.SportID > 0 && h.eventRepo != nil &&
+		(strings.TrimSpace(req.EventName) != "" || req.Status == model.MatchStatusScheduled || req.Status == "") {
+		eventName := strings.TrimSpace(req.EventName)
+		if eventName == "" {
+			eventName = "Belum ditentukan"
+		}
+		ev, err := h.eventRepo.FindOrCreate(r.Context(), req.SportID, eventName, req.EventGender)
 		if err != nil {
 			Error(w, http.StatusInternalServerError, "failed to create event: "+err.Error())
 			return
@@ -146,8 +151,13 @@ func (h *MatchHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Error(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
-	if req.EventID < 1 && req.SportID > 0 && strings.TrimSpace(req.EventName) != "" && h.eventRepo != nil {
-		ev, err := h.eventRepo.FindOrCreate(r.Context(), req.SportID, req.EventName, req.EventGender)
+	if req.EventID < 1 && req.SportID > 0 && h.eventRepo != nil &&
+		(strings.TrimSpace(req.EventName) != "" || req.Status == model.MatchStatusScheduled || req.Status == "") {
+		eventName := strings.TrimSpace(req.EventName)
+		if eventName == "" {
+			eventName = "Belum ditentukan"
+		}
+		ev, err := h.eventRepo.FindOrCreate(r.Context(), req.SportID, eventName, req.EventGender)
 		if err == nil {
 			req.EventID = ev.ID
 		}
@@ -164,8 +174,21 @@ func (h *MatchHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Error(w, http.StatusInternalServerError, "failed to update match: "+err.Error())
 		return
 	}
-	if len(req.ContingentIDs) == 2 && req.ContingentIDs[0] > 0 && req.ContingentIDs[1] > 0 && req.ContingentIDs[0] != req.ContingentIDs[1] {
-		_ = h.repo.UpdateMatchParticipants(r.Context(), id, req.ContingentIDs)
+	if req.ContingentIDs != nil {
+		validContingents := make([]int, 0, len(req.ContingentIDs))
+		for _, cid := range req.ContingentIDs {
+			if cid > 0 {
+				validContingents = append(validContingents, cid)
+			}
+		}
+		if err := h.repo.UpdateMatchParticipants(r.Context(), id, validContingents); err != nil {
+			if errors.Is(err, repository.ErrInvalidContingents) {
+				Error(w, http.StatusBadRequest, err.Error())
+				return
+			}
+			Error(w, http.StatusInternalServerError, "failed to update match participants: "+err.Error())
+			return
+		}
 	}
 	JSON(w, http.StatusOK, map[string]string{"message": "match updated successfully"})
 }

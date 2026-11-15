@@ -60,8 +60,8 @@ export default function BaganView() {
     setError("");
 
     void getAPIData<Sport[]>("/sports")
-      .then((sports) =>
-        Promise.all(
+      .then(async (sports) => {
+        const results = await Promise.allSettled(
           sports.map(async (sport) => {
             const tournament = await getAPIData<SportTournament>(
               `/sports/${sport.id}/tournament`,
@@ -72,8 +72,55 @@ export default function BaganView() {
               hasActiveData: hasActiveTournamentData(tournament),
             };
           }),
-        ),
-      )
+        );
+
+        const loaded: BracketEntry[] = [];
+        let firstNonNotFoundError: unknown = null;
+
+        results.forEach((res, idx) => {
+          const sport = sports[idx];
+          if (res.status === "fulfilled") {
+            loaded.push(res.value);
+            return;
+          }
+          const msg = getAPIErrorMessage(res.reason).toLowerCase();
+          if (!msg.includes("not found") && !firstNonNotFoundError) {
+            firstNonNotFoundError = res.reason;
+          }
+          loaded.push({
+            id: sport.id,
+            tournament: {
+              sport_id: sport.id,
+              sport_name: sport.name,
+              groups: [],
+              quarterfinals: [],
+              semifinals: [],
+              final: {
+                label: "Final Perebutan Emas",
+                home: "TBA",
+                away: "TBA",
+                home_score: null,
+                away_score: null,
+                status: "SCHEDULED",
+              },
+              bronze: {
+                label: "Perebutan Perunggu",
+                home: "TBA",
+                away: "TBA",
+                home_score: null,
+                away_score: null,
+                status: "SCHEDULED",
+              },
+            },
+            hasActiveData: false,
+          });
+        });
+
+        if (loaded.every((e) => !e.hasActiveData) && firstNonNotFoundError) {
+          throw firstNonNotFoundError;
+        }
+        return loaded;
+      })
       .then((data) => {
         if (!active) return;
         const sorted = [...data].sort((a, b) => {
@@ -210,12 +257,9 @@ export default function BaganView() {
                   rule.tableType === "TIME_LEADERBOARD" ||
                   rule.tableType === "SCORE_LEADERBOARD";
                 const isRacketNoPoints = rule.mode === "GROUP_RACKET_2_0";
-                const activeGroups =
-                  rule.tableType === "KNOCKOUT_ONLY"
-                    ? []
-                    : tournament.groups.filter(
-                      (g) => g.standings && g.standings.length > 0,
-                    );
+                const activeGroups = tournament.groups.filter(
+                  (g) => g.standings && g.standings.length > 0,
+                );
                 return (
                   <article className="bagan-event-card" key={id}>
                     <header className="bagan-event-heading">

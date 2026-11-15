@@ -25,7 +25,7 @@ import {
   Trophy,
   X,
 } from "lucide-react";
-import { API_BASE_URL, getAuthHeaders } from "../../api/client";
+import { API_BASE_URL, getAPIData, getAPIErrorMessage, getAuthHeaders } from "../../api/client";
 import type { ScheduleMatch } from "../../api/types";
 
 interface ScoreFormState {
@@ -174,6 +174,12 @@ export default function HasilPage() {
       .map((cid, idx) => ({ cid, score: (form.scores[idx] ?? "").trim() }))
       .filter((item) => item.cid > 0);
     const uniqueIds = new Set(filledPairs.map((item) => item.cid));
+    if (filledPairs.length === 0) {
+      alert(
+        "Pertandingan belum memiliki kontingen. Silakan isi kontingen di form Edit Jadwal atau pilih kontingen terlebih dahulu.",
+      );
+      return;
+    }
     if (filledPairs.length < 2 || uniqueIds.size !== filledPairs.length) {
       alert("Pilih minimal 2 kontingen yang berbeda (tidak boleh ada kontingen ganda).");
       return;
@@ -192,17 +198,22 @@ export default function HasilPage() {
       }
 
       await updateMatch(selectedMatch.id, {
-        status: form.status,
-        scores: nextScores,
+        status: form.status || "FINISHED",
+        scores: nextScores.map((s) => String(s ?? "")),
         winner_contingent_id: form.winner_contingent_id,
       });
+
+      if ((selectedMatch.sport_id ?? 0) > 0) {
+        await getAPIData(`/sports/${selectedMatch.sport_id}/tournament`).catch(() => null);
+      }
 
       setFeedbackMsg(
         `Hasil pertandingan "${selectedMatch.sport_name} - ${selectedMatch.title}" berhasil disimpan! Klasemen grup, bagan penyisihan, dan perolehan medali di web utama telah diperbarui otomatis.`,
       );
       closeScoreForm();
-    } catch {
-      alert("Gagal menyimpan hasil pertandingan.");
+    } catch (err) {
+      console.error("Failed to save match result:", err);
+      alert(`Gagal menyimpan hasil pertandingan: ${getAPIErrorMessage(err)}`);
     }
   };
 

@@ -1,0 +1,3 @@
+ALTER TABLE IF EXISTS sport_group_standings
+    ALTER COLUMN lost TYPE SMALLINT,
+    ALTER COLUMN points TYPE SMALLINT;
