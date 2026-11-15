@@ -879,10 +879,10 @@ export default function BaganPage() {
                   >
                     <div
                       className={`grid gap-4 sm:grid-cols-2 ${scoringRule.allowDraw
-                          ? "lg:grid-cols-7"
-                          : scoringRule.mode === "GROUP_RACKET_2_0"
-                            ? "lg:grid-cols-5"
-                            : "lg:grid-cols-6"
+                        ? "lg:grid-cols-7"
+                        : scoringRule.mode === "GROUP_RACKET_2_0"
+                          ? "lg:grid-cols-5"
+                          : "lg:grid-cols-6"
                         } items-end`}
                     >
                       <div className="space-y-1.5">
