@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,6 +24,8 @@ function normalizeText(value: string) {
 }
 
 export default function VenueView() {
+  const [searchParams] = useSearchParams();
+  const venueParam = searchParams.get("venue");
   const venues = useCompetitionStore((state) => state.venues);
   const loading = useCompetitionStore((state) => state.loading.venues);
   const error = useCompetitionStore((state) => state.errors.venues);
@@ -66,6 +68,20 @@ export default function VenueView() {
 
   const selectedVenue =
     filteredVenues.find((venue) => venue.name === selectedName) ?? null;
+
+  useEffect(() => {
+    if (!venueParam || venues.length === 0) return;
+    const target = normalizeText(venueParam);
+    const matched = venues.find((venue) => normalizeText(venue.name) === target);
+    if (matched) {
+      setQuery("");
+      setCategory("");
+      setSelectedName(matched.name);
+      requestAnimationFrame(() => {
+        document.getElementById("daftar-venue")?.scrollIntoView({ behavior: "smooth" });
+      });
+    }
+  }, [venueParam, venues]);
 
   useEffect(() => {
     if (selectedName && !venues.some((venue) => venue.name === selectedName)) {
@@ -143,7 +159,7 @@ export default function VenueView() {
                     document.getElementById("daftar-venue")?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
-                  <div className="relative h-28 w-full overflow-hidden rounded-md mb-3 bg-slate-100 shrink-0">
+                  <div className="relative h-40 w-full overflow-hidden rounded-md mb-3 bg-slate-100 shrink-0">
                     {(() => {
                       const photoUrl = getVenuePhotoUrl(
                         venue.name,
@@ -160,7 +176,7 @@ export default function VenueView() {
                         <img
                           src={photoUrl}
                           alt={venue.name}
-                          className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                          className="h-full w-full object-contain transition-transform duration-300 hover:scale-105"
                           loading="lazy"
                           onError={(e) => {
                             e.currentTarget.src = "/venues2/sportCenter.jpg";

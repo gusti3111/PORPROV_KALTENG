@@ -405,9 +405,19 @@ export default function HasilPage() {
                   <Label>Status Akhir Pertandingan</Label>
                   <Select
                     value={form.status}
-                    onValueChange={(v) =>
-                      setForm({ ...form, status: v ?? "FINISHED" })
-                    }
+                    onValueChange={(v) => {
+                      const nextStatus = v ?? "FINISHED";
+                      setForm({
+                        ...form,
+                        status: nextStatus,
+                        scores:
+                          nextStatus === "SCHEDULED"
+                            ? form.scores.map(() => "0")
+                            : form.scores,
+                        winner_contingent_id:
+                          nextStatus === "SCHEDULED" ? 0 : form.winner_contingent_id,
+                      });
+                    }}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue />
@@ -546,7 +556,7 @@ export default function HasilPage() {
                                     {p.contingent_name || "TBA"}
                                   </span>
                                   <Badge variant="secondary" className="text-xs">
-                                    {p.score || "–"}
+                                    {p.score || (match.status === "SCHEDULED" ? "0" : "–")}
                                   </Badge>
                                   {p.is_winner && (
                                     <Badge className="bg-emerald-600 text-white text-[10px] px-1.5 py-0">

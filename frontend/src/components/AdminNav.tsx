@@ -1,11 +1,13 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   CalendarRange,
   ExternalLink,
   GitBranch,
   LayoutDashboard,
+  LogOut,
   Trophy,
 } from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
 
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -16,6 +18,13 @@ const navItems = [
 
 export default function AdminNav() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/admin/login", { replace: true });
+  };
 
   return (
     <div className="rounded-xl border bg-card p-3 shadow-sm">
@@ -63,6 +72,14 @@ export default function AdminNav() {
           >
             Hasil & Medali <ExternalLink className="h-3 w-3" />
           </Link>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="inline-flex items-center gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-1.5 font-semibold text-red-700 hover:bg-red-100 transition-colors cursor-pointer"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Keluar
+          </button>
         </div>
       </div>
     </div>

@@ -8,14 +8,55 @@ import type { Sport as BackendSport } from "../api/types";
 import { useCompetitionStore } from "../stores/competitionStore";
 import type { Sport as SportCard } from "../types/sport";
 
+function splitSportNames(rawName: string): {
+  names: string[];
+  parentType?: string;
+} {
+  if (!rawName.includes("&")) {
+    return { names: [rawName] };
+  }
+
+  const parenMatch = rawName.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+  if (parenMatch) {
+    const baseName = parenMatch[1].trim();
+    const parts = parenMatch[2]
+      .split(/\s*(?:&|,)\s*/)
+      .map((part) => part.trim())
+      .filter(Boolean);
+    if (parts.length > 1) {
+      return {
+        names: parts.map((part) => `${baseName} ${part}`),
+        parentType: baseName,
+      };
+    }
+  }
+
+  const parts = rawName
+    .split(/\s*&\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (parts.length > 1) {
+    return {
+      names: parts,
+      parentType: parts[0],
+    };
+  }
+
+  return { names: [rawName] };
+}
+
 function toSportCards(sports: BackendSport[]): SportCard[] {
-  return sports.map((sport) => ({
-    id: sport.id,
-    name: sport.name,
-    group: sport.category,
-    icon: sport.icon,
-    description: sport.description,
-  }));
+  return sports.flatMap((sport) => {
+    const { names, parentType } = splitSportNames(sport.name);
+    return names.map((name) => ({
+      id: sport.id,
+      name,
+      parentType,
+      group: sport.category,
+      icon: sport.icon,
+      description: sport.description,
+    }));
+  });
 }
 
 export default function CaborView() {

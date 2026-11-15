@@ -53,7 +53,12 @@ export default function MatchUpdateForm() {
   }, [match]);
 
   const handleStatusChange = (value: MatchStatus | null) => {
-    setStatus(value === null ? "FINISHED" : value);
+    const nextStatus = value === null ? "FINISHED" : value;
+    setStatus(nextStatus);
+    if (nextStatus === "SCHEDULED") {
+      setScores((prev) => prev.map(() => "0"));
+      setWinnerContingentId(0);
+    }
   };
 
   if (!match) {
@@ -76,8 +81,8 @@ export default function MatchUpdateForm() {
     try {
       await updateMatch(id!, {
         status,
-        scores,
-        winner_contingent_id: winnerContingentId,
+        scores: status === "SCHEDULED" ? scores.map(() => "0") : scores,
+        winner_contingent_id: status === "SCHEDULED" ? 0 : winnerContingentId,
       });
       alert("✅ Sukses! Skor disimpan, bagan, klasemen, dan medali otomatis diperbarui.");
       navigate("/admin/hasil");

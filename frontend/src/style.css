@@ -33,21 +33,89 @@
 
 :root {
   --ink: #151d29;
+  --muted: #647184;
+  --winner-green: #23834f;
+  --winner-surface: #e8f4ec;
+
+  /* =========================================================================
+     PILIHAN WARNA TEMA & GRADASI (Uncomment salah satu, comment 3 lainnya)
+     ========================================================================= */
+
+  /* PILIHAN 1: Amber Tua (Aktif) */
+  /* --paper: #fdfaf5;
+  --green: #b45309;
+  --green-dark: #78350f;
+  --lime: #fef3c7;
+  --orange: #d97706;
+  --hero-gradient: linear-gradient(125deg, #451a03 0%, #78350f 40%, #b45309 78%, #d97706 100%);
+  --hero-overlay-desktop:
+    radial-gradient(circle at 75% 42%, rgba(251, 191, 36, 0.38) 0%, rgba(217, 119, 6, 0.28) 40%, transparent 80%),
+    linear-gradient(90deg, rgba(69, 26, 3, 0.88) 0%, rgba(120, 53, 15, 0.74) 38%, rgba(180, 83, 9, 0.45) 68%, rgba(217, 119, 6, 0.22) 100%),
+    linear-gradient(0deg, rgba(69, 26, 3, 0.65), transparent 55%);
+  --hero-overlay-mobile:
+    radial-gradient(circle at 65% 32%, rgba(251, 191, 36, 0.36) 0%, rgba(217, 119, 6, 0.28) 45%, transparent 80%),
+    linear-gradient(135deg, rgba(69, 26, 3, 0.90) 0%, rgba(120, 53, 15, 0.78) 50%, rgba(180, 83, 9, 0.55) 100%),
+    linear-gradient(0deg, rgba(69, 26, 3, 0.72), transparent 70%); */
+
+  /* /PILIHAN 2: Biru Navy + Sentuhan Emas (Tema Klasik PORPROV)*/
   --paper: #f4f7fb;
   --green: #174a72;
   --green-dark: #102b49;
   --lime: #dcecf9;
   --orange: #397eae;
-  --muted: #647184;
-  --winner-green: #23834f;
-  --winner-surface: #e8f4ec;
+  --hero-gradient: linear-gradient(125deg, #0c233c 0%, #102b49 40%, #174a72 75%, #397eae 100%);
+  --hero-overlay-desktop:
+    radial-gradient(circle at 75% 42%, rgba(251, 191, 36, 0.34) 0%, rgba(245, 158, 11, 0.22) 40%, transparent 80%),
+    linear-gradient(90deg, rgba(12, 35, 60, 0.90) 0%, rgba(16, 43, 73, 0.75) 38%, rgba(23, 74, 114, 0.45) 68%, rgba(245, 158, 11, 0.25) 100%),
+    linear-gradient(0deg, rgba(12, 25, 42, 0.65), transparent 55%);
+  --hero-overlay-mobile:
+    radial-gradient(circle at 65% 32%, rgba(251, 191, 36, 0.32) 0%, rgba(245, 158, 11, 0.22) 45%, transparent 80%),
+    linear-gradient(135deg, rgba(12, 35, 60, 0.92) 0%, rgba(16, 43, 73, 0.78) 50%, rgba(23, 74, 114, 0.55) 100%),
+    linear-gradient(0deg, rgba(12, 25, 42, 0.72), transparent 70%);
+
+
+  /* PILIHAN 3: Hijau Zamrud + Emas (Nuansa Kalimantan Tengah)
+  --paper: #f3f9f6;
+  --green: #065f46;
+  --green-dark: #064e3b;
+  --lime: #d1fae5;
+  --orange: #059669;
+  --hero-gradient: linear-gradient(125deg, #022c22 0%, #064e3b 40%, #065f46 75%, #059669 100%);
+  --hero-overlay-desktop:
+    radial-gradient(circle at 75% 42%, rgba(251, 191, 36, 0.34) 0%, rgba(217, 119, 6, 0.22) 40%, transparent 80%),
+    linear-gradient(90deg, rgba(2, 44, 34, 0.90) 0%, rgba(6, 78, 59, 0.74) 38%, rgba(6, 95, 70, 0.45) 68%, rgba(217, 119, 6, 0.22) 100%),
+    linear-gradient(0deg, rgba(2, 44, 34, 0.65), transparent 55%);
+  --hero-overlay-mobile:
+    radial-gradient(circle at 65% 32%, rgba(251, 191, 36, 0.32) 0%, rgba(217, 119, 6, 0.22) 45%, transparent 80%),
+    linear-gradient(135deg, rgba(2, 44, 34, 0.92) 0%, rgba(6, 78, 59, 0.78) 50%, rgba(6, 95, 70, 0.55) 100%),
+    linear-gradient(0deg, rgba(2, 44, 34, 0.72), transparent 70%);
+  */
+
+  /* PILIHAN 4: Slate Gelap + Emas (Modern Elegan)
+  --paper: #f8fafc;
+  --green: #334155;
+  --green-dark: #0f172a;
+  --lime: #fef3c7;
+  --orange: #f59e0b;
+  --hero-gradient: linear-gradient(125deg, #0f172a 0%, #1e293b 45%, #334155 80%, #d97706 100%);
+  --hero-overlay-desktop:
+    radial-gradient(circle at 75% 42%, rgba(251, 191, 36, 0.40) 0%, rgba(245, 158, 11, 0.26) 40%, transparent 80%),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.90) 0%, rgba(30, 41, 59, 0.76) 38%, rgba(51, 65, 85, 0.46) 68%, rgba(245, 158, 11, 0.24) 100%),
+    linear-gradient(0deg, rgba(15, 23, 42, 0.68), transparent 55%);
+  --hero-overlay-mobile:
+    radial-gradient(circle at 65% 32%, rgba(251, 191, 36, 0.36) 0%, rgba(245, 158, 11, 0.24) 45%, transparent 80%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.78) 50%, rgba(51, 65, 85, 0.55) 100%),
+    linear-gradient(0deg, rgba(15, 23, 42, 0.74), transparent 70%);
+  */
+
+  /* ========================================================================= */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #174a72;
+  --primary: var(--green);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -57,7 +125,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: #397eae;
+  --ring: var(--orange);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -229,7 +297,7 @@ body {
   gap: 12px;
   margin: 0;
   color: var(--ui-muted);
-  font-size: 9px;
+  font-size: clamp(10px, 0.9vw, 13px);
   font-weight: 800;
   letter-spacing: 0.16em;
 }
@@ -240,9 +308,9 @@ body {
 
 .home-stadium-heading h2 {
   margin: 11px 0 0;
-  font-size: clamp(28px, 4vw, 42px);
+  font-size: clamp(22px, 3.6vw, 52px);
   font-weight: 850;
-  letter-spacing: -0.065em;
+  letter-spacing: -0.055em;
 }
 
 .home-stadium-heading h2 span {
@@ -252,7 +320,7 @@ body {
 .home-stadium-description {
   margin: 10px 0 0;
   color: var(--ui-muted);
-  font-size: 12px;
+  font-size: clamp(12px, 1.1vw, 17px);
 }
 
 .home-stadium-controls {
@@ -337,14 +405,14 @@ body {
 
 .home-stadium-copy>small {
   color: var(--green);
-  font-size: 9px;
+  font-size: clamp(9px, 0.8vw, 12px);
   font-weight: 850;
   letter-spacing: 0.11em;
 }
 
 .home-stadium-copy h3 {
   margin: 1px 0 0;
-  font-size: 18px;
+  font-size: clamp(15px, 1.4vw, 22px);
   font-weight: 800;
   letter-spacing: -0.035em;
 }
@@ -352,14 +420,14 @@ body {
 .home-stadium-copy p {
   margin: 0 0 5px;
   color: var(--ui-muted);
-  font-size: 11px;
+  font-size: clamp(11px, 0.95vw, 15px);
 }
 
 .home-stadium-credit,
 .home-stadium-license {
   width: fit-content;
   color: var(--ui-muted);
-  font-size: 9px;
+  font-size: clamp(10px, 0.85vw, 13px);
   line-height: 1.5;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -383,32 +451,7 @@ body {
   position: absolute;
   z-index: 1;
   inset: 0;
-  background:
-    /* Gradasi gold yellow hangat & bercahaya
-    radial-gradient(
-      circle at 75% 42%,
-      rgba(254, 240, 138, 0.45) 0%,
-      rgba(245, 158, 11, 0.35) 35%,
-      rgba(217, 119, 6, 0.18) 65%,
-      transparent 85%
-    ),
-    linear-gradient(
-      135deg,
-      rgba(251, 191, 36, 0.42) 0%,
-      rgba(245, 158, 11, 0.32) 38%,
-      rgba(234, 179, 8, 0.22) 70%,
-      rgba(180, 83, 9, 0.38) 100%
-    ), */
-    /* Penyeimbang kontras teks sisi kiri agar tetap tajam dan mudah dibaca */
-    linear-gradient(90deg,
-      rgba(251, 191, 36, 0.42) 0%,
-      rgba(245, 158, 11, 0.32) 38%,
-      /* perubahan sebelumnya */
-      /* rgb(12 35 60 / 92%) 0%, */
-      /* rgb(12 35 60 / 80%) 38%, */
-      rgb(12 35 60 / 45%) 68%,
-      rgb(12 35 60 / 18%) 100%),
-    linear-gradient(0deg, rgb(12 25 42 / 60%), transparent 55%);
+  background: var(--hero-overlay-desktop);
 }
 
 .home-hero-mascot {
@@ -434,19 +477,7 @@ body {
   }
 
   .home-hero-photo-overlay {
-    background:
-      radial-gradient(circle at 65% 32%,
-        rgba(254, 240, 138, 0.45) 0%,
-        rgba(245, 158, 11, 0.32) 45%,
-        transparent 80%),
-      linear-gradient(135deg,
-        rgba(251, 191, 36, 0.35) 0%,
-        rgba(245, 158, 11, 0.25) 50%,
-        rgba(217, 119, 6, 0.35) 100%),
-      linear-gradient(90deg,
-        rgb(12 35 60 / 90%) 0%,
-        rgb(12 35 60 / 68%) 100%),
-      linear-gradient(0deg, rgb(12 25 42 / 68%), transparent 70%);
+    background: var(--hero-overlay-mobile);
   }
 
   .home-hero-mascot {
@@ -1263,7 +1294,7 @@ body {
   position: relative;
   min-height: 430px;
   overflow: hidden;
-  background: var(--green);
+  background: var(--hero-gradient);
   color: white;
 }
 
@@ -1755,7 +1786,7 @@ body {
   padding: 34px 38px;
   overflow: hidden;
   border-radius: 14px;
-  background: linear-gradient(125deg, #102b49, #174a72 70%, #397eae);
+  background: var(--hero-gradient);
   color: #fff;
 }
 
@@ -4462,7 +4493,7 @@ body {
   position: relative;
   overflow: hidden;
   padding: 58px 0 55px;
-  background: linear-gradient(120deg, #102b49, #174a72 72%, #397eae);
+  background: var(--hero-gradient);
   color: #fff;
 }
 

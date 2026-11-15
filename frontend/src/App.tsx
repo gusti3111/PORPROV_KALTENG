@@ -21,6 +21,7 @@ import HasilPage from "./views/admin/HasilPage";
 import BaganPage from "./views/admin/BaganPage";
 import AdminLoginPage from "./views/admin/AdminLoginPage";
 import AdminRegisterPage from "./views/admin/AdminRegisterPage";
+import ResetPasswordPage from "./views/admin/ResetPasswordPage";
 import AdminGuard from "./components/AdminGuard";
 
 function RouteEffects() {
@@ -99,6 +100,7 @@ export default function App() {
         <Route path="/informasi" element={<Newsview />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin/register" element={<AdminRegisterPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route element={<AdminGuard />}>
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/jadwal" element={<JadwalPage />} />

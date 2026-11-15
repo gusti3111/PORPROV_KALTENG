@@ -480,9 +480,15 @@ export default function BaganPage() {
                 <Label className="text-xs font-semibold">Status:</Label>
                 <Select
                   value={form.status}
-                  onValueChange={(v) =>
-                    setForm({ ...form, status: v ?? "FINISHED" })
-                  }
+                  onValueChange={(v) => {
+                    const nextStatus = v ?? "FINISHED";
+                    setForm({
+                      ...form,
+                      status: nextStatus,
+                      home_score: nextStatus === "SCHEDULED" ? "0" : form.home_score,
+                      away_score: nextStatus === "SCHEDULED" ? "0" : form.away_score,
+                    });
+                  }}
                 >
                   <SelectTrigger className="w-44 h-9">
                     <SelectValue />
@@ -533,7 +539,7 @@ export default function BaganPage() {
                 </span>
               </span>
               <span className="text-base font-extrabold tabular-nums">
-                {match.home_score ?? "–"}
+                {match.home_score ?? (match.status === "SCHEDULED" ? 0 : "–")}
               </span>
             </div>
             <div
@@ -556,7 +562,7 @@ export default function BaganPage() {
                 </span>
               </span>
               <span className="text-base font-extrabold tabular-nums">
-                {match.away_score ?? "–"}
+                {match.away_score ?? (match.status === "SCHEDULED" ? 0 : "–")}
               </span>
             </div>
           </div>

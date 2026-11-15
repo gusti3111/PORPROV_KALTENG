@@ -291,8 +291,8 @@ const galleryPhotos: GalleryPhoto[] = [
 
 const categories: CategoryFilter[] = [
   "Tempat Makan dan Nongkrong",
-  "Hotel dan Penginapan",
   "Pariwisata",
+  "Hotel dan Penginapan",
   "Galeri",
   "Berita",
   "About Us",
@@ -858,7 +858,7 @@ export default function Newsview() {
           {isAboutUsTab ? (
             <div className="space-y-10" aria-live="polite">
               {/* 1. Hero Sejarah / Profil Singkat */}
-              <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-[#0e2742] via-[#174a72] to-[#216396] p-6 text-white shadow-lg sm:p-10">
+              <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-[image:var(--hero-gradient)] p-6 text-white shadow-lg sm:p-10">
                 <div className="relative z-10 grid gap-8 lg:grid-cols-12 lg:items-center">
                   <div className="space-y-4 lg:col-span-8">
                     <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1.5 text-xs font-extrabold tracking-wider text-amber-300 uppercase backdrop-blur-xs">
@@ -1329,7 +1329,7 @@ export default function Newsview() {
           ) : isHotelTab ? (
             <div className="space-y-6" aria-live="polite">
               {/* Hero Banner: Akomodasi & Penginapan Kotawaringin Barat */}
-              <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-r from-[#0d2238] via-[#102b49] to-[#174a72] text-white shadow-lg">
+              <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-[image:var(--hero-gradient)] text-white shadow-lg">
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 p-6 sm:p-8">
                   <div className="max-w-2xl space-y-3">
                     <div className="inline-flex items-center gap-2 rounded-full bg-amber-400/20 border border-amber-400/30 px-3.5 py-1 text-xs font-bold text-amber-300">
@@ -1587,7 +1587,7 @@ export default function Newsview() {
           ) : isUMKMTab ? (
             <div className="space-y-8" aria-live="polite">
               {/* Hero Banner: Eksplorasi Kuliner Kotawaringin Barat */}
-              <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-900 via-[#102b49] to-[#174a72] text-white shadow-lg">
+              <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-[image:var(--hero-gradient)] text-white shadow-lg">
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 p-6 sm:p-8">
                   <div className="max-w-2xl space-y-3">
                     <div className="inline-flex items-center gap-2 rounded-full bg-amber-400/20 border border-amber-400/30 px-3.5 py-1 text-xs font-bold text-amber-300">
@@ -1855,7 +1855,7 @@ export default function Newsview() {
                                 loading="lazy"
                               />
                             ) : (
-                              <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[#102b49] to-[#174a72] text-white/80 p-4 text-center">
+                              <div className="flex h-full w-full flex-col items-center justify-center bg-[image:var(--hero-gradient)] text-white/80 p-4 text-center">
                                 <Coffee className="h-9 w-9 text-amber-300 mb-2" />
                                 <span className="text-xs font-bold">{item.nama}</span>
                                 <span className="text-[10px] text-sky-200/80 mt-0.5">Lihat galeri di Google Maps</span>

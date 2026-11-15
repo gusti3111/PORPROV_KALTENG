@@ -41,9 +41,9 @@ export default function SportSearch({
     if (!normalizedQuery) return indexedSports;
 
     return indexedSports.filter((sport) =>
-      normalizeText(`${sport.name} ${sport.group} ${sport.description}`).includes(
-        normalizedQuery,
-      ),
+      normalizeText(
+        `${sport.name} ${sport.parentType ?? ""} ${sport.group} ${sport.description}`,
+      ).includes(normalizedQuery),
     );
   }, [indexedSports, query]);
 
@@ -109,7 +109,7 @@ export default function SportSearch({
             const emblem = getSportEmblemInfo(sport.id, sport.name);
             return (
               <Link
-                key={sport.name}
+                key={`${sport.id ?? "sport"}-${sport.name}`}
                 className="cabor-card"
                 to={sport.id ? `/cabor/${sport.id}` : "/cabor"}
                 aria-label={sport.name}
@@ -163,6 +163,7 @@ export default function SportSearch({
                 <div className="cabor-card-info">
                   <span className="cabor-category">
                     {sport.group === "Utama" ? "CABANG UTAMA" : "EKSEBISI"}
+                    {sport.parentType ? ` • TIPE ${sport.parentType.toUpperCase()}` : ""}
                     {emblem ? ` • ${emblem.federationCode}` : ""}
                   </span>
                   <h3>{sport.name}</h3>

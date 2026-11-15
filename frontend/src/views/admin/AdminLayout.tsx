@@ -29,7 +29,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidecar Nav */}
-      <aside className="w-64 shrink-0 bg-sidebar border-r border-border">
+      <aside className="w-64 shrink-0 bg-sidebar border-r border-border flex flex-col">
         <div className="flex h-14 items-center gap-3 px-4 border-b border-border">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -38,7 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <span className="font-bold text-sm text-foreground">Admin Panel</span>
         </div>
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = location.pathname === item.to;
             return (
@@ -57,7 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             );
           })}
         </nav>
-        <div className="p-3 border-t border-border">
+        <div className="p-3 border-t border-border space-y-2">
           <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-sidebar-accent">
             <div className="h-8 w-8 shrink-0 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
               {initials || "AD"}
@@ -66,22 +66,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <p className="font-medium truncate">{user?.name || "Panitia"}</p>
               <p className="text-xs text-muted-foreground truncate">{user?.email || "admin@porprov.kalteng"}</p>
             </div>
-            <button
-              type="button"
-              onClick={handleLogout}
-              title="Keluar"
-              aria-label="Keluar"
-              className="ml-auto shrink-0 text-muted-foreground hover:text-destructive transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
           </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-destructive/30 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+          >
+            <LogOut className="h-4 w-4" />
+            Keluar
+          </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="p-6">
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <header className="h-14 shrink-0 border-b border-border bg-background px-6 flex items-center justify-between">
+          <span className="text-sm font-medium text-muted-foreground">
+            PORPROV XIII Kalteng 2026
+          </span>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="inline-flex items-center gap-2 rounded-lg border border-destructive/30 px-3 py-1.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+          >
+            <LogOut className="h-4 w-4" />
+            Keluar
+          </button>
+        </header>
+        <div className="flex-1 overflow-y-auto p-6">
           {children}
         </div>
       </main>

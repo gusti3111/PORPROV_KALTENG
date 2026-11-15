@@ -193,9 +193,9 @@ export default function AdminDashboard() {
                                 <span className={home?.is_winner ? "font-bold text-emerald-700" : ""}>
                                   {home?.contingent_name || "TBA"}
                                 </span>
-                                {home?.score && (
+                                {(home?.score || match.status === "SCHEDULED") && (
                                   <Badge variant="secondary" className="text-xs">
-                                    {home.score}
+                                    {home?.score || "0"}
                                   </Badge>
                                 )}
                                 {home?.is_winner && (
@@ -208,9 +208,9 @@ export default function AdminDashboard() {
                                 <span className={away?.is_winner ? "font-bold text-emerald-700" : ""}>
                                   {away?.contingent_name || "TBA"}
                                 </span>
-                                {away?.score && (
+                                {(away?.score || match.status === "SCHEDULED") && (
                                   <Badge variant="secondary" className="text-xs">
-                                    {away.score}
+                                    {away?.score || "0"}
                                   </Badge>
                                 )}
                                 {away?.is_winner && (

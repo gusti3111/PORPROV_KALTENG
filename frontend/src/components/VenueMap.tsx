@@ -81,7 +81,15 @@ export default function VenueMap({
                     <img
                       src={photoUrl}
                       alt={venue.name}
-                      style={{ width: "100%", height: 105, objectFit: "cover", borderRadius: 6, marginBottom: 8 }}
+                      style={{
+                        width: "100%",
+                        maxHeight: 140,
+                        height: "auto",
+                        objectFit: "contain",
+                        backgroundColor: "#f1f5f9",
+                        borderRadius: 6,
+                        marginBottom: 8,
+                      }}
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).src = "/venues2/sportCenter.jpg";
                       }}

@@ -1,35 +1,21 @@
-const NAME_PATTERN = /^[a-zA-Z\s.'-]+$/;
-const EMAIL_PATTERN = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const USERNAME_PATTERN = /^[a-zA-Z0-9._-]{3,50}$/;
 
-export function containsUnsafeSqlOrScriptChars(value: string): boolean {
-  return (
-    /['";<>]/.test(value) ||
-    value.includes("--") ||
-    value.includes("/*") ||
-    value.includes("*/") ||
-    // eslint-disable-next-line no-control-regex
-    /[\x00-\x1f\x7f]/.test(value)
-  );
-}
-
-export function validateAdminName(name: string): string | null {
-  const trimmed = name.trim();
-  if (trimmed.length < 3 || trimmed.length > 80) {
-    return "Nama lengkap harus 3 hingga 80 karakter.";
+export function validateAdminUsername(username: string): string | null {
+  const normalized = username.trim();
+  if (!normalized) {
+    return "Username wajib diisi.";
   }
-  if (!NAME_PATTERN.test(trimmed)) {
-    return "Nama hanya boleh mengandung huruf, spasi, titik, tanda hubung, dan apostrof.";
+  if (!USERNAME_PATTERN.test(normalized)) {
+    return "Username harus 3–50 karakter (huruf, angka, '.', '_', '-').";
   }
   return null;
 }
 
 export function validateAdminEmail(email: string): string | null {
   const normalized = email.trim().toLowerCase();
-  if (!normalized || normalized.length > 120) {
-    return "Email wajib diisi (maksimal 120 karakter).";
-  }
-  if (containsUnsafeSqlOrScriptChars(normalized)) {
-    return "Email mengandung karakter yang tidak diizinkan.";
+  if (!normalized) {
+    return "Email wajib diisi.";
   }
   if (!EMAIL_PATTERN.test(normalized)) {
     return "Format email tidak valid.";
@@ -37,83 +23,36 @@ export function validateAdminEmail(email: string): string | null {
   return null;
 }
 
-export interface PasswordStrengthResult {
-  isValid: boolean;
-  score: number;
-  label: string;
-  barColor: string;
-  checks: {
-    minLength: boolean;
-    hasUpper: boolean;
-    hasLower: boolean;
-    hasNumber: boolean;
-    hasSpecial: boolean;
-    noSpace: boolean;
-  };
-}
-
-export function evaluatePasswordStrength(password: string): PasswordStrengthResult {
-  const checks = {
-    minLength: password.length >= 8 && password.length <= 72,
-    hasUpper: /[A-Z]/.test(password),
-    hasLower: /[a-z]/.test(password),
-    hasNumber: /[0-9]/.test(password),
-    hasSpecial: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~]/.test(password),
-    noSpace: password.length > 0 && !/\s/.test(password),
-  };
-
-  const criteriaMet = [
-    checks.minLength,
-    checks.hasUpper,
-    checks.hasLower,
-    checks.hasNumber,
-    checks.hasSpecial,
-  ].filter(Boolean).length;
-
-  const isValid =
-    checks.minLength &&
-    checks.hasUpper &&
-    checks.hasLower &&
-    checks.hasNumber &&
-    checks.hasSpecial &&
-    checks.noSpace;
-
-  let label = "Sangat Lemah";
-  let barColor = "bg-destructive";
-  if (criteriaMet === 2) {
-    label = "Lemah";
-    barColor = "bg-orange-500";
-  } else if (criteriaMet === 3) {
-    label = "Sedang";
-    barColor = "bg-amber-500";
-  } else if (criteriaMet === 4) {
-    label = "Kuat";
-    barColor = "bg-lime-500";
-  } else if (criteriaMet === 5 && checks.noSpace) {
-    label = "Sangat Kuat";
-    barColor = "bg-emerald-500";
+export function validateStrongPassword(password: string): string | null {
+  if (!password) {
+    return "Password wajib diisi.";
   }
-
-  return {
-    isValid,
-    score: criteriaMet,
-    label,
-    barColor,
-    checks,
-  };
+  if (password.length < 8 || password.length > 72) {
+    return "Password harus 8–72 karakter.";
+  }
+  if (/\s/.test(password)) {
+    return "Password tidak boleh mengandung spasi.";
+  }
+  if (!/[A-Z]/.test(password)) {
+    return "Password harus mengandung minimal 1 huruf besar.";
+  }
+  if (!/[a-z]/.test(password)) {
+    return "Password harus mengandung minimal 1 huruf kecil.";
+  }
+  if (!/[0-9]/.test(password)) {
+    return "Password harus mengandung minimal 1 angka.";
+  }
+  if (!/[^a-zA-Z0-9\s]/.test(password)) {
+    return "Password harus mengandung minimal 1 karakter spesial.";
+  }
+  return null;
 }
+
+export const validateRegisterPassword = validateStrongPassword;
 
 export function validateLoginPassword(password: string): string | null {
   if (!password) {
     return "Password wajib diisi.";
   }
-  if (password.length > 72) {
-    return "Password maksimal 72 karakter.";
-  }
-  // eslint-disable-next-line no-control-regex
-  if (/[\x00-\x1f\x7f]/.test(password)) {
-    return "Password mengandung karakter yang tidak valid.";
-  }
   return null;
 }
-

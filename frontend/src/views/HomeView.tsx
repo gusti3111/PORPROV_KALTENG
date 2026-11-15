@@ -1,11 +1,6 @@
-import { useRef } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Sparkles,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 import ArrowIcon from "../components/ArrowIcon";
 import EventCountdown from "../components/EventCountdown";
 import SiteFooter from "../components/SiteFooter";
@@ -14,149 +9,140 @@ import { EVENT_START_LABEL } from "../event-config";
 
 const featuredStadiums = [
   {
-    category: "KOMPLEKS UTAMA",
-    venue: "Sport Center Pangkalan Bun",
+    category: "GOR SPORT CENTER",
+    venue: "GOR Sport Center Ratu Alamsyah",
     city: "Madurejo, Kotawaringin Barat",
-    cabor: "Upacara Pembukaan & Penutupan, Grass Track, Voli Pantai, Drumband, Korfball, Panahan, Sepatu Roda & Skateboard",
-    image: "/venues2/sportCenter.jpg",
+    cabor: "Bola Voli Indoor & Futsal",
+    image: "/venues2/gorSportCenter.jpeg",
   },
   {
-    category: "STADION & LINTASAN",
+    category: "LAPANGAN TREK LARI",
     venue: "Lintasan Atletik Sport Center",
     city: "Madurejo, Kotawaringin Barat",
     cabor: "Cabang Olahraga Atletik",
     image: "/venues2/LintasanAtletik.jpeg",
   },
   {
-    category: "GELANGGANG OLAHRAGA",
-    venue: "GOR Sport Center Ratu Alamsyah",
+    category: "STADION",
+    venue: "Stadion Sepak Bola Sport Center",
     city: "Madurejo, Kotawaringin Barat",
-    cabor: "Bola Voli Indoor, Futsal & Basket",
-    image: "/venues2/gorSportCenter.jpeg",
-  },
-  {
-    category: "GELANGGANG OLAHRAGA",
-    venue: "GOR KONI Kotawaringin Barat",
-    city: "Sidorejo, Pangkalan Bun",
-    cabor: "Cabang Olahraga Bulutangkis",
-    image: "/venues2/GORKoni.jpg",
-  },
-  {
-    category: "ARENA PERAIRAN",
-    venue: "Kampung Sega Sungai Arut",
-    city: "Mendawai, Pangkalan Bun",
-    cabor: "Dayung (Canoeing, Traditional Boat Race, & Argometer)",
-    image: "/venues2/kampungSega.jpg",
-  },
-  {
-    category: "ARENA TERBUKA",
-    venue: "Pangkalan Bun Park",
-    city: "Madurejo, Pangkalan Bun",
-    cabor: "MMA & Panjat Tebing",
-    image: "/venues2/pangakalnbunpark.jpg",
-  },
-  {
-    category: "STADION & FASILITAS OLAHRAGA",
-    venue: "Lapangan Tenis Pasir Panjang",
-    city: "Pasir Panjang, Arut Selatan",
-    cabor: "Cabang Olahraga Tenis Lapangan",
-    image: "/venues2/LapanganTenisPasirPanjang.jpeg",
-  },
-  {
-    category: "AULA & GEDUNG PERTEMUAN",
-    venue: "Aula Disdikbud",
-    city: "Pasir Panjang, Arut Selatan",
-    cabor: "Cabang Olahraga Tenis Meja",
-    image: "/venues2/aulaDISKDIKBUD.jpg",
-  },
-  {
-    category: "AULA & GEDUNG PERTEMUAN",
-    venue: "Aula Antakusuma",
-    city: "Pangkalan Bun, Kotawaringin Barat",
-    cabor: "Pencak Silat & Taekwondo",
-    image: "/venues2/aulaAntakusuma.jpeg",
-  },
-  {
-    category: "AULA & GEDUNG PERTEMUAN",
-    venue: "Aula Dispora",
-    city: "Pangkalan Bun, Kotawaringin Barat",
-    cabor: "Cabang Olahraga Bridge",
-    image: "/venues2/aulaDisipora.jpeg",
-  },
-  {
-    category: "AULA & GEDUNG PERTEMUAN",
-    venue: "Aula Bapperida",
-    city: "Pangkalan Bun, Kotawaringin Barat",
-    cabor: "Cabang Olahraga Catur",
-    image: "/venues2/bapperida.jpg",
-  },
-  {
-    category: "AULA & GEDUNG PERTEMUAN",
-    venue: "Aula Mapolres Kobar",
-    city: "Pangkalan Bun, Kotawaringin Barat",
-    cabor: "Cabang Olahraga Judo",
-    image: "/venues2/mapolres.jpg",
-  },
-  {
-    category: "ARENA INDOOR",
-    venue: "Samari Futsal",
-    city: "Pangkalan Bun, Kotawaringin Barat",
-    cabor: "Cabang Olahraga Karate",
-    image: "/venues2/samari.jpg",
-  },
-  {
-    category: "ARENA INDOOR & KOMERSIAL",
-    venue: "Juvenza Futsal",
-    city: "Madurejo, Pangkalan Bun",
-    cabor: "Cabang Olahraga Tinju",
-    image: "/venues2/juvenza.png",
-  },
-  {
-    category: "ARENA BILLIARD",
-    venue: "Onix Billiard",
-    city: "Pangkalan Bun, Kotawaringin Barat",
-    cabor: "Cabang Olahraga Billiard",
-    image: "/venues2/Onix.jpg",
-  },
-  {
-    category: "ARENA SEPAK BOLA MINI",
-    venue: "Minisoccer R88",
-    city: "Pasir Panjang, Arut Selatan",
-    cabor: "Sepak Bola Mini (KSMI)",
-    image: "/venues2/soccer88.jpeg",
-  },
-  {
-    category: "ARENA BALAP MOTOR",
-    venue: "Sirkuit Sabaru Palangka Raya",
-    city: "Sabaru, Sebangau, Palangka Raya",
-    cabor: "Bermotor / Balap Motor (Motoprix)",
-    image: "/venues2/sirkuitsabaru.jpg",
-  },
-  {
-    category: "AKUATIK & PERAIRAN",
-    venue: "Kolam Renang Isen Mulang",
-    city: "Jekan Raya, Palangka Raya",
-    cabor: "Cabang Olahraga Akuatik / Renang",
-    image: "/venues2/kolamIsenMulang.jpg",
-  },
-  {
-    category: "AULA & GEDUNG PERTEMUAN",
-    venue: "Aula Kiyai Gede",
-    city: "Kotawaringin Lama, Kotawaringin Barat",
-    cabor: "Binaraga Fitnes, Dancesport & Gimnastik",
-    image: "",
-  },
-  {
-    category: "ARENA JALAN RAYA",
-    venue: "Jalan Raya Pangkalan Bun",
-    city: "Pangkalan Bun, Kotawaringin Barat",
-    cabor: "Balap Sepeda (Road Bike & Mountain Bike)",
-    image: "/venues2/jalanRaya.jpg",
+    cabor: "Cabang Olahraga Sepak Bola",
+    image: "/venues2/sportCenter.jpg",
   },
 ];
 
+type HomeNewsCard = {
+  id: string;
+  title: string;
+  date: string;
+  category: string;
+  excerpt: string;
+  image: string;
+};
+
+const fallbackNewsCards: HomeNewsCard[] = [
+  {
+    id: "fallback-1",
+    title: "Bupati Kobar Dampingi Gubernur Kalteng Tinjau Kesiapan Arena PORPROV XIII 2026",
+    date: "November 2026",
+    category: "PEMKAB KOBAR",
+    excerpt: "Peninjauan langsung sejumlah venue utama di Pangkalan Bun untuk memastikan kesiapan teknis penyelenggaraan PORPROV XIII Kalimantan Tengah.",
+    image: "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/gub.jpeg",
+  },
+  {
+    id: "fallback-2",
+    title: "Buka CdM Meeting PORPROV XIII, Wabup Kobar Tekankan Sportivitas dan Keselamatan Atlet",
+    date: "November 2026",
+    category: "CDM MEETING",
+    excerpt: "Pertemuan Chef de Mission membahas kesiapan kontingen, jadwal pertandingan, layanan kesehatan, serta tata tertib arena.",
+    image: "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/dci.jpeg",
+  },
+  {
+    id: "fallback-3",
+    title: "Dorong Pemulihan Ekonomi Daerah, Pemkab Kobar Integrasikan PORPROV XIII dan Kobar Expo 2026",
+    date: "November 2026",
+    category: "EKONOMI & UMKM",
+    excerpt: "Ribuan atlet, ofisial, dan pengunjung PORPROV XIII diharapkan menggerakkan sektor kuliner, perhotelan, dan UMKM lokal.",
+    image: "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/expo.jpeg",
+  },
+];
+
+function stripHtmlTags(raw: string): string {
+  return raw
+    .replace(/<[^>]*>?/gm, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export default function HomeView() {
-  const stadiumTrackRef = useRef<HTMLDivElement>(null);
+  const [latestNews, setLatestNews] = useState<HomeNewsCard[]>(fallbackNewsCards);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadLatestNews = async () => {
+      try {
+        const res = await fetch(
+          "https://mmc.apikobar.id/api/berita?search=porprov%20xiii",
+        );
+        if (!res.ok) return;
+        const json = (await res.json()) as {
+          data?: Array<{
+            id_berita?: number;
+            judul?: string;
+            sub_judul?: string;
+            deskripsi?: string;
+            sopd?: string;
+            set_tanggal_publish?: string;
+            slug_berita?: string;
+            filename1?: string;
+          }>;
+        };
+        const items = Array.isArray(json.data) ? json.data.slice(0, 3) : [];
+        if (cancelled || items.length === 0) return;
+
+        const slugImageMap: Record<string, string> = {
+          "pemkab-kobar-resmi-tetapkan-jadwal-porprov-xiii-kalteng-28-november-hingga-8-desember-2026":
+            "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/jadwal.jpeg",
+          "bupati-kobar-dampingi-gubernur-kalteng-tinjau-kesiapan-arena-porprov-xiii-2026":
+            "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/gub.jpeg",
+          "buka-cdm-meeting-porprov-xiii-wabup-kobar-tekankan-sportivitas-dan-keselamatan-atlet":
+            "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/dci.jpeg",
+          "dorong-pemulihan-ekonomi-daerah-pemkab-kobar-integrasikan-porprov-xiii-dan-kobar-expo-2026":
+            "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/expo.jpeg",
+        };
+
+        setLatestNews(
+          items.map((item, idx) => ({
+            id: String(item.id_berita ?? idx),
+            title: item.judul || fallbackNewsCards[idx]?.title || "Berita PORPROV XIII",
+            date: item.set_tanggal_publish || "Terbaru",
+            category: item.sopd || "BERITA PORPROV",
+            excerpt:
+              stripHtmlTags(item.sub_judul || item.deskripsi || "") ||
+              fallbackNewsCards[idx]?.excerpt ||
+              "",
+            image:
+              (item.filename1
+                ? `https://mmc.kotawaringinbaratkab.go.id/upload/berita/${item.filename1}`
+                : "") ||
+              (item.slug_berita && slugImageMap[item.slug_berita]) ||
+              fallbackNewsCards[idx]?.image ||
+              "",
+          })),
+        );
+      } catch {
+        // Keep fallbackNewsCards on network/CORS error
+      }
+    };
+    void loadLatestNews();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <>
@@ -185,28 +171,28 @@ export default function HomeView() {
           />
 
           <div className="relative z-[2] w-[54%] pt-[76px] pb-[105px] pl-[10%] min-[1500px]:pl-[max(8%,calc((100vw-var(--container-max,1760px))/2))] max-[900px]:w-[60%] max-[900px]:pl-[7%] max-[620px]:w-full max-[620px]:px-[6%] max-[620px]:pt-[65px] max-[620px]:pb-[170px]">
-            <p className="mb-6 flex items-center gap-[10px] text-[10px] font-extrabold uppercase tracking-[0.15em] text-[var(--lime)]">
+            <p className="mb-6 flex items-center gap-[10px] text-[clamp(10px,0.9vw,14px)] font-extrabold uppercase tracking-[0.15em] text-[var(--lime)]">
               <span className="size-[7px] rounded-full bg-[var(--lime)] shadow-[0_0_14px_rgba(220,236,249,0.75)]" />
               Panggung prestasi Kalimantan Tengah
             </p>
-            <h1 className="m-0 text-[clamp(44px,5.6vw,78px)] font-black leading-[0.92] tracking-[-0.08em] max-[900px]:text-[clamp(36px,6vw,58px)] max-[620px]:text-[clamp(30px,8vw,44px)]">
+            <h1 className="m-0 text-[clamp(28px,5.6vw,88px)] font-black leading-[0.94] tracking-[-0.06em]">
               PORPROV XIII
-              <span className="mt-2.5 ml-1 flex flex-wrap items-center gap-2 sm:gap-3 text-[clamp(20px,2.4vw,34px)] font-extrabold tracking-[-0.04em] text-white max-[900px]:text-[clamp(17px,2.5vw,26px)] max-[620px]:mt-1.5 max-[620px]:text-[clamp(15px,4.5vw,22px)]">
+              <span className="mt-2.5 ml-1 flex flex-wrap items-center gap-2 sm:gap-3 text-[clamp(14px,2.4vw,38px)] font-extrabold tracking-[-0.03em] text-white max-[620px]:mt-1.5">
                 KALIMANTAN TENGAH
                 <i className="font-extrabold not-italic tracking-normal text-[var(--lime)]">
                   2026
                 </i>
               </span>
             </h1>
-            <p className="mt-7 ml-[5px] max-w-[390px] xl:max-w-[480px] 2xl:max-w-[620px] min-[2560px]:max-w-[800px] text-[14px] xl:text-[16px] 2xl:text-[18px] min-[2560px]:text-[22px] leading-[1.85] text-white/75 max-[620px]:max-w-[340px] max-[620px]:text-[12px]">
+            <p className="mt-7 ml-[5px] max-w-[390px] xl:max-w-[480px] 2xl:max-w-[620px] min-[2560px]:max-w-[800px] text-[clamp(12px,1.15vw,21px)] leading-[1.85] text-white/75 max-[620px]:max-w-[340px]">
               Pekan Olahraga Provinsi Kalimantan Tengah. Satu semangat untuk
               berkompetisi, berprestasi, dan tumbuh bersama.
             </p>
             <div className="mt-[29px] ml-[5px] flex items-center gap-[25px] max-[620px]:flex-wrap max-[620px]:gap-x-5 max-[620px]:gap-y-[14px]">
-              <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[11px] font-extrabold text-[#102b49] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#c6e2f5] max-[620px]:min-h-[45px] max-[620px]:px-[15px]" href="#tentang">
+              <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[clamp(11px,0.95vw,15px)] font-extrabold text-[#102b49] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#c6e2f5] max-[620px]:min-h-[45px] max-[620px]:px-[15px]" href="#tentang">
                 Jelajahi PORPROV <ArrowIcon />
               </a>
-              <Link className="rounded-md text-[11px] font-bold text-white/80 hover:text-[var(--lime)]" to="/cabor">
+              <Link className="rounded-md text-[clamp(11px,0.95vw,15px)] font-bold text-white/80 hover:text-[var(--lime)]" to="/cabor">
                 Kenali cabang olahraga
               </Link>
             </div>
@@ -242,13 +228,13 @@ export default function HomeView() {
 
 
 
-          <div className="absolute right-[7.2%] bottom-0 left-[7.2%] flex h-14 items-center gap-4 border-t border-white/20 text-[8px] font-extrabold tracking-[0.15em] text-white/75 max-[620px]:right-[5%] max-[620px]:left-[5%] max-[620px]:gap-2 max-[620px]:text-[7px]">
+          <div className="absolute right-[7.2%] bottom-0 left-[7.2%] flex h-14 items-center gap-4 border-t border-white/20 text-[clamp(8px,0.75vw,12px)] font-extrabold tracking-[0.15em] text-white/75 max-[620px]:right-[5%] max-[620px]:left-[5%] max-[620px]:gap-2">
             <span>SPORTIVITAS</span>
             <span className="text-xs text-[var(--lime)]">✳</span>
             <span>PERSAUDARAAN</span>
             <span className="text-xs text-[var(--lime)]">✳</span>
             <span>PRESTASI</span>
-            <span className="ml-auto text-[7px] text-white/50 max-[620px]:hidden">
+            <span className="ml-auto text-[clamp(8px,0.7vw,11px)] text-white/50 max-[620px]:hidden">
               KALIMANTAN TENGAH, INDONESIA
             </span>
           </div>
@@ -259,12 +245,12 @@ export default function HomeView() {
           aria-labelledby="countdown-title"
         >
           <div>
-            <p className="mb-[5px] text-[8px] font-extrabold tracking-[0.15em] text-[var(--green)]">HITUNG MUNDUR</p>
-            <h2 id="countdown-title" className="m-0 text-[19px] font-extrabold tracking-[-0.04em]">Menuju pembukaan</h2>
-            <p className="mt-[6px] mb-0 text-[10px] text-[var(--muted)]">{EVENT_START_LABEL}</p>
+            <p className="mb-[5px] text-[clamp(9px,0.8vw,12px)] font-extrabold tracking-[0.15em] text-[var(--green)]">HITUNG MUNDUR</p>
+            <h2 id="countdown-title" className="m-0 text-[clamp(17px,1.8vw,28px)] font-extrabold tracking-[-0.04em]">Menuju pembukaan</h2>
+            <p className="mt-[6px] mb-0 text-[clamp(11px,0.95vw,15px)] text-[var(--muted)]">{EVENT_START_LABEL}</p>
           </div>
           <EventCountdown />
-          <p className="col-span-full m-0 text-[8px] text-[var(--muted)] max-[620px]:col-span-1">
+          <p className="col-span-full m-0 text-[clamp(9px,0.8vw,12px)] text-[var(--muted)] max-[620px]:col-span-1">
             Tanggal sementara, sesuaikan dengan jadwal resmi PORPROV XIII.
           </p>
         </section>
@@ -283,105 +269,157 @@ export default function HomeView() {
             <div className="flex items-center gap-3">
               <Link
                 to="/venue"
-                className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-950 hover:underline"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-950 hover:underline"
               >
                 Semua Venue
                 <ArrowIcon diagonal />
               </Link>
-              <div className="home-stadium-controls" aria-label="Kontrol carousel venue">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  aria-label="Venue sebelumnya"
-                  onClick={() => stadiumTrackRef.current?.scrollBy({ left: -360, behavior: "smooth" })}
-                >
-                  <ChevronLeft aria-hidden="true" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  aria-label="Venue berikutnya"
-                  onClick={() => stadiumTrackRef.current?.scrollBy({ left: 360, behavior: "smooth" })}
-                >
-                  <ChevronRight aria-hidden="true" />
-                </Button>
-              </div>
             </div>
           </div>
-          <div className="home-stadium-track" ref={stadiumTrackRef}>
-            {featuredStadiums.map((item, index) => (
-              <article className="home-stadium-card" key={item.venue}>
+          <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-[repeat(3,minmax(0,1fr))_auto] items-stretch">
+            {featuredStadiums.slice(0, 3).map((item, index) => {
+              const venueTarget = `/venue?venue=${encodeURIComponent(item.venue)}`;
+              return (
                 <Link
-                  className="home-stadium-image-link"
-                  to="/venue"
+                  to={venueTarget}
+                  className="home-stadium-card !w-full !flex-none group block no-underline text-inherit"
+                  key={item.venue}
                   aria-label={`Lihat detail ${item.venue} di halaman Venue`}
                 >
-                  {item.image ? (
-                    <img
-                      className="home-stadium-image"
-                      src={item.image}
-                      alt={item.venue}
-                      loading="lazy"
-                      decoding="async"
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        if (!target.src.includes("sportCenter.jpg")) {
-                          target.src = "/venues2/sportCenter.jpg";
-                        }
-                      }}
-                    />
-                  ) : (
-                    <div className="home-stadium-image flex items-center justify-center bg-slate-100 text-xs font-medium text-slate-400">
-                      Foto belum tersedia
-                    </div>
-                  )}
-                  <span className="home-stadium-index">{String(index + 1).padStart(2, "0")}</span>
+                  <div className="home-stadium-image-link">
+                    {item.image ? (
+                      <img
+                        className="home-stadium-image"
+                        src={item.image}
+                        alt={item.venue}
+                        loading="lazy"
+                        decoding="async"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (!target.src.includes("sportCenter.jpg")) {
+                            target.src = "/venues2/sportCenter.jpg";
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="home-stadium-image flex items-center justify-center bg-slate-100 text-xs font-medium text-slate-400">
+                        Foto belum tersedia
+                      </div>
+                    )}
+                    <span className="home-stadium-index">{String(index + 1).padStart(2, "0")}</span>
+                  </div>
+                  <div className="home-stadium-copy">
+                    <small>{item.category}</small>
+                    <h3>{item.venue}</h3>
+                    <p>{item.city}</p>
+                    <span className="home-stadium-credit" style={{ textDecoration: "none" }}>
+                      {item.cabor}
+                    </span>
+                    <span className="home-stadium-license text-emerald-800 font-bold group-hover:underline">
+                      Lihat di peta venue →
+                    </span>
+                  </div>
                 </Link>
-                <div className="home-stadium-copy">
-                  <small>{item.category}</small>
-                  <h3>{item.venue}</h3>
-                  <p>{item.city}</p>
-                  <span className="home-stadium-credit" style={{ textDecoration: "none" }}>
-                    {item.cabor}
-                  </span>
-                  <Link className="home-stadium-license text-emerald-800 font-bold" to="/venue">
-                    Lihat di peta venue →
-                  </Link>
-                </div>
-              </article>
-            ))}
+              );
+            })}
 
-            {/* End Action Card: Venue */}
-            <article className="home-stadium-card flex flex-col justify-between p-6 sm:p-7 bg-gradient-to-br from-[#0e2742] via-[#174a72] to-[#216396] text-white border-2 border-dashed border-sky-300/40 hover:border-amber-400 transition-all shrink-0">
-              <div className="space-y-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/15 text-amber-300 backdrop-blur-xs">
-                  <Sparkles className="h-3 w-3" />
-                  Arena Tuan Rumah
-                </span>
-                <h3 className="text-xl sm:text-2xl font-black text-white leading-tight">
-                  Jelajahi 23 Venue Pertandingan
-                </h3>
-                <p className="text-xs text-sky-100/90 leading-relaxed">
-                  Cek peta lokasi interaktif, rute Google Maps, serta fasilitas pendukung seluruh venue resmi di Kabupaten Kotawaringin Barat.
-                </p>
-              </div>
-              <div className="pt-6 mt-auto">
-                <Link
-                  to="/venue"
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm py-3.5 px-4 shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <span>Buka Halaman Venue</span>
-                  <ArrowIcon diagonal />
-                </Link>
-              </div>
-            </article>
+            {/* End Arrow Link: Venue Page */}
+            <Link
+              to="/venue"
+              aria-label="Lihat semua venue di halaman Venue"
+              className="group flex md:flex-col items-center justify-center gap-3 rounded-xl px-5 py-4 bg-[image:var(--hero-gradient)] text-white border-2 border-dashed border-amber-300/50 hover:border-amber-300 transition-all text-center no-underline md:min-w-[130px]"
+            >
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-400 text-slate-950 shadow-lg transition-transform duration-200 group-hover:translate-x-1 group-hover:scale-105">
+                <ArrowRight className="h-6 w-6" />
+              </span>
+              <span className="text-xs font-extrabold text-white leading-tight">
+                Semua Venue
+              </span>
+            </Link>
           </div>
         </section>
 
-        <section id="cabang-olahraga" className="mx-auto w-[var(--container-width)] pt-[94px] pb-[108px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:py-[72px]">
-          <div className="flex items-center gap-[13px] text-[9px] font-extrabold tracking-[0.16em] text-[#596156] [&>span:first-child]:text-[var(--orange)]">
+        {/*  3 Berita Terkini  */}
+        <section className="home-stadium-section" aria-labelledby="home-news-title">
+          <div className="home-stadium-heading">
+            <div>
+              <p className="home-stadium-kicker">
+                <span>02</span> BERITA TERKINI
+              </p>
+              <h2 id="home-news-title">Berita terbaru PORPROV XIII</h2>
+              <p className="home-stadium-description">
+                Ikuti perkembangan informasi dan rilis resmi terbaru seputar PORPROV XIII Kalimantan Tengah.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link
+                to="/informasi?tab=berita"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-950 hover:underline"
+              >
+                Semua Berita
+                <ArrowIcon diagonal />
+              </Link>
+            </div>
+          </div>
+          <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-[repeat(3,minmax(0,1fr))_auto] items-stretch">
+            {latestNews.slice(0, 3).map((news, index) => (
+              <Link
+                to="/informasi?tab=berita"
+                className="home-stadium-card !w-full !flex-none group block no-underline text-inherit"
+                key={news.id}
+                aria-label={`Baca berita ${news.title}`}
+              >
+                <div className="home-stadium-image-link">
+                  <img
+                    className="home-stadium-image"
+                    src={news.image}
+                    alt={news.title}
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (target.src.includes("/upload/berita/")) {
+                        target.src = target.src.replace("/upload/berita/", "/foto_berita/");
+                      } else {
+                        target.style.display = "none";
+                      }
+                    }}
+                  />
+                  <span className="home-stadium-index">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                </div>
+                <div className="home-stadium-copy">
+                  <small>{news.category} • {news.date}</small>
+                  <h3 className="line-clamp-2">{news.title}</h3>
+                  <p className="line-clamp-2">{news.excerpt}</p>
+                  <span className="home-stadium-license text-emerald-800 font-bold group-hover:underline">
+                    Baca selengkapnya →
+                  </span>
+                </div>
+              </Link>
+            ))}
+
+            {/* End Arrow Link: News Page */}
+            <Link
+              to="/informasi?tab=berita"
+              aria-label="Lihat semua berita di halaman Informasi"
+              className="group flex md:flex-col items-center justify-center gap-3 rounded-xl px-5 py-4 bg-[image:var(--hero-gradient)] text-white border-2 border-dashed border-amber-300/50 hover:border-amber-300 transition-all text-center no-underline md:min-w-[130px]"
+            >
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-400 text-slate-950 shadow-lg transition-transform duration-200 group-hover:translate-x-1 group-hover:scale-105">
+                <ArrowRight className="h-6 w-6" />
+              </span>
+              <span className="text-xs font-extrabold text-white leading-tight">
+                Semua Berita
+              </span>
+            </Link>
+          </div>
+        </section>
+        {/* caroussel cabor */}
+
+
+        <section id="kuliner" className="mx-auto w-[var(--container-width)] pt-[94px] pb-[108px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:py-[72px]">
+          <div className="flex items-center gap-[10px] text-[clamp(11px,1.3vw,18px)] font-extrabold tracking-[0.16em] text-[#596156] [&>span:first-child]:text-[var(--orange)]">
             <span>07</span>
             <span>Sentra Kuliner dan Restoran </span>
           </div>
@@ -396,16 +434,16 @@ export default function HomeView() {
               />
             </div>
             <div>
-              <h2 className="m-0 text-[clamp(34px,4.5vw,60px)] font-extrabold leading-[1.08] tracking-[-0.075em] max-[620px]:text-[clamp(37px,10vw,52px)] [&>span]:text-[var(--green)]">
+              <h2 className="m-0 text-[clamp(24px,4.2vw,64px)] font-extrabold leading-[1.08] tracking-[-0.06em] [&>span]:text-[var(--green)]">
                 Untuk apa memperebutkan semangkuk coto,
                 <br />
                 <span>kita bisa temukan jauh lebih banyak di sini </span>
               </h2>
-              <p className="mt-[21px] mb-0 max-w-[390px] xl:max-w-[480px] 2xl:max-w-[620px] min-[2560px]:max-w-[800px] text-[13px] xl:text-[15px] 2xl:text-[17px] min-[2560px]:text-[20px] leading-[1.9] text-[var(--muted)]">
+              <p className="mt-[21px] mb-0 max-w-[390px] xl:max-w-[480px] 2xl:max-w-[620px] min-[2560px]:max-w-[800px] text-[clamp(12px,1.1vw,20px)] leading-[1.9] text-[var(--muted)]">
                 Berikut beberapa rekomendasi tempat makan yang enak dan cocok untuk menikmati kuliner khas Kotawaringin Barat.
               </p>
               <div className="mt-5 flex flex-wrap items-center gap-4">
-                <Link className="inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/informasi?tab=makan">
+                <Link className="inline-flex items-center gap-2 rounded-md text-[clamp(11px,1vw,16px)] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/informasi?tab=makan">
                   Lihat Tempat makan dan Restoran <ArrowIcon diagonal />
                 </Link>
                 {/* <Link className="inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/venue">
@@ -416,25 +454,25 @@ export default function HomeView() {
 
           </div>
         </section>
-        <section id="cabang-olahraga" className="mx-auto w-[var(--container-width)] pt-[94px] pb-[108px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:py-[72px]">
-          <div className="flex items-center gap-[13px] text-[9px] font-extrabold tracking-[0.16em] text-[#596156] [&>span:first-child]:text-[var(--orange)]">
+        <section id="wisata" className="mx-auto w-[var(--container-width)] pt-[94px] pb-[108px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:py-[72px]">
+          <div className="flex items-center gap-[13px] text-[clamp(11px,1.3vw,18px)] font-extrabold tracking-[0.16em] text-[#596156] [&>span:first-child]:text-[var(--orange)]">
             <span>08</span>
             <span>Tempat Wisata </span>
           </div>
 
           <div className="mt-[33px] grid grid-cols-[1fr_1fr] items-center gap-[8%] max-[900px]:gap-[5%] max-[620px]:grid-cols-1 max-[620px]:gap-[27px]">
             <div>
-              <h2 className="m-0 text-[clamp(34px,4.5vw,60px)] font-extrabold leading-[1.08] tracking-[-0.075em] max-[620px]:text-[clamp(37px,10vw,52px)] [&>span]:text-[var(--green)]">
+              <h2 className="m-0 text-[clamp(24px,4.2vw,64px)] font-extrabold leading-[1.08] tracking-[-0.06em] [&>span]:text-[var(--green)]">
                 Setelah kenyang perut
                 <br />
                 <span>Yuk Jalan-jalan</span>
               </h2>
-              <p className="mt-[21px] mb-0 max-w-[390px] xl:max-w-[480px] 2xl:max-w-[620px] min-[2560px]:max-w-[800px] text-[13px] xl:text-[15px] 2xl:text-[17px] min-[2560px]:text-[20px] leading-[1.9] text-[var(--muted)]">
+              <p className="mt-[21px] mb-0 max-w-[390px] xl:max-w-[480px] 2xl:max-w-[620px] min-[2560px]:max-w-[800px] text-[clamp(12px,1.1vw,20px)] leading-[1.9] text-[var(--muted)]">
                 Anda bisa mengunjungi beberapa tempat wisata menarik di Kotawaringin Barat yang sayang untuk dilewatkan.
                 Berikut beberapa rekomendasi tempat wisata yang cocok untuk dikunjungi setelah menikmati kuliner khas Kotawaringin Barat.
               </p>
               <div className="mt-5 flex flex-wrap items-center gap-4">
-                <Link className="inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/informasi?tab=wisata">
+                <Link className="inline-flex items-center gap-2 rounded-md text-[clamp(11px,1vw,16px)] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/informasi?tab=wisata">
                   Lihat Tempat Wisata<ArrowIcon diagonal />
                 </Link>
 
@@ -456,8 +494,8 @@ export default function HomeView() {
           </div>
         </section>
 
-        <section id="cabang-olahraga" className="mx-auto w-[var(--container-width)] pt-[94px] pb-[108px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:py-[72px]">
-          <div className="flex items-center gap-[13px] text-[9px] font-extrabold tracking-[0.16em] text-[#596156] [&>span:first-child]:text-[var(--orange)]">
+        <section id="penginapan" className="mx-auto w-[var(--container-width)] pt-[94px] pb-[108px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:py-[72px]">
+          <div className="flex items-center gap-[13px] text-[clamp(11px,1.3vw,18px)] font-extrabold tracking-[0.16em] text-[#596156] [&>span:first-child]:text-[var(--orange)]">
             <span>09</span>
             <span>Hotel dan Penginapan </span>
           </div>
@@ -472,16 +510,16 @@ export default function HomeView() {
               />
             </div>
             <div>
-              <h2 className="m-0 text-[clamp(34px,4.5vw,60px)] font-extrabold leading-[1.08] tracking-[-0.075em] max-[620px]:text-[clamp(37px,10vw,52px)] [&>span]:text-[var(--green)]">
+              <h2 className="m-0 text-[clamp(24px,4.2vw,64px)] font-extrabold leading-[1.08] tracking-[-0.06em] [&>span]:text-[var(--green)]">
                 Udah Capek Jalan-jalannya
                 <br />
                 <span>Jangan Khawatir,kita ada tempat penginapan yang nyaman</span>
               </h2>
-              <p className="mt-[21px] mb-0 max-w-[390px] xl:max-w-[480px] 2xl:max-w-[620px] min-[2560px]:max-w-[800px] text-[13px] xl:text-[15px] 2xl:text-[17px] min-[2560px]:text-[20px] leading-[1.9] text-[var(--muted)]">
+              <p className="mt-[21px] mb-0 max-w-[390px] xl:max-w-[480px] 2xl:max-w-[620px] min-[2560px]:max-w-[800px] text-[clamp(12px,1.1vw,20px)] leading-[1.9] text-[var(--muted)]">
                 Berikut beberapa  tempat penginapan pilihan di Kotawaringin Barat yang dapat membuat  istirahat anda semakin nyaman
               </p>
               <div className="mt-5 flex flex-wrap items-center gap-4">
-                <Link className="inline-flex items-center gap-2 rounded-md text-[11px] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/informasi?tab=penginapan">
+                <Link className="inline-flex items-center gap-2 rounded-md text-[clamp(11px,1vw,16px)] font-extrabold text-[var(--green)] transition-colors duration-[160ms] hover:text-[var(--orange)]" to="/informasi?tab=penginapan">
                   Lihat Hotel dan Penginapan<ArrowIcon diagonal />
                 </Link>
 
@@ -499,20 +537,20 @@ export default function HomeView() {
         <section className="relative min-h-[355px] overflow-hidden bg-[var(--orange)] text-white max-[620px]:min-h-[330px]">
           <div className="closing-pattern" aria-hidden="true" />
           <div className="relative z-[1] mx-auto w-[var(--container-width)] pt-[62px] pb-[65px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:pt-[55px] max-[620px]:pb-[55px]">
-            <p className="mb-6 flex items-center gap-[10px] text-[10px] font-extrabold uppercase tracking-[0.15em] text-white [&>span]:bg-[var(--lime)]">
+            <p className="mb-6 flex items-center gap-[10px] text-[clamp(10px,0.9vw,14px)] font-extrabold uppercase tracking-[0.15em] text-white [&>span]:bg-[var(--lime)]">
               <span className="size-[7px] rounded-full shadow-[0_0_14px_rgba(211,237,113,0.75)]" />
               Menuju PORPROV XIII KALIMANTAN TENGAH 2026
             </p>
-            <h2 className="mt-0 mb-[26px] text-[clamp(42px,6vw,76px)] font-black leading-[0.98] tracking-[-0.08em] [&>span]:text-[var(--lime)]">
+            <h2 className="mt-0 mb-[26px] text-[clamp(28px,6vw,84px)] font-black leading-[0.98] tracking-[-0.06em] [&>span]:text-[var(--lime)]">
               Bersama kita
               <br />
               <span>jadi juara.</span>
             </h2>
-            <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[11px] font-extrabold text-[#102b49] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#c6e2f5] max-[620px]:min-h-[45px] max-[620px]:px-[15px]" href="#beranda">
+            <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[clamp(11px,0.95vw,15px)] font-extrabold text-[#102b49] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#c6e2f5] max-[620px]:min-h-[45px] max-[620px]:px-[15px]" href="#beranda">
               Kembali ke atas
             </a>
           </div>
-          <span className="absolute right-[8%] bottom-[-73px] text-[clamp(200px,35vw,420px)] font-black leading-none tracking-[-0.12em] text-white/10 max-[620px]:right-0 max-[620px]:bottom-[-32px] max-[620px]:text-[230px]" aria-hidden="true">
+          <span className="absolute right-[8%] bottom-[-73px] text-[clamp(140px,35vw,440px)] font-black leading-none tracking-[-0.12em] text-white/10 max-[620px]:right-0 max-[620px]:bottom-[-32px]" aria-hidden="true">
             XIII
           </span>
         </section>

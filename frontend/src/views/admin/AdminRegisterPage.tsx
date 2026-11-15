@@ -8,28 +8,23 @@ import {
   User,
   ArrowLeft,
   UserPlus,
-  Check,
-  X,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import {
-  evaluatePasswordStrength,
   validateAdminEmail,
-  validateAdminName,
+  validateAdminUsername,
+  validateRegisterPassword,
 } from "@/utils/authValidation";
 
 export default function AdminRegisterPage() {
   const navigate = useNavigate();
   const { register, token, user, isLoading, error, clearError } = useAuthStore();
 
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-
-  const strength = evaluatePasswordStrength(password);
 
   useEffect(() => {
     clearError();
@@ -46,12 +41,12 @@ export default function AdminRegisterPage() {
     setLocalError(null);
     clearError();
 
-    const trimmedName = name.trim();
+    const trimmedUsername = username.trim();
     const trimmedEmail = email.trim().toLowerCase();
 
-    const nameErr = validateAdminName(trimmedName);
-    if (nameErr) {
-      setLocalError(nameErr);
+    const usernameErr = validateAdminUsername(trimmedUsername);
+    if (usernameErr) {
+      setLocalError(usernameErr);
       return;
     }
 
@@ -61,20 +56,14 @@ export default function AdminRegisterPage() {
       return;
     }
 
-    if (!strength.isValid) {
-      setLocalError(
-        "Password belum memenuhi kriteria Strong Password (minimal 8 karakter, huruf besar, huruf kecil, angka, karakter spesial, tanpa spasi).",
-      );
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setLocalError("Konfirmasi password tidak cocok.");
+    const passwordErr = validateRegisterPassword(password);
+    if (passwordErr) {
+      setLocalError(passwordErr);
       return;
     }
 
     try {
-      await register(trimmedName, trimmedEmail, password);
+      await register(trimmedUsername, trimmedEmail, password);
       navigate("/admin", { replace: true });
     } catch {
       // Error message already stored in useAuthStore
@@ -82,15 +71,6 @@ export default function AdminRegisterPage() {
   };
 
   const displayError = localError || error;
-
-  const strengthItems = [
-    { label: "Minimal 8 karakter (maks. 72)", met: strength.checks.minLength },
-    { label: "Huruf besar (A-Z)", met: strength.checks.hasUpper },
-    { label: "Huruf kecil (a-z)", met: strength.checks.hasLower },
-    { label: "Angka (0-9)", met: strength.checks.hasNumber },
-    { label: "Karakter spesial (!@#$%^&*...)", met: strength.checks.hasSpecial },
-    { label: "Tanpa spasi", met: strength.checks.noSpace },
-  ];
 
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -128,31 +108,31 @@ export default function AdminRegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">
-                Nama Lengkap
+              <label htmlFor="username" className="block text-sm font-medium text-foreground mb-1.5">
+                Username
               </label>
               <div className="relative">
                 <User className="h-4 w-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
-                  id="name"
+                  id="username"
                   type="text"
-                  autoComplete="name"
-                  maxLength={80}
+                  autoComplete="username"
+                  maxLength={50}
                   required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Contoh: Budi Santoso"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="contoh: panitia_kobar"
                   className="w-full rounded-lg border border-border bg-background pl-10 pr-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                 />
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                3–80 karakter, hanya huruf, spasi, titik, tanda hubung, atau apostrof.
+                3–50 karakter (huruf, angka, titik, underscore, atau strip).
               </p>
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">
-                Email Panitia
+                Email
               </label>
               <div className="relative">
                 <Mail className="h-4 w-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -184,7 +164,7 @@ export default function AdminRegisterPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Buat password yang kuat"
+                  placeholder="Minimal 8 karakter kuat"
                   className="w-full rounded-lg border border-border bg-background pl-10 pr-10 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                 />
                 <button
@@ -196,62 +176,9 @@ export default function AdminRegisterPage() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-
-              {password.length > 0 && (
-                <div className="mt-2.5 space-y-2 rounded-lg border border-border bg-muted/20 p-3">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Kekuatan Password:</span>
-                    <span className="font-semibold text-foreground">{strength.label}</span>
-                  </div>
-                  <div className="grid grid-cols-5 gap-1">
-                    {[1, 2, 3, 4, 5].map((level) => (
-                      <div
-                        key={level}
-                        className={`h-1.5 rounded-full transition-colors ${
-                          strength.score >= level ? strength.barColor : "bg-muted"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1 pt-1">
-                    {strengthItems.map((item) => (
-                      <li
-                        key={item.label}
-                        className={`flex items-center gap-1.5 text-[11px] ${
-                          item.met ? "text-emerald-600 font-medium" : "text-muted-foreground"
-                        }`}
-                      >
-                        {item.met ? (
-                          <Check className="h-3 w-3 shrink-0" />
-                        ) : (
-                          <X className="h-3 w-3 shrink-0" />
-                        )}
-                        <span>{item.label}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-1.5">
-                Konfirmasi Password
-              </label>
-              <div className="relative">
-                <Lock className="h-4 w-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  id="confirmPassword"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  maxLength={72}
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Ulangi password"
-                  className="w-full rounded-lg border border-border bg-background pl-10 pr-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
-                />
-              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                8–72 karakter: wajib huruf besar, huruf kecil, angka, karakter spesial, tanpa spasi.
+              </p>
             </div>
 
             <button

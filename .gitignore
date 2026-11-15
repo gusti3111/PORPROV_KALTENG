@@ -48,3 +48,6 @@ yarn-error.log*
 
 # Vercel
 .vercel
+
+# Local test folder (not part of git repo)
+test/

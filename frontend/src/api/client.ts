@@ -27,7 +27,9 @@ function extractAPIErrorText(err: unknown): string | undefined {
 }
 
 export const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL || "/api/v1"
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  "/api/v1"
 ).replace(/\/$/, "");
 
 export const apiClient = axios.create({
@@ -40,7 +42,7 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
   try {
-    const token = sessionStorage.getItem("porprov_admin_token");
+    const token = localStorage.getItem("porprov_admin_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -55,10 +57,15 @@ apiClient.interceptors.response.use(
   (error) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       const url = error.config?.url || "";
-      if (!url.includes("/auth/login") && !url.includes("/auth/register")) {
+      const isPublicAuthEndpoint =
+        url.endsWith("/login") ||
+        url.endsWith("/register") ||
+        url.endsWith("/forgot-password") ||
+        url.endsWith("/reset-password");
+      if (!isPublicAuthEndpoint) {
         try {
-          sessionStorage.removeItem("porprov_admin_token");
-          sessionStorage.removeItem("porprov_admin_user");
+          localStorage.removeItem("porprov_admin_token");
+          localStorage.removeItem("porprov_admin_user");
         } catch {
           // Ignore storage errors
         }
@@ -74,7 +81,7 @@ apiClient.interceptors.response.use(
 export function getAuthHeaders(extra?: Record<string, string>): Record<string, string> {
   const headers: Record<string, string> = { ...(extra ?? {}) };
   try {
-    const token = sessionStorage.getItem("porprov_admin_token");
+    const token = localStorage.getItem("porprov_admin_token");
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }

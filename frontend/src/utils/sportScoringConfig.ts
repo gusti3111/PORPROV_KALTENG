@@ -216,6 +216,13 @@ const SPORT_ID_MODE_MAP: Record<number, SportScoringMode> = {
   30: "KNOCKOUT_COMBAT", // Taekwondo
   31: "KNOCKOUT_COMBAT", // Tinju
   32: "GROUP_3_1_0", // Sepak Bola Mini (KSMI)
+  33: "LEADERBOARD_SCORE", // Bermotor Motoprix
+  34: "LEADERBOARD_TIME", // Balap Sepeda Mountain
+  35: "GROUP_VOLLEY", // Bola Voli Pasir/Pantai
+  36: "LEADERBOARD_TIME", // Dayung TBR
+  37: "LEADERBOARD_TIME", // Dayung Ergometer
+  38: "LEADERBOARD_TIME", // Skateboard
+  39: "GROUP_3_1_0", // Futsal
 };
 
 export function getSportScoringRule(
@@ -247,8 +254,11 @@ export function getSportScoringRule(
     lower.includes("akuatik") ||
     lower.includes("renang") ||
     lower.includes("dayung") ||
+    lower.includes("canoeing") ||
+    lower.includes("ergometer") ||
     lower.includes("sepeda") ||
     lower.includes("sepatu roda") ||
+    lower.includes("skateboard") ||
     lower.includes("panjat")
   ) {
     return RULES.LEADERBOARD_TIME;
@@ -271,10 +281,15 @@ export function getSportScoringRule(
     lower.includes("dance") ||
     lower.includes("binaraga") ||
     lower.includes("bermotor") ||
+    lower.includes("motoprix") ||
+    lower.includes("grass track") ||
     lower.includes("aerosport") ||
     lower.includes("panahan")
   ) {
     return RULES.LEADERBOARD_SCORE;
+  }
+  if (lower.includes("sepak bola") || lower.includes("futsal")) {
+    return RULES.GROUP_3_1_0;
   }
   return RULES.GROUP_3_1_0;
 }

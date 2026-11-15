@@ -165,7 +165,7 @@ export default function JadwalPage() {
     end_time: "10:30",
     status: "SCHEDULED",
     contingent_ids: [0, 0],
-    scores: ["", ""],
+    scores: ["0", "0"],
     winner_contingent_id: 0,
   });
 
@@ -214,7 +214,7 @@ export default function JadwalPage() {
       end_time: "10:30",
       status: "SCHEDULED",
       contingent_ids: [0, 0],
-      scores: ["", ""],
+      scores: ["0", "0"],
       winner_contingent_id: 0,
     });
     setShowForm(true);
@@ -258,10 +258,12 @@ export default function JadwalPage() {
             ],
       scores:
         match.participants.length >= 2
-          ? match.participants.map((p) => p.score ?? "")
+          ? match.participants.map(
+              (p) => p.score || (match.status === "SCHEDULED" ? "0" : ""),
+            )
           : [
-              match.participants[0]?.score ?? "",
-              match.participants[1]?.score ?? "",
+              match.participants[0]?.score || (match.status === "SCHEDULED" ? "0" : ""),
+              match.participants[1]?.score || (match.status === "SCHEDULED" ? "0" : ""),
             ],
       winner_contingent_id: winnerPart?.contingent_id ?? 0,
     };
@@ -309,7 +311,9 @@ export default function JadwalPage() {
     }
 
     const selectedContingentIds = form.contingent_ids;
-    const selectedScores = form.contingent_ids.map((_, idx) => form.scores[idx] ?? "");
+    const selectedScores = form.contingent_ids.map((_, idx) =>
+      form.status === "SCHEDULED" ? "0" : (form.scores[idx] ?? ""),
+    );
     const selectedNames = selectedContingentIds.map(
       (cid, idx) => contingents.find((c) => c.id === cid)?.name || `Kontingen ${idx + 1}`,
     );
@@ -802,9 +806,19 @@ export default function JadwalPage() {
                   <Label>Status Pertandingan</Label>
                   <Select
                     value={form.status}
-                    onValueChange={(v) =>
-                      setForm({ ...form, status: v ?? "SCHEDULED" })
-                    }
+                    onValueChange={(v) => {
+                      const nextStatus = v ?? "SCHEDULED";
+                      setForm({
+                        ...form,
+                        status: nextStatus,
+                        scores:
+                          nextStatus === "SCHEDULED"
+                            ? form.contingent_ids.map(() => "0")
+                            : form.scores,
+                        winner_contingent_id:
+                          nextStatus === "SCHEDULED" ? 0 : form.winner_contingent_id,
+                      });
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -980,7 +994,11 @@ export default function JadwalPage() {
                                 >
                                   {parts.length === 2 && idx === 1 ? "vs " : ""}
                                   {p.contingent_name || "TBA"}{" "}
-                                  {p.score ? `(${p.score})` : ""}
+                                  {p.score
+                                    ? `(${p.score})`
+                                    : match.status === "SCHEDULED"
+                                      ? "(0)"
+                                      : ""}
                                   {p.is_winner ? " 🏆" : ""}
                                 </div>
                               ))}
