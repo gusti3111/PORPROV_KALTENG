@@ -34,6 +34,16 @@ export default function VenueView() {
   const [category, setCategory] = useState("");
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const mapFrameRef = useRef<HTMLDivElement>(null);
+
+  const scrollToMap = () => {
+    requestAnimationFrame(() => {
+      mapFrameRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
+  };
 
   const scrollCarousel = (direction: -1 | 1) => {
     const carousel = carouselRef.current;
@@ -49,14 +59,58 @@ export default function VenueView() {
     void fetchVenues();
   }, [fetchVenues]);
 
+  const displayVenues = useMemo(() => {
+    const result: typeof venues = [];
+    const gorByAddress = new Map<string, number>();
+    const mergedAliases = new Map<string, string[]>();
+
+    for (const venue of venues) {
+      const normName = normalizeText(venue.name);
+      const normAddr = normalizeText(venue.address || "");
+      const isGorSportCenter =
+        normName.includes("gor") && normName.includes("sport center");
+
+      if (isGorSportCenter && normAddr) {
+        const existingIdx = gorByAddress.get(normAddr);
+        if (existingIdx !== undefined) {
+          const existing = result[existingIdx];
+          const extraNote = (venue.note || "").trim();
+          const combinedNotes = [existing.note, extraNote]
+            .filter(Boolean)
+            .filter((val, idx, arr) => arr.indexOf(val) === idx)
+            .join(" ");
+          const preferredName = normName.includes("ratu alamsyah")
+            ? venue.name
+            : existing.name;
+          result[existingIdx] = {
+            ...existing,
+            name: preferredName,
+            note: combinedNotes,
+          };
+          mergedAliases.set(normAddr, [
+            ...(mergedAliases.get(normAddr) ?? []),
+            normName,
+          ]);
+          continue;
+        }
+        gorByAddress.set(normAddr, result.length);
+        mergedAliases.set(normAddr, [normName]);
+      }
+
+      result.push(venue);
+    }
+
+    return result;
+  }, [venues]);
+
   const categories = useMemo(
-    () => [...new Set(venues.map((venue) => venue.category))].sort(),
-    [venues],
+    () => [...new Set(displayVenues.map((venue) => venue.category))].sort(),
+    [displayVenues],
   );
 
   const filteredVenues = useMemo(() => {
     const normalizedQuery = normalizeText(query.trim());
-    return venues.filter((venue) => {
+    return displayVenues.filter((venue) => {
       const matchesQuery =
         !normalizedQuery ||
         normalizeText(
@@ -64,30 +118,35 @@ export default function VenueView() {
         ).includes(normalizedQuery);
       return matchesQuery && (!category || venue.category === category);
     });
-  }, [category, query, venues]);
+  }, [category, displayVenues, query]);
 
   const selectedVenue =
     filteredVenues.find((venue) => venue.name === selectedName) ?? null;
 
   useEffect(() => {
-    if (!venueParam || venues.length === 0) return;
+    if (!venueParam || displayVenues.length === 0) return;
     const target = normalizeText(venueParam);
-    const matched = venues.find((venue) => normalizeText(venue.name) === target);
+    const matched =
+      displayVenues.find((venue) => normalizeText(venue.name) === target) ??
+      (target.includes("gor") && target.includes("sport center")
+        ? displayVenues.find((venue) => {
+          const n = normalizeText(venue.name);
+          return n.includes("gor") && n.includes("sport center");
+        })
+        : undefined);
     if (matched) {
       setQuery("");
       setCategory("");
       setSelectedName(matched.name);
-      requestAnimationFrame(() => {
-        document.getElementById("daftar-venue")?.scrollIntoView({ behavior: "smooth" });
-      });
+      scrollToMap();
     }
-  }, [venueParam, venues]);
+  }, [displayVenues, venueParam]);
 
   useEffect(() => {
-    if (selectedName && !venues.some((venue) => venue.name === selectedName)) {
+    if (selectedName && !displayVenues.some((venue) => venue.name === selectedName)) {
       setSelectedName(null);
     }
-  }, [selectedName, venues]);
+  }, [displayVenues, selectedName]);
 
   return (
     <>
@@ -144,9 +203,9 @@ export default function VenueView() {
           </div>
           {loading && <p className="venue-carousel-status" role="status">Memuat venue...</p>}
           {error && <p className="venue-carousel-status" role="alert">Venue belum dapat dimuat dari backend.</p>}
-          {!loading && !error && venues.length > 0 && (
+          {!loading && !error && displayVenues.length > 0 && (
             <div className="venue-carousel-track" ref={carouselRef}>
-              {venues.map((venue, index) => (
+              {displayVenues.map((venue, index) => (
                 <button
                   className={`venue-carousel-card${selectedName === venue.name ? " is-selected" : ""}`}
                   key={venue.id}
@@ -156,7 +215,7 @@ export default function VenueView() {
                     setQuery("");
                     setCategory("");
                     setSelectedName(venue.name);
-                    document.getElementById("daftar-venue")?.scrollIntoView({ behavior: "smooth" });
+                    scrollToMap();
                   }}
                 >
                   <div className="relative h-40 w-full overflow-hidden rounded-md mb-3 bg-slate-100 shrink-0">
@@ -322,7 +381,10 @@ export default function VenueView() {
                       size="lg"
                       type="button"
                       aria-pressed={isSelected}
-                      onClick={() => setSelectedName(venue.name)}
+                      onClick={() => {
+                        setSelectedName(venue.name);
+                        scrollToMap();
+                      }}
                     >
                       <span className="venue-list-number">
                         {String(index + 1).padStart(2, "0")}
@@ -349,6 +411,7 @@ export default function VenueView() {
               venues={filteredVenues}
               selectedVenue={selectedVenue}
               onSelectVenue={(venue) => setSelectedName(venue.name)}
+              containerRef={mapFrameRef}
             />
           </div>
 

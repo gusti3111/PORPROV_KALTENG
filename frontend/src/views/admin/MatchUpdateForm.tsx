@@ -18,6 +18,7 @@ import SiteFooter from "../../components/SiteFooter";
 import AdminNav from "../../components/AdminNav";
 import { useCompetitionStore } from "../../stores/competitionStore";
 import type { MatchStatus } from "../../api/types";
+import { formatParticipantName } from "../../utils/participantDisplay";
 import { ArrowLeft, Save, CheckCircle2, Zap } from "lucide-react";
 
 export default function MatchUpdateForm() {
@@ -171,7 +172,7 @@ export default function MatchUpdateForm() {
                     </SelectItem>
                     {match.participants.map((p) => (
                       <SelectItem key={p.id} value={String(p.contingent_id)}>
-                        🏆 Pemenang: {p.contingent_name}
+                        🏆 Pemenang: {formatParticipantName(p)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -192,7 +193,7 @@ export default function MatchUpdateForm() {
                     className="flex items-center gap-4 p-3 rounded-lg bg-muted/30"
                   >
                     <span className="flex-1 font-medium text-sm sm:text-base">
-                      {p.contingent_name}
+                      {formatParticipantName(p)}
                     </span>
                     <Input
                       type="text"

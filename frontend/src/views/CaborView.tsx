@@ -46,17 +46,19 @@ function splitSportNames(rawName: string): {
 }
 
 function toSportCards(sports: BackendSport[]): SportCard[] {
-  return sports.flatMap((sport) => {
-    const { names, parentType } = splitSportNames(sport.name);
-    return names.map((name) => ({
-      id: sport.id,
-      name,
-      parentType,
-      group: sport.category,
-      icon: sport.icon,
-      description: sport.description,
-    }));
-  });
+  return sports
+    .flatMap((sport) => {
+      const { names, parentType } = splitSportNames(sport.name);
+      return names.map((name) => ({
+        id: sport.id,
+        name,
+        parentType,
+        group: sport.category,
+        icon: sport.icon,
+        description: sport.description,
+      }));
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, "id", { sensitivity: "base" }));
 }
 
 export default function CaborView() {

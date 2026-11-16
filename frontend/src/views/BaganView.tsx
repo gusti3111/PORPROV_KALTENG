@@ -8,6 +8,7 @@ import SportBracket from "../components/SportBracket";
 import { getAPIData, getAPIErrorMessage } from "../api/client";
 import type { Sport, SportTournament } from "../api/types";
 import { getContingentLogoUrl } from "../utils/contingentLogo";
+import { formatParticipantName } from "../utils/participantDisplay";
 import {
   formatGroupDisplayName,
   formatStandingPrimaryMetric,
@@ -158,7 +159,12 @@ export default function BaganView() {
         tournament.sport_name,
         ...tournament.groups.flatMap((group) => [
           group.name,
-          ...group.standings.map((standing) => standing.contingent),
+          ...group.standings.map((standing) =>
+            formatParticipantName({
+              athlete_name: standing.athlete_name,
+              contingent_name: standing.contingent,
+            }),
+          ),
         ]),
         ...(tournament.quarterfinals ?? []).flatMap((m) => [m.label, m.home, m.away]),
         ...tournament.semifinals.flatMap((match) => [match.label, match.home, match.away]),
@@ -332,13 +338,15 @@ export default function BaganView() {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {group.standings.map((row) => {
+                                  {group.standings.map((row, rowIndex) => {
                                     const logoUrl = getContingentLogoUrl(
                                       row.contingent,
                                       row.contingent_id,
                                     );
                                     return (
-                                      <tr key={row.contingent}>
+                                      <tr
+                                        key={`${row.contingent_id ?? row.contingent}-${row.athlete_name ?? ""}-${rowIndex}`}
+                                      >
                                         <td>{String(row.rank).padStart(2, "0")}</td>
                                         <th scope="row">
                                           <span className="inline-flex items-center gap-2">
@@ -350,7 +358,12 @@ export default function BaganView() {
                                                 loading="lazy"
                                               />
                                             )}
-                                            <span>{row.contingent}</span>
+                                            <span>
+                                              {formatParticipantName({
+                                                athlete_name: row.athlete_name,
+                                                contingent_name: row.contingent,
+                                              })}
+                                            </span>
                                           </span>
                                         </th>
                                         {isTimeOrScore ? (

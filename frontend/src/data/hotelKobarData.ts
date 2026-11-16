@@ -30,7 +30,7 @@ export const hotelData: HotelItem[] = [
   },
   {
     id: 2,
-    hotelName: "Brits Hotel Pangkalan Bun",
+    hotelName: "Britsh Hotel Pangkalan Bun",
     type: "Hotel Bintang",
     address: "Jl. Ahmad Yani No. 50, Pasir Panjang, Kec. Arut Selatan, Pangkalan Bun, Kabupaten Kotawaringin Barat",
     district: "Arut Selatan",
@@ -70,22 +70,9 @@ export const hotelData: HotelItem[] = [
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=Arsela+Hotel+Pangkalan+Bun",
     image: "https://web.visitkotawaringinbarat.id/wp-content/uploads/2024/07/Arsela-Hotel.jpg",
   },
+
   {
     id: 5,
-    hotelName: "Brits Hotel Pangkalan Bun",
-    type: "Hotel Bintang",
-    address: "Jl. Ahmad Yani KM. 2, Baru, Kec. Arut Selatan, Pangkalan Bun, Kabupaten Kotawaringin Barat",
-    district: "Arut Selatan",
-    nearVenue: "± 6 menit ke Sport Center & Lintasan Atletik",
-    priceRange: "Rp 500.000 - Rp 950.000 / malam",
-    contact: "6253227888",
-    rating: 4.5,
-    facilities: ["Kolam Renang", "Restoran & Bar", "Fitness Center", "WiFi", "Resepsionis 24 Jam"],
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Brits+Hotel+Pangkalan+Bun",
-    image: "https://pix8.agoda.net/hotelImages/22631087/0/aad83cf7e589da3851f87eb04f8b052e.jpg?ce=0",
-  },
-  {
-    id: 6,
     hotelName: "Avilla Hotel Pangkalan Bun",
     type: "Hotel Bintang",
     address: "Jl. Pangeran Diponegoro No. 81, Sidorejo, Kec. Arut Selatan, Pangkalan Bun, Kabupaten Kotawaringin Barat",
@@ -97,6 +84,7 @@ export const hotelData: HotelItem[] = [
     facilities: ["Kolam Renang", "Spa & Relaksasi", "Coffee Shop", "WiFi", "Dekat Rumah Sakit"],
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=Avilla+Hotel+Pangkalan+Bun",
     image: "https://avilla-hotel.com/images/carousel/IMG34958.png",
-  },
+  }
+
 ];
 

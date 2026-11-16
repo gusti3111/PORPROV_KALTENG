@@ -1,3 +1,0 @@
-DELETE FROM venues WHERE id BETWEEN 11 AND 25;
-DELETE FROM sports WHERE id IN (31, 32);
-

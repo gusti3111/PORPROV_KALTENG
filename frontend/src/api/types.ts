@@ -11,6 +11,7 @@ export type SportTournamentStanding = {
   rank: number;
   contingent_id?: number;
   contingent: string;
+  athlete_name?: string;
   played: number;
   won: number;
   drawn: number;
@@ -41,6 +42,7 @@ export type SportTournament = {
   semifinals: SportTournamentMatch[];
   final: SportTournamentMatch;
   bronze: SportTournamentMatch;
+  third_place?: SportTournamentMatch;
 };
 
 export type Event = {
@@ -81,7 +83,7 @@ export type MatchParticipant = {
   id: number;
   contingent_id: number;
   contingent_name: string;
-  athlete_name: string;
+  athlete_name?: string;
   score: string;
   is_winner: boolean;
 };

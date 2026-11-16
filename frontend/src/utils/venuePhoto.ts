@@ -1,120 +1,153 @@
 /**
- * Mapping foto resmi dokumentasi venue PORPROV XIII Kalimantan Tengah di Kotawaringin Barat
- * Menggunakan aset real dari /venues2/
- * Catatan: Aula Kiyai Gede & Karanganyar dibiarkan kosong ("") sesuai permintaan.
+ * Mapping foto dokumentasi resmi venue PORPROV XIII Kalimantan Tengah (Kotawaringin Barat).
+ *
+ * CARA EDIT / UPDATE FOTO VENUE:
+ * 1. Simpan file foto baru ke folder: `frontend/public/venues2/`
+ *    (pastikan nama file & ekstensi sama persis / case-sensitive, mis. `.jpg` vs `.JPG`).
+ * 2. Cari blok komentar nama venue yang ingin diubah di `venuePhotoMap` di bawah,
+ *    lalu ganti path-nya menjadi `"/venues2/NamaFileBaru.ext"` (atau `""` jika belum ada foto).
+ * 3. Aturan penting:
+ *    - Semua kata kunci (kolom kiri) WAJIB huruf kecil.
+ *    - Pencocokan berjalan dari ATAS ke BAWAH (yang paling spesifik harus di atas
+ *      kata kunci umum seperti `"sport center"` atau `"futsal"`).
  */
 
 const venuePhotoMap: Array<[string, string]> = [
-  // 1. Dibiarkan kosong dulu
-  ["kiyai gede", "AulaKiyaiGede.JPG"],
-  ["binaraga", "AulaKiyaiGede.JPG"],
+  // --- Venue: Aula Kiyai Gede (Binaraga Fitnes) ---
+  ["kiyai gede", "/venues2/AulaKiyaiGede.JPG"],
+  ["binaraga", "/venues2/AulaKiyaiGede.JPG"],
+
+  // --- Cabor Dancesport & Gimnastik (belum ada foto khusus) ---
   ["dancesport", ""],
   ["gimnastik", ""],
-  ["karanganyar", "/venues2/KarangAnyar.JPG"],
-  ["karang anyar", ""],
 
-  // 2. Venue spesifik dengan foto di /venues2/ (prioritas sebelum keyword umum seperti 'futsal' atau 'sport center')
+  // --- Venue: Airstrip Karang Anyar / Karanganyar (Aerosport) ---
+  ["karanganyar", "/venues2/KarangAnyar.JPG"],
+  ["karang anyar", "/venues2/KarangAnyar.JPG"],
+  ["aerosport", "/venues2/KarangAnyar.JPG"],
+
+  // --- Venue: Jalan Raya Pangkalan Bun (Balap Sepeda) ---
   ["jalan raya", "/venues2/BalapSepeda.jpeg"],
   ["balap sepeda", "/venues2/BalapSepeda.jpeg"],
-  // ["koridor", "/venues2/jalanRaya.jpg"],
+
+  // --- Venue: Lapangan Tenis Pasir Panjang (Tenis Lapangan) ---
   ["lapangan tenis", "/venues2/LapanganTenisPasirPanjang.jpeg"],
   ["tenis pasir panjang", "/venues2/LapanganTenisPasirPanjang.jpeg"],
   ["tenis lapangan", "/venues2/LapanganTenisPasirPanjang.jpeg"],
 
+  // --- Venue: Lintasan Atletik Sport Center (Atletik) ---
   ["lintasan", "/venues2/LintasanAtletik.jpeg"],
   ["atletik", "/venues2/LintasanAtletik.jpeg"],
-  ["Aerosport", "/venues2/KarangAnyar.JPG"],
 
+  // --- Venue: Juvenza Futsal (Tinju) ---
   ["juvenza", "/venues2/juvenza.png"],
   ["tinju", "/venues2/juvenza.png"],
 
+  // --- Venue: Samari Futsal (Karate) ---
   ["samari", "/venues2/samari.jpg"],
   ["karate", "/venues2/samari.jpg"],
 
-  ["gor koni", "/venues2/GORKoni.jpg"],
-  ["koni", "/venues2/GORKoni.jpg"],
-  ["bulutangkis", "/venues2/GORKoni.jpg"],
+  // --- Venue: GOR KONI (Bulutangkis) ---
+  ["koni", "/venues2/GORKoni.JPG"],
+  ["bulutangkis", "/venues2/GORKoni.JPG"],
 
+  // --- Venue: Onix Billiard (Billiard) ---
   ["onix", "/venues2/OnixBilliard.jpeg"],
-  // ["billiard", "/venues2/Onix.jpg"],
+  ["billiard", "/venues2/OnixBilliard.jpeg"],
 
+  // --- Venue: Aula Antakusuma (Pencak Silat & Taekwondo) ---
   ["antakusuma", "/venues2/aulaAntakusuma.jpeg"],
   ["pencak silat", "/venues2/aulaAntakusuma.jpeg"],
   ["taekwondo", "/venues2/aulaAntakusuma.jpeg"],
 
-  ["disdikbud", "/venues2/aulaDISKDIKBUD.jpg"],
-  ["disdik", "/venues2/aulaDISKDIKBUD.jpg"],
-  ["tenis meja", "/venues2/aulaDISKDIKBUD.jpg"],
+  // --- Venue: Aula Disdikbud (Tenis Meja) ---
+  ["disdik", "/venues2/aulaDISDIKBUD.jpg"],
+  ["tenis meja", "/venues2/aulaDISDIKBUD.jpg"],
 
+  // --- Venue: Aula Dispora (Bridge) ---
+  // belum diubah
   ["dispora", "/venues2/aulaDisipora.jpeg"],
   ["disipora", "/venues2/aulaDisipora.jpeg"],
   ["bridge", "/venues2/aulaDisipora.jpeg"],
 
+  // --- Venue: Aula Bapperida (Catur) ---
+  //belum diubah
   ["bapperida", "/venues2/bapperida.jpg"],
   ["catur", "/venues2/bapperida.jpg"],
 
+  // --- Venue: Aula Mapolres Kobar (Judo) ---
+  //belum diubah
   ["mapolres", "/venues2/mapolres.jpg"],
   ["judo", "/venues2/mapolres.jpg"],
 
-  ["kampung sega", "/venues2/kampungSega.jpg"],
+  // --- Venue: Aula Sangga Banua (E-Sport) ---
+  ["sangga banua", "/venues2/AulaSanggaBanua.jpeg"],
+  ["e-sport", "/venues2/AulaSanggaBanua.jpeg"],
+  ["esport", "/venues2/AulaSanggaBanua.jpeg"],
+
+  // --- Venue: Kampung Sega / Sungai Arut (Dayung) ---
   ["sega", "/venues2/kampungSega.jpg"],
   ["sungai arut", "/venues2/kampungSega.jpg"],
   ["dayung", "/venues2/kampungSega.jpg"],
 
+  // --- Venue: Kolam Renang Isen Mulang (Akuatik) ---
   ["isen mulang", "/venues2/kolamIsenMulang.jpg"],
   ["kolam renang", "/venues2/kolamIsenMulang.jpg"],
+
+  // belum diubah
   ["akuatik", "/venues2/kolamIsenMulang.jpg"],
 
-  ["pangkalan bun park", "/venues2/pangakalnbunpark.jpg"],
-  ["mma", "/venues2/pangakalnbunpark.jpg"],
-  ["panjat tebing", "/venues2/pangakalnbunpark.jpg"],
+  // --- Venue: Pangkalan Bun Park (MMA & Panjat Tebing) ---
+  ["pangkalan bun park", "/venues2/pangkalanbunpark.JPG"],
+  ["mma", "/venues2/pangkalanbunpark.JPG"],
+  ["panjat tebing", "/venues2/pangkalanbunpark.JPG"],
 
+  // --- Venue: Sirkuit Sabaru / Arena Motocross (Bermotor) ---
   ["sabaru", "/venues2/SportCenterMotorCross.jpeg"],
-  ["sirkuit", "/venues2/sirkuitsabaru.jpg"],
-  ["balap motor", "/venues2/sirkuitsabaru.jpg"],
-  ["motoprix", "/venues2/sirkuitsabaru.jpg"],
+  ["sirkuit", "/venues2/SportCenterMotorCross.jpeg"],
+  ["balap motor", "/venues2/SportCenterMotorCross.jpeg"],
+  ["motoprix", "/venues2/SportCenterMotorCross.jpeg"],
 
+  // --- Venue: Minisoccer R88 (Sepak Bola Mini / KSMI) ---
   ["minisoccer", "/venues2/soccer88.jpeg"],
   ["mini soccer", "/venues2/soccer88.jpeg"],
   ["r88", "/venues2/soccer88.jpeg"],
   ["soccer88", "/venues2/soccer88.jpeg"],
   ["sepak bola mini", "/venues2/soccer88.jpeg"],
 
-  // 3. Stadion -> menggunakan /venues2/stadion.jpeg
+  // --- Venue: Stadion Sepak Bola Sport Center (Sepak Bola) ---
   ["stadion", "/venues2/stadion.jpeg"],
   ["sepak bola", "/venues2/stadion.jpeg"],
 
-  // 4. GOR Sport Center -> menggunakan /venues2/gorSportCenter.jpeg
+  // --- Semua GOR di kawasan Sport Center (Basket, Voli Indoor, Futsal, Sepak Takraw, Ratu Alamsyah) ---
+  ["gor basket", "/venues2/gorSportCenter.jpeg"],
+  ["basket", "/venues2/gorSportCenter.jpeg"],
+  ["gor futsal", "/venues2/gorSportCenter.jpeg"],
+  ["gor voli", "/venues2/gorSportCenter.jpeg"],
+  ["voli indoor", "/venues2/gorSportCenter.jpeg"],
+  ["ratu alamsyah", "/venues2/gorSportCenter.jpeg"],
+  ["gor sepak takraw", "/venues2/gorSportCenter.jpeg"],
+  ["sepak takraw", "/venues2/gorSportCenter.jpeg"],
   ["gor sport center", "/venues2/gorSportCenter.jpeg"],
   ["gor sportcenter", "/venues2/gorSportCenter.jpeg"],
-  ["ratu alamsyah", "/venues2/gorSportCenter.jpeg"],
   ["gor indoor", "/venues2/gorSportCenter.jpeg"],
+  ["futsal", "/venues2/gorSportCenter.jpeg"],
 
-  // 5. Sport Center (Kompleks), Basket, Futsal, Voli, Indoor -> menggunakan /venues2/sportCenter.jpg
-  ["basket", "/venues2/sportCenter.jpg"],
-  ["futsal", "/venues2/sportCenter.jpg"],
-  ["voli", "/venues2/sportCenter.jpg"],
+  // --- Fallback Lapangan Voli & Kompleks Sport Center Pangkalan Bun ---
+  ["lapangan voli", "/venues2/LapanganVoli.jpeg"],
+  ["voli", "/venues2/LapanganVoli.jpeg"],
   ["indoor", "/venues2/sportCenter.jpg"],
   ["sport center", "/venues2/sportCenter.jpg"],
-  ["sepak takraw", "/venues2/sportCenter.jpg"],
 ];
 
 export function getVenuePhotoUrl(venueName?: string, additionalText?: string): string {
-  if (!venueName) return "/venues2/sportCenter.jpg";
+  if (!venueName) return "";
   const normalized = `${venueName} ${additionalText || ""}`.toLowerCase();
-
-  if (
-    normalized.includes("gor") &&
-    !normalized.includes("koni") &&
-    (normalized.includes("sport center") || normalized.includes("sportcenter"))
-  ) {
-    return "/venues2/gorSportCenter.jpeg";
-  }
 
   for (const [key, url] of venuePhotoMap) {
     if (normalized.includes(key)) {
       return url;
     }
   }
-  return "/venues2/sportCenter.jpg";
+  return "";
 }

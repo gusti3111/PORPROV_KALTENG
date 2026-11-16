@@ -14,6 +14,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useCompetitionStore } from "../../stores/competitionStore";
 import { isGroupPhaseNonHeadToHeadMatch } from "../../utils/sportScoringConfig";
+import {
+  formatParticipantName,
+  hasDuplicateParticipantEntry,
+} from "../../utils/participantDisplay";
 import SiteHeader from "../../components/SiteHeader";
 import SiteFooter from "../../components/SiteFooter";
 import AdminNav from "../../components/AdminNav";
@@ -45,8 +49,10 @@ interface MatchFormState {
   end_time: string;
   status: string;
   contingent_ids: number[];
+  athlete_names: string[];
   scores: string[];
   winner_contingent_id: number;
+  live_stream_url: string;
 }
 
 const ROUND_OPTIONS = [
@@ -73,7 +79,7 @@ function getJakartaDateTimeParts(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     const today = getTodayJakarta();
-    return { date: today, time: "09:00" };
+    return { date: today, time: "" };
   }
 
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -87,14 +93,16 @@ function getJakartaDateTimeParts(value: string) {
   }).formatToParts(date);
   const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
 
+  const time = `${values.hour}:${values.minute}`;
   return {
     date: `${values.year}-${values.month}-${values.day}`,
-    time: `${values.hour}:${values.minute}`,
+    time: time === "00:00" ? "" : time,
   };
 }
 
 function toApiDateTime(date: string, time: string) {
-  return new Date(`${date}T${time}:00+07:00`).toISOString();
+  const safeTime = time.trim() || "00:00";
+  return new Date(`${date}T${safeTime}:00+07:00`).toISOString();
 }
 
 function getScheduleValidationError(form: MatchFormState): string | null {
@@ -107,23 +115,29 @@ function getScheduleValidationError(form: MatchFormState): string | null {
     return "Pilih atau isi nomor pertandingan terlebih dahulu.";
   }
   if (!form.venue_id) return "Pilih tempat / venue pertandingan terlebih dahulu.";
-  if (form.status !== "SCHEDULED" && !form.round_name.trim()) {
-    return "Pilih babak / fase pertandingan.";
+  const participantEntries = form.contingent_ids.map((cid, idx) => ({
+    contingent_id: cid,
+    athlete_name: form.athlete_names[idx] ?? "",
+  }));
+  if (hasDuplicateParticipantEntry(participantEntries)) {
+    return "Peserta duplikat: jika memilih kontingen yang sama, isi nama atlet yang berbeda.";
   }
-  const selectedContingents = form.contingent_ids.filter((cid) => cid > 0);
-  if (new Set(selectedContingents).size !== selectedContingents.length) {
-    return "Kontingen peserta tidak boleh ada yang ganda.";
+  if (!form.start_date.trim()) {
+    return "Tanggal mulai wajib diisi.";
   }
-  if (!form.start_date.trim() || !form.start_time.trim()) {
-    return "Tanggal dan jam mulai wajib diisi.";
+  if (!form.end_date.trim()) {
+    return "Tanggal selesai wajib diisi.";
   }
-  if (!form.end_date.trim() || !form.end_time.trim()) {
-    return "Tanggal dan jam selesai wajib diisi.";
-  }
-  if (`${form.end_date}T${form.end_time}` < `${form.start_date}T${form.start_time}`) {
+  const startComparable = `${form.start_date}T${form.start_time.trim() || "00:00"}`;
+  const endComparable = `${form.end_date}T${form.end_time.trim() || "23:59"}`;
+  if (endComparable < startComparable) {
     return "Waktu selesai tidak boleh lebih awal dari waktu mulai.";
   }
   if (!form.status.trim()) return "Pilih status pertandingan.";
+  const streamUrl = form.live_stream_url.trim();
+  if (streamUrl && !/^https?:\/\//i.test(streamUrl)) {
+    return "Link live streaming harus diawali http:// atau https://.";
+  }
   return null;
 }
 
@@ -143,6 +157,7 @@ export default function JadwalPage() {
   const fetchMedalStandings = useCompetitionStore((s) => s.fetchMedalStandings);
   const fetchSportMedalStandings = useCompetitionStore((s) => s.fetchSportMedalStandings);
   const createEvent = useCompetitionStore((s) => s.createEvent);
+  const deleteMatches = useCompetitionStore((s) => s.deleteMatches);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [filterDate, setFilterDate] = useState("");
@@ -152,6 +167,7 @@ export default function JadwalPage() {
   const [useCustomEvent, setUseCustomEvent] = useState(false);
   const [editing, setEditing] = useState<MatchFormState | null>(null);
   const [feedbackMsg, setFeedbackMsg] = useState("");
+  const [deletingAll, setDeletingAll] = useState(false);
 
   const today = getTodayJakarta();
 
@@ -165,15 +181,17 @@ export default function JadwalPage() {
       event_gender: "Mixed",
       venue_id: 0,
       title: "",
-      round_name: "Fase Grup - Grup A",
+      round_name: "",
       start_date: currentToday,
-      start_time: "09:00",
+      start_time: "",
       end_date: currentToday,
-      end_time: "10:30",
+      end_time: "",
       status: "SCHEDULED",
       contingent_ids: [0, 0],
+      athlete_names: ["", ""],
       scores: ["0", "0"],
       winner_contingent_id: 0,
+      live_stream_url: "",
     };
   };
 
@@ -248,6 +266,13 @@ export default function JadwalPage() {
             match.participants[0]?.contingent_id ?? 0,
             match.participants[1]?.contingent_id ?? 0,
           ],
+      athlete_names:
+        match.participants.length >= 2
+          ? match.participants.map((p) => p.athlete_name || "")
+          : [
+            match.participants[0]?.athlete_name ?? "",
+            match.participants[1]?.athlete_name ?? "",
+          ],
       scores:
         match.participants.length >= 2
           ? match.participants.map(
@@ -258,6 +283,7 @@ export default function JadwalPage() {
             match.participants[1]?.score || (match.status === "SCHEDULED" ? "0" : ""),
           ],
       winner_contingent_id: winnerPart?.contingent_id ?? 0,
+      live_stream_url: match.live_stream_url || "",
     };
     setUseCustomEvent(false);
     setEditing(editForm);
@@ -305,14 +331,20 @@ export default function JadwalPage() {
     const selectedParticipants = form.contingent_ids
       .map((cid, idx) => ({
         cid,
+        athleteName: (form.athlete_names[idx] ?? "").trim(),
         score: form.status === "SCHEDULED" ? "" : (form.scores[idx] ?? ""),
       }))
       .filter((item) => item.cid > 0);
     const selectedContingentIds = selectedParticipants.map((item) => item.cid);
+    const selectedAthleteNames = selectedParticipants.map((item) => item.athleteName);
     const selectedScores = selectedParticipants.map((item) => item.score);
-    const selectedNames = selectedContingentIds.map(
-      (cid, idx) => contingents.find((c) => c.id === cid)?.name || `Kontingen ${idx + 1}`,
-    );
+    const selectedNames = selectedParticipants.map((item, idx) => {
+      const contingentName =
+        contingents.find((c) => c.id === item.cid)?.name || `Kontingen ${idx + 1}`;
+      return item.athleteName
+        ? `${item.athleteName} (${contingentName})`
+        : contingentName;
+    });
     const selectedSportName =
       sports.find((s) => s.id === form.sport_id)?.name || "Pertandingan";
     const selectedEventName =
@@ -355,8 +387,10 @@ export default function JadwalPage() {
         end_time: toApiDateTime(form.end_date, form.end_time),
         status: form.status,
         contingent_ids: selectedContingentIds,
+        athlete_names: selectedAthleteNames,
         scores: selectedScores,
         winner_contingent_id: form.winner_contingent_id,
+        live_stream_url: form.live_stream_url.trim(),
       };
       const url = editing?.match_id
         ? `${API_BASE_URL}/matches/${editing.match_id}`
@@ -426,10 +460,46 @@ export default function JadwalPage() {
     }
   };
 
+  const handleDeleteAll = async () => {
+    if (filteredMatches.length === 0 || deletingAll) return;
+    const confirmed = confirm(
+      `Hapus SEMUA ${filteredMatches.length} pertandingan yang ditampilkan? Tindakan ini tidak dapat dibatalkan dan akan memperbarui klasemen, bagan, serta medali.`,
+    );
+    if (!confirmed) return;
+
+    setDeletingAll(true);
+    try {
+      const targetIds = filteredMatches.map((m) => m.id);
+      const { deleted, failed } = await deleteMatches(targetIds);
+      if (editing?.match_id && targetIds.includes(editing.match_id)) {
+        setEditing(null);
+        setUseCustomEvent(false);
+        setForm(createEmptyMatchForm());
+      }
+      if (failed > 0) {
+        alert(`${deleted} pertandingan dihapus, ${failed} gagal dihapus.`);
+      } else {
+        setFeedbackMsg(`${deleted} pertandingan berhasil dihapus.`);
+      }
+    } catch {
+      alert("Gagal menghapus semua pertandingan.");
+    } finally {
+      setDeletingAll(false);
+    }
+  };
+
   const formEvents = events.filter((event) => event.sport_id === form.sport_id);
   const selectedSportObj = sports.find((s) => s.id === form.sport_id);
   const scoringRule = getSportScoringRule(form.sport_id, selectedSportObj?.name);
   const scheduleValidationError = getScheduleValidationError(form);
+  const hasAnyFormInput =
+    Boolean(editing) ||
+    form.sport_id > 0 ||
+    form.event_id > 0 ||
+    form.venue_id > 0 ||
+    form.custom_event_name.trim() !== "" ||
+    form.title.trim() !== "" ||
+    form.contingent_ids.some((cid) => cid > 0);
 
   const statusLabels: Record<string, string> = {
     SCHEDULED: "Terjadwal",
@@ -454,7 +524,7 @@ export default function JadwalPage() {
               Jadwal dan hasil yang diinput di sini otomatis tampil di halaman Jadwal, Bagan, dan Hasil Pertandingan web utama.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
               onClick={() => setFilterDate(today)}
@@ -467,6 +537,18 @@ export default function JadwalPage() {
                 Tampilkan Semua Tanggal
               </Button>
             )}
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => void handleDeleteAll()}
+              disabled={filteredMatches.length === 0 || deletingAll}
+              className="gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              {deletingAll
+                ? "Menghapus..."
+                : `Hapus Semua (${filteredMatches.length})`}
+            </Button>
           </div>
         </div>
 
@@ -597,8 +679,7 @@ export default function JadwalPage() {
 
                 <div className="grid gap-2">
                   <Label>
-                    3. Fase / Babak Pertandingan
-                    {form.status === "SCHEDULED" ? " (Opsional)" : ""}
+                    3. Fase / Babak Pertandingan (Opsional)
                   </Label>
                   <Select
                     value={form.round_name || "__EMPTY__"}
@@ -610,7 +691,7 @@ export default function JadwalPage() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Pilih babak / fase (opsional jika terjadwal)" />
+                      <SelectValue placeholder="Belum ditentukan (Opsional)" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="__EMPTY__">
@@ -688,6 +769,7 @@ export default function JadwalPage() {
                               setForm({
                                 ...form,
                                 contingent_ids: form.contingent_ids.filter((_, i) => i !== idx),
+                                athlete_names: form.athlete_names.filter((_, i) => i !== idx),
                                 scores: form.scores.filter((_, i) => i !== idx),
                               })
                             }
@@ -740,6 +822,16 @@ export default function JadwalPage() {
                           />
                         )}
                       </div>
+                      <Input
+                        type="text"
+                        placeholder="Nama atlet (opsional, untuk nomor perorangan)"
+                        value={form.athlete_names[idx] ?? ""}
+                        onChange={(e) => {
+                          const nextAthletes = [...form.athlete_names];
+                          nextAthletes[idx] = e.target.value;
+                          setForm({ ...form, athlete_names: nextAthletes });
+                        }}
+                      />
                     </div>
                   ))}
                 </div>
@@ -756,6 +848,7 @@ export default function JadwalPage() {
                       setForm({
                         ...form,
                         contingent_ids: [...form.contingent_ids, 0],
+                        athlete_names: [...form.athlete_names, ""],
                         scores: [...form.scores, ""],
                       })
                     }
@@ -802,7 +895,6 @@ export default function JadwalPage() {
                     <Input
                       id="new-match-start-time"
                       type="time"
-                      required
                       className="w-28"
                       value={form.start_time}
                       onChange={(e) =>
@@ -827,7 +919,6 @@ export default function JadwalPage() {
                     <Input
                       id="new-match-end-time"
                       type="time"
-                      required
                       className="w-28"
                       value={form.end_time}
                       onChange={(e) =>
@@ -878,7 +969,22 @@ export default function JadwalPage() {
                 </div>
               </div>
 
-              {scheduleValidationError && (
+              <div className="grid gap-2">
+                <Label htmlFor="match-live-stream-url">
+                  Link Live Streaming YouTube / URL (Opsional)
+                </Label>
+                <Input
+                  id="match-live-stream-url"
+                  type="url"
+                  placeholder="https://www.youtube.com/watch?v=... (tampil saat status Sedang Berlangsung)"
+                  value={form.live_stream_url}
+                  onChange={(e) =>
+                    setForm({ ...form, live_stream_url: e.target.value })
+                  }
+                />
+              </div>
+
+              {hasAnyFormInput && scheduleValidationError && (
                 <p className="text-xs text-amber-600 font-medium" role="status">
                   * Lengkapi semua kolom wajib sebelum menyimpan (kecuali Judul Pertandingan): {scheduleValidationError}
                 </p>
@@ -1008,7 +1114,11 @@ export default function JadwalPage() {
                       <tr key={match.id} className="border-b hover:bg-muted/20">
                         <td className="p-2 font-medium whitespace-nowrap">
                           <div>{match.date}</div>
-                          <div className="text-xs text-muted-foreground">{match.time} WIB</div>
+                          <div className="text-xs text-muted-foreground">
+                            {!match.time || match.time === "00:00"
+                              ? "Jam menyusul"
+                              : `${match.time} WIB`}
+                          </div>
                         </td>
                         <td className="p-2">
                           <div className="font-semibold">{match.sport_name}</div>
@@ -1040,7 +1150,7 @@ export default function JadwalPage() {
                                   )
                                     ? "vs "
                                     : ""}
-                                  {p.contingent_name || "TBA"}{" "}
+                                  {formatParticipantName(p)}{" "}
                                   {p.score
                                     ? `(${p.score})`
                                     : match.status === "SCHEDULED"

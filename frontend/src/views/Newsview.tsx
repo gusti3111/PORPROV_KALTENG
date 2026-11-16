@@ -210,12 +210,6 @@ const galleryPhotos: GalleryPhoto[] = [
     src: "/galeri/gor-basket-indoor.jpg",
   },
   {
-    id: 11,
-    category: "Venue",
-    title: "Lapangan Tenis Kota Manis",
-    src: "/galeri/lapangan-tenis-kota-manis.jpg",
-  },
-  {
     id: 12,
     category: "Venue",
     title: "Stadion & Lintasan Atletik Sport Center",
@@ -234,60 +228,26 @@ const galleryPhotos: GalleryPhoto[] = [
     src: "/galeri/lapangan-tenis-pasir-panjang.jpg",
   },
   {
-    id: 1,
-    category: "Atlet",
-    title: "Semangat para atlet",
-    src: "https://picsum.photos/seed/porprov-atlet-1/900/650",
+    id: 15,
+    category: "Venue",
+    title: "Roller Track di Sport Center",
+    src: "/galeri/VenueSepatuRoda.JPG",
   },
   {
-    id: 2,
-    category: "Pertandingan",
-    title: "Momen di arena pertandingan",
-    src: "https://picsum.photos/seed/porprov-arena-2/900/650",
+    id: 16,
+    category: "Venue",
+    title: "Malam Hari di Sport Center",
+    src: "/galeri/drumband.JPG",
   },
   {
-    id: 3,
-    category: "Kebersamaan",
-    title: "Kebersamaan dalam olahraga",
-    src: "https://picsum.photos/seed/porprov-team-3/900/650",
+    id: 14,
+    category: "Venue",
+    title: "Aula Antakusuma",
+    src: "/galeri/aulaAntakusuma.jpeg",
   },
-  {
-    id: 4,
-    category: "Aksi",
-    title: "Aksi penuh semangat",
-    src: "https://picsum.photos/seed/porprov-action-4/900/650",
-  },
-  {
-    id: 5,
-    category: "Suasana",
-    title: "Suasana di sekitar venue",
-    src: "https://picsum.photos/seed/porprov-venue-5/900/650",
-  },
-  {
-    id: 6,
-    category: "Sportivitas",
-    title: "Menjunjung tinggi sportivitas",
-    src: "https://picsum.photos/seed/porprov-sport-6/900/650",
-  },
-  {
-    id: 7,
-    category: "Prestasi",
-    title: "Perjuangan menuju prestasi",
-    src: "https://picsum.photos/seed/porprov-achievement-7/900/650",
-  },
-  {
-    id: 8,
-    category: "Dukungan",
-    title: "Dukungan untuk para atlet",
-    src: "https://picsum.photos/seed/porprov-support-8/900/650",
-  },
-  {
-    id: 9,
-    category: "Momen",
-    title: "Kenangan dari PORPROV",
-    src: "https://picsum.photos/seed/porprov-moment-9/900/650",
-  },
+
 ];
+
 
 const categories: CategoryFilter[] = [
   "Tempat Makan dan Nongkrong",
@@ -479,7 +439,8 @@ export default function Newsview() {
     if (tabParam === "wisata" || tabParam === "pariwisata" || tabParam === "tourism") return "Pariwisata";
     if (tabParam === "galeri" || tabParam === "gallery") return "Galeri";
     if (tabParam === "about" || tabParam === "about-us" || tabParam === "about_us" || tabParam === "sejarah" || tabParam === "history") return "About Us";
-    return "Berita";
+    if (tabParam === "berita") return "Berita";
+    return "Tempat Makan dan Nongkrong";
   });
 
   useEffect(() => {
@@ -490,6 +451,7 @@ export default function Newsview() {
     else if (tabParam === "galeri" || tabParam === "gallery") setSelectedCategory("Galeri");
     else if (tabParam === "about" || tabParam === "about-us" || tabParam === "about_us" || tabParam === "sejarah" || tabParam === "history") setSelectedCategory("About Us");
     else if (tabParam === "berita") setSelectedCategory("Berita");
+    else if (!tabParam) setSelectedCategory("Tempat Makan dan Nongkrong");
   }, [searchParams]);
   const [selectedUMKMType, setSelectedUMKMType] =
     useState<"Semua" | KobarUMKMType>("Semua");
@@ -1381,26 +1343,25 @@ export default function Newsview() {
                     >
                       <div>
                         <div className="relative h-48 w-full overflow-hidden bg-slate-100">
-                          <img
-                            className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-                            src={hotel.image}
-                            alt={hotel.hotelName}
-                            loading="lazy"
-                          />
+                          {hotel.image ? (
+                            <img
+                              className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                              src={hotel.image}
+                              alt={hotel.hotelName}
+                              loading="lazy"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                              }}
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-slate-100 text-xs font-medium text-slate-400">
+                              Foto belum tersedia
+                            </div>
+                          )}
                           <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
                             <span className="rounded-full bg-[#102b49]/90 px-2.5 py-1 text-[10px] font-bold tracking-wide text-white uppercase backdrop-blur-xs">
                               {hotel.type}
                             </span>
-                            <a
-                              href={hotel.mapsUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              title="Buka foto asli & ulasan di Google Maps"
-                              className="inline-flex items-center gap-1 rounded-full bg-slate-950/80 hover:bg-slate-950 px-2.5 py-1 text-[10px] font-bold text-amber-300 backdrop-blur-xs transition-colors shadow-xs"
-                            >
-                              <Camera className="h-3 w-3 text-amber-300" />
-                              <span>Foto Asli ↗</span>
-                            </a>
                           </div>
                           <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-amber-400/95 px-2.5 py-1 text-xs font-extrabold text-slate-950 shadow-xs">
                             <Star className="h-3.5 w-3.5 fill-slate-950" />
@@ -1451,21 +1412,33 @@ export default function Newsview() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#174a72] bg-[#174a72]/5 px-3 py-2 text-xs font-bold text-[#174a72] transition-colors hover:bg-[#174a72] hover:text-white"
-                          title="Buka foto asli hotel, fasilitas, dan rute di Google Maps"
+                          title="Buka lokasi hotel, fasilitas, dan rute di Google Maps"
                         >
                           <Camera className="h-3.5 w-3.5" />
                           Foto &amp; Peta
                           <ExternalLink className="h-3 w-3 opacity-70" />
                         </a>
-                        <a
-                          href={`https://wa.me/${hotel.contact.replace(/\D/g, "")}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-emerald-700"
-                        >
-                          <Phone className="h-3.5 w-3.5" />
-                          Reservasi
-                        </a>
+                        {hotel.contact ? (
+                          <a
+                            href={`https://wa.me/${hotel.contact.replace(/\D/g, "")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-emerald-700"
+                          >
+                            <Phone className="h-3.5 w-3.5" />
+                            Reservasi
+                          </a>
+                        ) : (
+                          <a
+                            href={hotel.mapsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-700 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-slate-800"
+                          >
+                            <MapPin className="h-3.5 w-3.5" />
+                            Cek Lokasi
+                          </a>
+                        )}
                       </div>
                     </Card>
                   ))}
@@ -1600,7 +1573,7 @@ export default function Newsview() {
                     </h2>
 
                     <p className="text-xs sm:text-sm text-sky-100/90 leading-relaxed">
-                      Menampilkan <strong>{kobarUMKMData.length} tempat makan, restoran khas sungai, warung tradisional, food court, dan kafe pilihan</strong> di Pangkalan Bun (Kotawaringin Barat) lengkap dengan foto asli tempat, keunggulan menu, jam operasional, dan info reservasi.
+                      Menampilkan <strong>{kobarUMKMData.length} tempat makan, restoran khas sungai, warung tradisional, food court, dan kafe pilihan</strong> di Pangkalan Bun (Kotawaringin Barat) lengkap dengan foto tempat, keunggulan menu, jam operasional, dan info reservasi.
                     </p>
 
                     <div className="flex flex-wrap items-center gap-4 pt-2 text-xs font-semibold text-slate-200">
@@ -1610,7 +1583,7 @@ export default function Newsview() {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Camera className="h-4 w-4 text-emerald-300" />
-                        <span>{kobarUMKMData.filter((x) => x.image.startsWith("/kuliner-real/")).length} Foto Asli Lokasi</span>
+                        <span>{kobarUMKMData.filter((x) => x.image.startsWith("/kuliner-real/")).length} Foto Lokasi</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Tag className="h-4 w-4 text-sky-300" />
@@ -1827,10 +1800,10 @@ export default function Newsview() {
                   <p>
                     *Catatan: Jam buka, ketersediaan menu, dan nomor telepon bersumber dari data publik Google Maps Kotawaringin Barat.
                   </p>
-                  <p className="flex items-center gap-1 font-semibold text-[#174a72]">
+                  {/* <p className="flex items-center gap-1 font-semibold text-[#174a72]">
                     <Camera className="h-3.5 w-3.5 text-amber-500" />
-                    Klik <strong>&quot;Foto Asli&quot;</strong> pada kartu untuk melihat foto nyata tempat &amp; menu dari pengunjung Google Maps.
-                  </p>
+                    Klik <strong>&quot;Maps ↗&quot;</strong> pada kartu untuk melihat foto tempat &amp; menu dari pengunjung Google Maps.
+                  </p> */}
                 </div>
               </div>
 
@@ -1862,29 +1835,22 @@ export default function Newsview() {
                               </div>
                             )}
 
-                            {/* Theme Pill Overlay & Foto Asli Pill */}
-                            <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
-                              {item.image.startsWith("/kuliner-real/") ? (
-                                <span className="rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-white shadow-xs backdrop-blur-xs flex items-center gap-1">
-                                  <CheckCircle2 className="h-3 w-3" />
-                                  <span>Foto Asli</span>
-                                </span>
-                              ) : (
-                                <span className="rounded-full bg-[#102b49]/90 px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-white uppercase backdrop-blur-xs">
-                                  {item.culinaryTheme}
-                                </span>
-                              )}
+                            {/* Theme Pill Overlay */}
+                            {/* <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
+                              <span className="rounded-full bg-[#102b49]/90 px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-white uppercase backdrop-blur-xs">
+                                {item.culinaryTheme}
+                              </span>
                               <a
                                 href={item.google_maps_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                title="Lihat foto asli tempat & menu di Google Maps"
+                                title="Lihat foto tempat & menu di Google Maps"
                                 className="inline-flex items-center gap-1 rounded-full bg-slate-950/80 hover:bg-slate-950 px-2 py-1 text-[10px] font-bold text-amber-300 backdrop-blur-xs transition-colors shadow-xs"
                               >
                                 <Camera className="h-3 w-3 text-amber-300" />
                                 <span>Maps ↗</span>
                               </a>
-                            </div>
+                            </div> */}
 
                             {/* Rating Badge */}
                             {item.ada_rating && (
@@ -1961,10 +1927,10 @@ export default function Newsview() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#174a72] bg-[#174a72]/5 px-2.5 py-2 text-xs font-bold text-[#174a72] transition-colors hover:bg-[#174a72] hover:text-white"
-                            title="Buka foto asli tempat, menu, dan rute di Google Maps"
+                            title="Buka foto tempat, menu, dan rute di Google Maps"
                           >
-                            <Camera className="h-3.5 w-3.5 shrink-0" />
-                            <span>Foto &amp; Peta</span>
+                            {/* <Camera className="h-3.5 w-3.5 shrink-0" /> */}
+                            <span>Lihat Lokasi</span>
                             <ExternalLink className="h-3 w-3 opacity-70 shrink-0" />
                           </a>
 
@@ -2160,10 +2126,10 @@ export default function Newsview() {
                       <Camera className="h-5 w-5 shrink-0 text-[#174a72] mt-0.5" />
                       <div className="space-y-1">
                         <span className="font-bold block text-slate-900">
-                          📸 Galeri Foto Asli Tempat &amp; Menu
+                          📸 Galeri Foto Tempat &amp; Menu
                         </span>
                         <p className="text-[11px] text-slate-600 leading-relaxed">
-                          Lihat foto asli fisik warung/kafe, suasana meja makan, foto buku menu &amp; harga terkini, serta ulasan terbaru dari pengunjung Google Maps.
+                          Lihat foto fisik warung/kafe, suasana meja makan, foto buku menu &amp; harga terkini, serta ulasan terbaru dari pengunjung Google Maps.
                         </p>
                         <a
                           href={selectedUMKMDetail.google_maps_url}

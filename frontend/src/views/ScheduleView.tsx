@@ -15,6 +15,7 @@ import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { useCompetitionStore } from "../stores/competitionStore";
 import { isGroupPhaseNonHeadToHeadMatch } from "../utils/sportScoringConfig";
+import { formatParticipantName } from "../utils/participantDisplay";
 import { SlidersHorizontal } from "lucide-react";
 
 type ScheduleEvent = {
@@ -96,15 +97,16 @@ export default function ScheduleView() {
           match.round_name,
           match.title,
         );
-        const participantsSummary = nonHeadToHead
-          ? parts.length > 0
-            ? parts
-                .map((p) => `${p.contingent_name}${p.score ? ` (${p.score})` : ""}`)
+        const participantsSummary =
+          parts.length === 0
+            ? undefined
+            : nonHeadToHead || parts.length > 2
+              ? parts
+                .map((p) => `${formatParticipantName(p)}${p.score ? ` (${p.score})` : ""}`)
                 .join(" • ")
-            : undefined
-          : p0 && p1
-            ? `${p0.contingent_name}${p0.score ? ` (${p0.score})` : ""} vs ${p1.contingent_name}${p1.score ? ` (${p1.score})` : ""}`
-            : undefined;
+              : parts.length === 2 && p0 && p1
+                ? `${formatParticipantName(p0)}${p0.score ? ` (${p0.score})` : ""} vs ${formatParticipantName(p1)}${p1.score ? ` (${p1.score})` : ""}`
+                : `${formatParticipantName(p0)}${p0.score ? ` (${p0.score})` : ""}`;
         return {
           id: match.id,
           date: match.date,
@@ -196,13 +198,7 @@ export default function ScheduleView() {
             src="/keraWak.png"
             alt="Maskot PORPROV memegang stopwatch"
           />
-          <div className="schedule-source-note" role="note">
-            <strong>Jadwal dari backend</strong>
-            {/* <span>
-              Data seed yang digunakan saat ini adalah simulasi dan bukan
-              jadwal resmi. Konfirmasi jadwal kepada panitia.
-            </span> */}
-          </div>
+
         </section>
 
         <section className="schedule-content section-wrap" aria-label="Jadwal">
@@ -368,54 +364,60 @@ export default function ScheduleView() {
                     }
                   };
                   return (
-                  <article
-                    className="schedule-event-card cursor-pointer"
-                    key={event.id}
-                    role="link"
-                    tabIndex={0}
-                    aria-label={
-                      isOngoing
-                        ? `Tonton live YouTube: ${event.title}`
-                        : `Lihat hasil pertandingan ${event.sport}: ${event.title}`
-                    }
-                    onClick={handleCardActivate}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        handleCardActivate();
+                    <article
+                      className="schedule-event-card cursor-pointer"
+                      key={event.id}
+                      role="link"
+                      tabIndex={0}
+                      aria-label={
+                        isOngoing
+                          ? `Tonton live YouTube: ${event.title}`
+                          : `Lihat hasil pertandingan ${event.sport}: ${event.title}`
                       }
-                    }}
-                  >
-                    <time>{event.time}</time>
-                    <div>
-                      <strong>
-                        {event.sport}
-                        {event.roundName ? ` · ${event.roundName}` : ""}
-                      </strong>
-                      <span className="schedule-event-title">
-                        {event.eventName ? `${event.eventName} — ` : ""}
-                        {event.title || "-"}
-                      </span>
-                      {event.participantsSummary && (
-                        <small className="font-semibold text-foreground">
-                          {event.participantsSummary}
-                        </small>
-                      )}
-                      <small>{event.venue}</small>
-                      {isOngoing ? (
-                        <span className="schedule-live-link" aria-hidden="true">
-                          Tonton live di YouTube
+                      onClick={handleCardActivate}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleCardActivate();
+                        }
+                      }}
+                    >
+                      <time>
+                        {!event.time ||
+                          event.time === "00:00" ||
+                          event.time === "00:00 WIB"
+                          ? "Menyusul"
+                          : event.time}
+                      </time>
+                      <div>
+                        <strong>
+                          {event.sport}
+                          {event.roundName ? ` · ${event.roundName}` : ""}
+                        </strong>
+                        <span className="schedule-event-title">
+                          {event.eventName ? `${event.eventName} — ` : ""}
+                          {event.title || "-"}
                         </span>
-                      ) : (
-                        <span className="text-xs text-primary font-medium mt-0.5 inline-block" aria-hidden="true">
-                          Lihat hasil pertandingan {event.sport} →
-                        </span>
-                      )}
-                    </div>
-                    <Badge variant="secondary" className={`schedule-event-badge schedule-status-${event.status.toLowerCase()}`}>
-                      {statusLabel(event.status)}
-                    </Badge>
-                  </article>
+                        {event.participantsSummary && (
+                          <small className="font-semibold text-foreground">
+                            {event.participantsSummary}
+                          </small>
+                        )}
+                        <small>{event.venue}</small>
+                        {isOngoing ? (
+                          <span className="schedule-live-link" aria-hidden="true">
+                            Tonton live di YouTube
+                          </span>
+                        ) : (
+                          <span className="text-xs text-primary font-medium mt-0.5 inline-block" aria-hidden="true">
+                            Lihat hasil pertandingan {event.sport} →
+                          </span>
+                        )}
+                      </div>
+                      <Badge variant="secondary" className={`schedule-event-badge schedule-status-${event.status.toLowerCase()}`}>
+                        {statusLabel(event.status)}
+                      </Badge>
+                    </article>
                   );
                 })}
               </div>

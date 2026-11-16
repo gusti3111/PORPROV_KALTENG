@@ -27,12 +27,18 @@ import {
 } from "lucide-react";
 import { API_BASE_URL, getAPIData, getAPIErrorMessage, getAuthHeaders } from "../../api/client";
 import type { ScheduleMatch } from "../../api/types";
+import {
+  formatParticipantName,
+  hasDuplicateParticipantEntry,
+} from "../../utils/participantDisplay";
 
 interface ScoreFormState {
   status: string;
   scores: string[];
   contingent_ids: number[];
+  athlete_names: string[];
   winner_contingent_id: number;
+  live_stream_url: string;
 }
 
 function getRoundPhaseLevel(roundName?: string): { level: number; label: string } {
@@ -108,17 +114,21 @@ export default function HasilPage() {
   const fetchContingents = useCompetitionStore((s) => s.fetchContingents);
   const updateMatch = useCompetitionStore((s) => s.updateMatch);
   const updateMatchContingents = useCompetitionStore((s) => s.updateMatchContingents);
+  const deleteMatches = useCompetitionStore((s) => s.deleteMatches);
 
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterSport, setFilterSport] = useState("all");
   const [selectedMatch, setSelectedMatch] = useState<ScheduleMatch | null>(null);
   const [showScoreForm, setShowScoreForm] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState("");
+  const [deletingAll, setDeletingAll] = useState(false);
   const [form, setForm] = useState<ScoreFormState>({
     status: "FINISHED",
     scores: ["", ""],
     contingent_ids: [0, 0],
+    athlete_names: ["", ""],
     winner_contingent_id: 0,
+    live_stream_url: "",
   });
 
   useEffect(() => {
@@ -153,7 +163,12 @@ export default function HasilPage() {
         parts.length >= 2
           ? parts.map((p) => p.contingent_id || 0)
           : [parts[0]?.contingent_id || 0, parts[1]?.contingent_id || 0],
+      athlete_names:
+        parts.length >= 2
+          ? parts.map((p) => p.athlete_name || "")
+          : [parts[0]?.athlete_name || "", parts[1]?.athlete_name || ""],
       winner_contingent_id: winner?.contingent_id || 0,
+      live_stream_url: match.live_stream_url || "",
     });
     setShowScoreForm(true);
   };
@@ -171,36 +186,59 @@ export default function HasilPage() {
       return;
     }
     const filledPairs = form.contingent_ids
-      .map((cid, idx) => ({ cid, score: (form.scores[idx] ?? "").trim() }))
+      .map((cid, idx) => ({
+        cid,
+        athleteName: (form.athlete_names[idx] ?? "").trim(),
+        score: (form.scores[idx] ?? "").trim(),
+      }))
       .filter((item) => item.cid > 0);
-    const uniqueIds = new Set(filledPairs.map((item) => item.cid));
     if (filledPairs.length === 0) {
       alert(
         "Pertandingan belum memiliki kontingen. Silakan isi kontingen di form Edit Jadwal atau pilih kontingen terlebih dahulu.",
       );
       return;
     }
-    if (filledPairs.length < 2 || uniqueIds.size !== filledPairs.length) {
-      alert("Pilih minimal 2 kontingen yang berbeda (tidak boleh ada kontingen ganda).");
+    if (
+      filledPairs.length < 2 ||
+      hasDuplicateParticipantEntry(
+        filledPairs.map((item) => ({
+          contingent_id: item.cid,
+          athlete_name: item.athleteName,
+        })),
+      )
+    ) {
+      alert(
+        "Pilih minimal 2 peserta yang valid. Jika kontingen sama, isi nama atlet yang berbeda.",
+      );
       return;
     }
 
     const nextContingentIds = filledPairs.map((item) => item.cid);
+    const nextAthleteNames = filledPairs.map((item) => item.athleteName);
     const nextScores = filledPairs.map((item) => item.score);
-    const origContingentIds = (selectedMatch.participants || []).map((p) => p.contingent_id);
-    const contingentsChanged =
-      origContingentIds.length !== nextContingentIds.length ||
-      origContingentIds.some((cid, idx) => cid !== nextContingentIds[idx]);
+    const origParticipants = selectedMatch.participants || [];
+    const participantsChanged =
+      origParticipants.length !== nextContingentIds.length ||
+      origParticipants.some(
+        (p, idx) =>
+          p.contingent_id !== nextContingentIds[idx] ||
+          (p.athlete_name || "").trim() !== nextAthleteNames[idx],
+      );
 
     try {
-      if (contingentsChanged) {
-        await updateMatchContingents(selectedMatch.id, nextContingentIds);
+      if (participantsChanged) {
+        await updateMatchContingents(
+          selectedMatch.id,
+          nextContingentIds,
+          nextAthleteNames,
+        );
       }
 
       await updateMatch(selectedMatch.id, {
         status: form.status || "FINISHED",
         scores: nextScores.map((s) => String(s ?? "")),
         winner_contingent_id: form.winner_contingent_id,
+        live_stream_url: form.live_stream_url.trim(),
       });
 
       if ((selectedMatch.sport_id ?? 0) > 0) {
@@ -227,6 +265,32 @@ export default function HasilPage() {
       void fetchMatches();
     } catch {
       alert("Gagal menghapus pertandingan");
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (filteredMatches.length === 0 || deletingAll) return;
+    const confirmed = confirm(
+      `Hapus SEMUA ${filteredMatches.length} pertandingan yang ditampilkan? Tindakan ini tidak dapat dibatalkan.`,
+    );
+    if (!confirmed) return;
+
+    setDeletingAll(true);
+    try {
+      const targetIds = filteredMatches.map((m) => m.id);
+      const { deleted, failed } = await deleteMatches(targetIds);
+      if (selectedMatch && targetIds.includes(selectedMatch.id)) {
+        closeScoreForm();
+      }
+      if (failed > 0) {
+        alert(`${deleted} pertandingan dihapus, ${failed} gagal dihapus.`);
+      } else {
+        setFeedbackMsg(`${deleted} pertandingan berhasil dihapus.`);
+      }
+    } catch {
+      alert("Gagal menghapus semua pertandingan.");
+    } finally {
+      setDeletingAll(false);
     }
   };
 
@@ -318,6 +382,7 @@ export default function HasilPage() {
                             setForm({
                               ...form,
                               contingent_ids: form.contingent_ids.filter((_, i) => i !== idx),
+                              athlete_names: form.athlete_names.filter((_, i) => i !== idx),
                               scores: form.scores.filter((_, i) => i !== idx),
                               winner_contingent_id:
                                 form.winner_contingent_id === cid ? 0 : form.winner_contingent_id,
@@ -347,6 +412,16 @@ export default function HasilPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <Input
+                      type="text"
+                      placeholder="Nama atlet (opsional, untuk nomor perorangan)"
+                      value={form.athlete_names[idx] ?? ""}
+                      onChange={(e) => {
+                        const nextAthletes = [...form.athlete_names];
+                        nextAthletes[idx] = e.target.value;
+                        setForm({ ...form, athlete_names: nextAthletes });
+                      }}
+                    />
                     <div className="flex items-center justify-between gap-3">
                       <Label>Skor / Catatan Waktu:</Label>
                       <Input
@@ -375,6 +450,7 @@ export default function HasilPage() {
                     setForm({
                       ...form,
                       contingent_ids: [...form.contingent_ids, 0],
+                      athlete_names: [...form.athlete_names, ""],
                       scores: [...form.scores, ""],
                     })
                   }
@@ -404,7 +480,11 @@ export default function HasilPage() {
                         (cid, idx) =>
                           cid > 0 && (
                             <SelectItem key={`${cid}-${idx}`} value={String(cid)}>
-                              🏆 Pemenang: {getContingentName(cid, idx)}
+                              🏆 Pemenang:{" "}
+                              {formatParticipantName({
+                                athlete_name: form.athlete_names[idx],
+                                contingent_name: getContingentName(cid, idx),
+                              })}
                             </SelectItem>
                           ),
                       )}
@@ -446,6 +526,21 @@ export default function HasilPage() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="hasil-live-stream-url">
+                  Link Live Streaming YouTube / URL (Opsional)
+                </Label>
+                <Input
+                  id="hasil-live-stream-url"
+                  type="url"
+                  placeholder="https://www.youtube.com/watch?v=... (tampil saat status Sedang Berlangsung)"
+                  value={form.live_stream_url}
+                  onChange={(e) =>
+                    setForm({ ...form, live_stream_url: e.target.value })
+                  }
+                />
               </div>
             </div>
 
@@ -512,11 +607,26 @@ export default function HasilPage() {
 
         {/* Matches list */}
         <Card className="p-4">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <h2 className="text-lg font-semibold">Daftar Pertandingan</h2>
-            <span className="text-sm text-muted-foreground">
-              {filteredMatches.length} pertandingan
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">
+                {filteredMatches.length} pertandingan
+              </span>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={() => void handleDeleteAll()}
+                disabled={filteredMatches.length === 0 || deletingAll}
+                className="gap-1.5"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                {deletingAll
+                  ? "Menghapus..."
+                  : `Hapus Semua (${filteredMatches.length})`}
+              </Button>
+            </div>
           </div>
 
           {loading ? (
@@ -564,7 +674,7 @@ export default function HasilPage() {
                               {parts.map((p, idx) => (
                                 <div key={`${p.contingent_id}-${idx}`} className="flex items-center gap-2">
                                   <span className={p.is_winner ? "font-bold text-emerald-700" : ""}>
-                                    {p.contingent_name || "TBA"}
+                                    {formatParticipantName(p)}
                                   </span>
                                   <Badge variant="secondary" className="text-xs">
                                     {p.score || (match.status === "SCHEDULED" ? "0" : "–")}

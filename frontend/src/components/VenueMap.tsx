@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   MapContainer,
   Marker,
@@ -14,14 +14,41 @@ type VenueMapProps = {
   venues: Venue[];
   selectedVenue: Venue | null;
   onSelectVenue: (venue: Venue) => void;
+  containerRef?: React.RefObject<HTMLDivElement | null>;
 };
 
-function MapViewport({ venue }: { venue: Venue | null }) {
+function MapViewport({
+  venue,
+  markerRefs,
+}: {
+  venue: Venue | null;
+  markerRefs: React.MutableRefObject<Map<string, L.Marker>>;
+}) {
   const map = useMap();
 
   useEffect(() => {
-    if (venue) map.flyTo(venue.position, 16, { duration: 0.45 });
-  }, [map, venue]);
+    if (!venue) return;
+    map.invalidateSize({ animate: false });
+    map.closePopup();
+
+    const openSelectedPopup = () => {
+      const marker = markerRefs.current.get(venue.name);
+      if (marker) {
+        marker.openPopup();
+      }
+    };
+
+    const handleMoveEnd = () => {
+      openSelectedPopup();
+    };
+
+    map.once("moveend", handleMoveEnd);
+    map.flyTo(venue.position, 16, { duration: 0.45 });
+
+    return () => {
+      map.off("moveend", handleMoveEnd);
+    };
+  }, [map, markerRefs, venue]);
 
   return null;
 }
@@ -40,14 +67,16 @@ export default function VenueMap({
   venues,
   selectedVenue,
   onSelectVenue,
+  containerRef,
 }: VenueMapProps) {
+  const markerRefs = useRef<Map<string, L.Marker>>(new Map());
   const icons = useMemo(
     () => new Map(venues.map((venue) => [venue.name, createVenueIcon(venue.name === selectedVenue?.name)])),
     [selectedVenue?.name, venues],
   );
 
   return (
-    <div className="venue-map-frame">
+    <div className="venue-map-frame" ref={containerRef}>
       <MapContainer
         className="venue-map"
         center={[-2.6765645, 111.6316259]}
@@ -59,17 +88,24 @@ export default function VenueMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <MapViewport venue={selectedVenue} />
+        <MapViewport venue={selectedVenue} markerRefs={markerRefs} />
         {venues.map((venue) => (
           <Marker
             key={venue.name}
+            ref={(instance) => {
+              if (instance) {
+                markerRefs.current.set(venue.name, instance);
+              } else {
+                markerRefs.current.delete(venue.name);
+              }
+            }}
             position={venue.position}
             icon={icons.get(venue.name)}
             eventHandlers={{
               click: () => onSelectVenue(venue),
             }}
           >
-            <Popup>
+            <Popup autoPanPadding={[32, 32]}>
               <div style={{ maxWidth: 220 }}>
                 {(() => {
                   const photoUrl = getVenuePhotoUrl(
@@ -91,7 +127,7 @@ export default function VenueMap({
                         marginBottom: 8,
                       }}
                       onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = "/venues2/sportCenter.jpg";
+                        (e.currentTarget as HTMLImageElement).style.display = "none";
                       }}
                     />
                   );

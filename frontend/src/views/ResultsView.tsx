@@ -21,12 +21,14 @@ import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { useCompetitionStore } from "../stores/competitionStore";
 import { getContingentLogoUrl } from "../utils/contingentLogo";
+import { formatParticipantName } from "../utils/participantDisplay";
 
 type ResultsTab = "matches" | "medals" | "sports";
 
 type MatchParticipantResult = {
   id: string;
   name: string;
+  contingentName?: string;
   score: string;
   isWinner: boolean;
 };
@@ -40,6 +42,7 @@ type MatchResult = {
   roundName: string;
   venue: string;
   status: string;
+  liveStreamUrl?: string;
   participants: MatchParticipantResult[];
 };
 
@@ -160,11 +163,13 @@ export default function ResultsView() {
           roundName: match.round_name || "Penyisihan",
           venue: match.venue_name,
           status: match.status,
+          liveStreamUrl: match.live_stream_url,
           participants:
             match.participants.length > 0
               ? match.participants.map((participant, idx) => ({
                   id: `${match.id}-${participant.contingent_id ?? idx}-${idx}`,
-                  name: participant.contingent_name || "Belum ditentukan",
+                  name: formatParticipantName(participant, "Belum ditentukan"),
+                  contingentName: participant.contingent_name,
                   score:
                     match.status === "SCHEDULED"
                       ? "–"
@@ -574,7 +579,9 @@ export default function ResultsView() {
                           aria-label="Skor pertandingan"
                         >
                           {result.participants.map((participant) => {
-                            const logoUrl = getContingentLogoUrl(participant.name);
+                            const logoUrl = getContingentLogoUrl(
+                              participant.contingentName || participant.name,
+                            );
                             return (
                               <div
                                 key={participant.id}
@@ -612,13 +619,25 @@ export default function ResultsView() {
                           <span className="min-w-0 text-[10px] leading-snug text-[var(--muted)]">
                             {result.venue}
                           </span>
-                          <Badge variant="secondary" className="result-simulation-badge">
-                            {result.status === "FINISHED"
-                              ? "SELESAI"
-                              : result.status === "ONGOING"
-                                ? "BERLANGSUNG"
-                                : "TERJADWAL"}
-                          </Badge>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {result.status === "ONGOING" && result.liveStreamUrl?.trim() && (
+                              <a
+                                href={result.liveStreamUrl.trim()}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="rounded-full bg-red-600 px-2.5 py-0.5 text-[10px] font-bold text-white hover:bg-red-700"
+                              >
+                                ● Tonton Live
+                              </a>
+                            )}
+                            <Badge variant="secondary" className="result-simulation-badge">
+                              {result.status === "FINISHED"
+                                ? "SELESAI"
+                                : result.status === "ONGOING"
+                                  ? "BERLANGSUNG"
+                                  : "TERJADWAL"}
+                            </Badge>
+                          </div>
                         </div>
                       </Card>
                     ))

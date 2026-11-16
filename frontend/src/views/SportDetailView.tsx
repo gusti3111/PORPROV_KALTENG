@@ -6,6 +6,7 @@ import SportBracket from "../components/SportBracket";
 import { getAPIData, getAPIErrorMessage } from "../api/client";
 import type { SportTournament, SportTournamentStanding } from "../api/types";
 import { getContingentLogoUrl } from "../utils/contingentLogo";
+import { formatParticipantName } from "../utils/participantDisplay";
 import { getSportEmblemInfo } from "../utils/sportEmblem";
 import {
   formatGroupDisplayName,
@@ -68,10 +69,12 @@ function standingsTable(
                 </td>
               </tr>
             ) : (
-              standings.map((row) => {
+              standings.map((row, rowIndex) => {
                 const logoUrl = getContingentLogoUrl(row.contingent, row.contingent_id);
                 return (
-                  <tr key={row.contingent}>
+                  <tr
+                    key={`${row.contingent_id ?? row.contingent}-${row.athlete_name ?? ""}-${rowIndex}`}
+                  >
                     <td>{String(row.rank).padStart(2, "0")}</td>
                     <th scope="row">
                       <span className="inline-flex items-center gap-2">
@@ -83,7 +86,12 @@ function standingsTable(
                             loading="lazy"
                           />
                         )}
-                        <span>{row.contingent}</span>
+                        <span>
+                          {formatParticipantName({
+                            athlete_name: row.athlete_name,
+                            contingent_name: row.contingent,
+                          })}
+                        </span>
                       </span>
                     </th>
                     {isTimeOrScore ? (
@@ -175,9 +183,17 @@ export default function SportDetailView() {
           </section>
         ) : !tournament ? (
           <section className="sport-detail-not-found" role={error ? "alert" : undefined}>
-            <span>{error ? "DATA BELUM TERSEDIA" : "404"}</span>
-            <h1>{error ? "Klasemen belum dapat dimuat" : "Cabang belum tersedia"}</h1>
-            <p>{error || "Belum ada data turnamen untuk cabang olahraga ini."}</p>
+            <span>DATA BELUM TERSEDIA</span>
+            <h1>
+              {error && !error.toLowerCase().includes("not found")
+                ? "Klasemen belum dapat dimuat"
+                : "Bagan & Klasemen Belum Tersedia"}
+            </h1>
+            <p>
+              {error && !error.toLowerCase().includes("not found")
+                ? error
+                : "Cabang olahraga ini belum memiliki jadwal, klasemen, atau bagan pertandingan."}
+            </p>
             <Link to="/cabor">Kembali ke daftar cabang</Link>
           </section>
         ) : (

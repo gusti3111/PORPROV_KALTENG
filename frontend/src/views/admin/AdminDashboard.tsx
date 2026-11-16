@@ -13,6 +13,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { useCompetitionStore } from "../../stores/competitionStore";
+import { formatParticipantName } from "../../utils/participantDisplay";
 import SiteHeader from "../../components/SiteHeader";
 import SiteFooter from "../../components/SiteFooter";
 import AdminNav from "../../components/AdminNav";
@@ -191,7 +192,7 @@ export default function AdminDashboard() {
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
                                 <span className={home?.is_winner ? "font-bold text-emerald-700" : ""}>
-                                  {home?.contingent_name || "TBA"}
+                                  {formatParticipantName(home)}
                                 </span>
                                 {(home?.score || match.status === "SCHEDULED") && (
                                   <Badge variant="secondary" className="text-xs">
@@ -206,7 +207,7 @@ export default function AdminDashboard() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <span className={away?.is_winner ? "font-bold text-emerald-700" : ""}>
-                                  {away?.contingent_name || "TBA"}
+                                  {formatParticipantName(away)}
                                 </span>
                                 {(away?.score || match.status === "SCHEDULED") && (
                                   <Badge variant="secondary" className="text-xs">

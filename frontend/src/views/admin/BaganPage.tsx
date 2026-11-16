@@ -17,6 +17,7 @@ import SiteHeader from "../../components/SiteHeader";
 import SiteFooter from "../../components/SiteFooter";
 import AdminNav from "../../components/AdminNav";
 import SportBracket from "../../components/SportBracket";
+import { formatParticipantName } from "../../utils/participantDisplay";
 import {
   ArrowRight,
   CheckCircle2,
@@ -1227,9 +1228,9 @@ export default function BaganPage() {
                                 )}
                               </thead>
                               <tbody>
-                                {group.standings.map((row) => (
+                                {group.standings.map((row, rowIndex) => (
                                   <tr
-                                    key={row.contingent}
+                                    key={`${row.contingent_id ?? row.contingent}-${row.athlete_name ?? ""}-${rowIndex}`}
                                     className="border-b last:border-b-0 hover:bg-muted/20"
                                   >
                                     <td className="p-2 font-bold">
@@ -1252,7 +1253,12 @@ export default function BaganPage() {
                                               className="h-5 w-5 shrink-0 object-contain"
                                             />
                                           )}
-                                        <span>{row.contingent}</span>
+                                        <span>
+                                          {formatParticipantName({
+                                            athlete_name: row.athlete_name,
+                                            contingent_name: row.contingent,
+                                          })}
+                                        </span>
                                       </span>
                                     </td>
 

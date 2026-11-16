@@ -41,6 +41,8 @@ function matchCard(match: SportTournamentMatch) {
         ? "Berlangsung"
         : "Akan bertanding";
 
+  const homeLabel = (match.home || "").trim() || "Menunggu peserta";
+  const awayLabel = (match.away || "").trim() || "Menunggu peserta";
   const homeLogo = getContingentLogoUrl(match.home);
   const awayLogo = getContingentLogoUrl(match.away);
 
@@ -70,13 +72,16 @@ function matchCard(match: SportTournamentMatch) {
           {homeLogo && (
             <img
               src={homeLogo}
-              alt={`Logo ${match.home}`}
+              alt={`Logo ${homeLabel}`}
               className="h-5 w-5 xl:h-6 xl:w-6 2xl:h-8 2xl:w-8 min-[2560px]:h-10 min-[2560px]:w-10 min-[3400px]:h-12 min-[3400px]:w-12 shrink-0 object-contain"
               loading="lazy"
             />
           )}
-          <span className="truncate">
-            {match.home || "Menunggu peserta"}
+          <span
+            className="line-clamp-2 break-words leading-snug"
+            title={homeLabel}
+          >
+            {homeLabel}
             {homeWon ? " 🏆" : ""}
           </span>
         </strong>
@@ -87,13 +92,16 @@ function matchCard(match: SportTournamentMatch) {
           {awayLogo && (
             <img
               src={awayLogo}
-              alt={`Logo ${match.away}`}
+              alt={`Logo ${awayLabel}`}
               className="h-5 w-5 xl:h-6 xl:w-6 2xl:h-8 2xl:w-8 min-[2560px]:h-10 min-[2560px]:w-10 min-[3400px]:h-12 min-[3400px]:w-12 shrink-0 object-contain"
               loading="lazy"
             />
           )}
-          <span className="truncate">
-            {match.away || "Menunggu peserta"}
+          <span
+            className="line-clamp-2 break-words leading-snug"
+            title={awayLabel}
+          >
+            {awayLabel}
             {awayWon ? " 🏆" : ""}
           </span>
         </strong>
@@ -105,6 +113,21 @@ function matchCard(match: SportTournamentMatch) {
 
 export default function SportBracket({ tournament }: { tournament: SportTournament }) {
   const quarterfinals = tournament.quarterfinals ?? [];
+  const thirdPlaceMatch = tournament.bronze ?? tournament.third_place;
+  const hasKnockoutSlots =
+    quarterfinals.length > 0 ||
+    tournament.semifinals.length > 0 ||
+    Boolean((tournament.final?.home || "").trim()) ||
+    Boolean((tournament.final?.away || "").trim());
+
+  if (!hasKnockoutSlots) {
+    return (
+      <p className="rounded-lg border border-dashed bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
+        Belum ada bagan pertandingan untuk cabang olahraga ini.
+      </p>
+    );
+  }
+
   const outcomes = tournament.semifinals.map(getOutcome);
   const bracketHeight = 260;
   const sourceCenters = [
@@ -193,12 +216,14 @@ export default function SportBracket({ tournament }: { tournament: SportTourname
         </div>
       </div>
 
-      <section className="sport-bracket-third" aria-label="Perebutan peringkat 3">
-        <div className="sport-bracket-third-match">
-          <h3>Perebutan peringkat 3</h3>
-          {matchCard(tournament.bronze)}
-        </div>
-      </section>
+      {thirdPlaceMatch && (
+        <section className="sport-bracket-third" aria-label="Perebutan peringkat 3">
+          <div className="sport-bracket-third-match">
+            <h3>Perebutan peringkat 3</h3>
+            {matchCard(thirdPlaceMatch)}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
