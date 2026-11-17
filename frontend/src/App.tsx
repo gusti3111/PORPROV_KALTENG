@@ -7,7 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import CaborView from "./views/CaborView";
-import BaganView from "./views/BaganView";
+// import BaganView from "./views/BaganView";
 import HomeView from "./views/HomeView";
 import Newsview from "./views/Newsview";
 import ResultsView from "./views/ResultsView";
@@ -93,7 +93,7 @@ export default function App() {
         <Route path="/" element={<HomeView />} />
         <Route path="/cabor" element={<CaborView />} />
         <Route path="/cabor/:sportId" element={<SportDetailView />} />
-        <Route path="/bagan" element={<BaganView />} />
+        {/* <Route path="/bagan" element={<BaganView />} /> */}
         <Route path="/venue" element={<VenueView />} />
         <Route path="/jadwal" element={<ScheduleView />} />
         <Route path="/hasil" element={<ResultsView />} />

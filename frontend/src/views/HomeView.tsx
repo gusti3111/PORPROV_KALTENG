@@ -226,7 +226,7 @@ export default function HomeView() {
       <main>
         <section
           id="beranda"
-          className="relative flex min-h-[610px] items-center overflow-hidden bg-[var(--green)] text-white max-[900px]:min-h-[570px] max-[620px]:min-h-[710px] max-[620px]:items-start"
+          className="relative flex min-h-[610px] items-center overflow-hidden bg-[var(--green)] text-white max-[900px]:min-h-[570px] max-[620px]:min-h-0 max-[620px]:flex-col max-[620px]:items-stretch max-[620px]:pb-14"
         >
           <img
             className="home-hero-photo"
@@ -245,7 +245,7 @@ export default function HomeView() {
             aria-hidden="true"
           />
 
-          <div className="relative z-[2] w-[54%] pt-[76px] pb-[105px] pl-[10%] min-[1500px]:pl-[max(8%,calc((100vw-var(--container-max,1760px))/2))] max-[900px]:w-[60%] max-[900px]:pl-[7%] max-[620px]:w-full max-[620px]:px-[6%] max-[620px]:pt-[65px] max-[620px]:pb-[170px]">
+          <div className="relative z-[2] w-[54%] pt-[76px] pb-[105px] pl-[10%] min-[1500px]:pl-[max(8%,calc((100vw-var(--container-max,1760px))/2))] max-[900px]:w-[60%] max-[900px]:pl-[7%] max-[620px]:w-full max-[620px]:px-[6%] max-[620px]:pt-[48px] max-[620px]:pb-4">
             <p className="mb-6 flex items-center gap-[10px] text-[clamp(10px,0.9vw,14px)] font-extrabold uppercase tracking-[0.15em] text-[var(--lime)]">
               <span className="size-[7px] rounded-full bg-[var(--lime)] shadow-[0_0_14px_rgba(220,236,249,0.75)]" />
               Panggung prestasi Kalimantan Tengah
@@ -303,7 +303,7 @@ export default function HomeView() {
 
 
 
-          <div className="absolute right-[7.2%] bottom-0 left-[7.2%] flex h-14 items-center gap-4 border-t border-white/20 text-[clamp(8px,0.75vw,12px)] font-extrabold tracking-[0.15em] text-white/75 max-[620px]:right-[5%] max-[620px]:left-[5%] max-[620px]:gap-2">
+          <div className="absolute right-[7.2%] bottom-0 left-[7.2%] flex h-14 items-center gap-4 border-t border-white/20 text-[clamp(8px,0.75vw,12px)] font-extrabold tracking-[0.15em] text-white/75 max-[620px]:right-[5%] max-[620px]:left-[5%] max-[620px]:h-auto max-[620px]:min-h-12 max-[620px]:flex-wrap max-[620px]:justify-center max-[620px]:gap-x-2 max-[620px]:gap-y-1 max-[620px]:py-2.5">
             <span>SPORTIVITAS</span>
             <span className="text-xs text-[var(--lime)]">✳</span>
             <span>PERSAUDARAAN</span>
@@ -394,14 +394,14 @@ export default function HomeView() {
                     <div className="mt-auto pt-4">
                       <div className="grid grid-cols-2 gap-4 border-t-2 border-[var(--ui-border)] pt-4">
 
-                        <div>
+                        {/* <div>
                           <div className="text-[10px] font-bold tracking-wider text-[var(--muted)] uppercase">
                             CABOR
                           </div>
                           <div className="mt-0.5 text-sm font-extrabold text-[var(--ink)]">
                             {item.caborCount}
                           </div>
-                        </div>
+                        </div> */}
                       </div>
 
                       <div className="mt-3 border-t-2 border-[var(--ui-border)] pt-3 text-xs text-[var(--muted)]">

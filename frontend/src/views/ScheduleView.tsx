@@ -292,7 +292,7 @@ export default function ScheduleView() {
             )}
             <div
               ref={dayStripRef}
-              className="schedule-day-strip flex-1 scroll-smooth"
+              className="schedule-day-strip flex-1 min-w-0 scroll-smooth"
               aria-label="Pilih hari pertandingan"
             >
               {scheduleDates.map((date) => (

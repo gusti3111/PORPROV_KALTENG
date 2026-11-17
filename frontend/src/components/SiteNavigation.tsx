@@ -6,7 +6,7 @@ import { Menu, X } from "lucide-react";
 const links = [
   { label: "BERANDA", to: "/beranda" },
   { label: "CABOR", to: "/cabor", active: "/cabor" },
-  { label: "BAGAN", to: "/bagan", active: "/bagan" },
+  // { label: "BAGAN", to: "/bagan", active: "/bagan" },
   { label: "VENUE", to: "/venue", active: "/venue" },
   { label: "JADWAL PERTANDINGAN", to: "/jadwal", active: "/jadwal" },
   { label: "HASIL PERTANDINGAN", to: "/hasil", active: "/hasil" },

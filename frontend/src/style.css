@@ -491,12 +491,15 @@ body {
   }
 
   .home-hero-mascot {
-    z-index: 1;
+    position: relative;
+    z-index: 2;
     top: auto;
-    right: -9px;
-    bottom: 53px;
-    width: min(76vw, 320px);
-    height: 235px;
+    right: auto;
+    bottom: auto;
+    width: min(72vw, 270px);
+    height: auto;
+    max-height: 220px;
+    margin: 4px auto 8px;
     border-radius: 18px;
     transform: none;
   }
@@ -2697,9 +2700,10 @@ body {
 .medal-sport-summary {
   display: flex;
   min-height: 55px;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
   padding: 12px 16px;
   border-bottom: 1px solid #e1e2da;
   color: var(--muted);
@@ -3105,11 +3109,13 @@ body {
   }
 
   .schedule-hero-illustration {
-    top: 38%;
-    right: -2%;
-    width: 43vw;
-    height: 190px;
-    opacity: 0.58;
+    position: static;
+    display: block;
+    width: min(210px, 56vw);
+    height: auto;
+    max-height: 185px;
+    margin: 18px auto 0;
+    opacity: 1;
     transform: none;
   }
 
@@ -3119,20 +3125,23 @@ body {
   }
 
   .results-hero-illustration {
-    top: 38%;
-    right: -2%;
-    width: 43vw;
-    height: 190px;
-    opacity: 0.62;
+    position: static;
+    display: block;
+    width: min(210px, 56vw);
+    height: auto;
+    max-height: 185px;
+    margin: 18px auto 0;
+    opacity: 1;
     transform: none;
   }
 
   .results-hero h1 {
-    font-size: clamp(38px, 11vw, 56px);
+    font-size: clamp(36px, 10.5vw, 54px);
   }
 
   .results-total {
     min-height: 72px;
+    flex-wrap: wrap;
     gap: 9px;
     padding: 10px;
   }
@@ -3224,13 +3233,20 @@ body {
   .schedule-results-heading,
   .schedule-calendar-heading {
     min-height: 75px;
+    flex-wrap: wrap;
+    gap: 8px 14px;
     padding: 14px;
+  }
+
+  .schedule-results-heading>div,
+  .schedule-calendar-heading>div {
+    min-width: 0;
   }
 
   .schedule-results-heading>span,
   .schedule-calendar-heading>span {
     font-size: 8px;
-    text-align: right;
+    text-align: left;
   }
 
   .schedule-empty {
@@ -3257,8 +3273,14 @@ body {
     padding: 14px;
   }
 
+  .schedule-event-card>div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
   .schedule-event-card .schedule-event-badge {
     grid-column: 2;
+    justify-self: start;
   }
 
   .schedule-event-card time {
@@ -3266,26 +3288,28 @@ body {
   }
 
   .cabor-hero {
-    min-height: 410px;
+    min-height: auto;
   }
 
   .venue-hero-illustration {
-    top: auto;
-    right: 1%;
-    bottom: 42px;
-    width: 48vw;
-    height: 235px;
-    opacity: 0.72;
+    position: static;
+    display: block;
+    width: min(210px, 56vw);
+    height: auto;
+    max-height: 195px;
+    margin: 20px auto 0;
+    opacity: 1;
     transform: none;
   }
 
   .cabor-page-hero-illustration {
-    top: auto;
-    right: 1%;
-    bottom: 42px;
-    width: 48vw;
-    height: 235px;
-    opacity: 0.72;
+    position: static;
+    display: block;
+    width: min(210px, 56vw);
+    height: auto;
+    max-height: 195px;
+    margin: 20px auto 0;
+    opacity: 1;
     transform: none;
   }
 
@@ -3295,11 +3319,13 @@ body {
   }
 
   .cabor-hero-content {
-    padding-top: 61px;
+    padding-top: 48px;
+    padding-bottom: 64px;
   }
 
   .cabor-hero h1 {
-    font-size: clamp(61px, 17vw, 85px);
+    font-size: clamp(36px, 10.5vw, 54px);
+    line-height: 0.98;
   }
 
   .cabor-hero-description {
@@ -3330,7 +3356,7 @@ body {
   }
 
   .cabor-section-heading h2 {
-    font-size: 43px;
+    font-size: clamp(28px, 8.5vw, 38px);
   }
 
   .cabor-intro {
@@ -3729,16 +3755,18 @@ body {
   }
 
   .news-hero-illustration {
-    top: 38%;
-    right: -2%;
-    width: 43vw;
-    height: 190px;
-    opacity: 0.58;
+    position: static;
+    display: block;
+    width: min(210px, 56vw);
+    height: auto;
+    max-height: 185px;
+    margin: 18px auto 0;
+    opacity: 1;
     transform: none;
   }
 
   .news-intro h1 {
-    font-size: clamp(38px, 11vw, 56px);
+    font-size: clamp(36px, 10.5vw, 54px);
   }
 
   .news-toolbar {
@@ -3997,14 +4025,19 @@ body {
 
 @media (max-width: 620px) {
   .schedule-toolbar {
-    align-items: flex-start;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 10px;
     padding-block: 12px;
   }
 
   .schedule-date-input {
-    display: grid;
-    justify-items: end;
-    gap: 4px;
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
     font-size: 11px;
   }
 
@@ -4783,12 +4816,13 @@ body {
   }
 
   .bagan-page-hero-illustration {
-    top: auto;
-    right: -3%;
-    bottom: 18px;
-    width: 47vw;
-    height: 210px;
-    opacity: 0.62;
+    position: static;
+    display: block;
+    width: min(210px, 56vw);
+    height: auto;
+    max-height: 190px;
+    margin: 20px auto 0;
+    opacity: 1;
     transform: none;
   }
 
