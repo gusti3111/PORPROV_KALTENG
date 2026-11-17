@@ -304,7 +304,7 @@ export default function BaganView() {
                         {activeGroups.map((group) => (
                           <div className="sport-standings-group" key={group.name}>
                             <h3>
-                              Klasemen {formatGroupDisplayName(rule, group.name)}
+                              Klasemen {formatGroupDisplayName(rule, group.name, activeGroups.length)}
                             </h3>
                             <div className="sport-standings-scroll">
                               <table className="sport-standings-table">

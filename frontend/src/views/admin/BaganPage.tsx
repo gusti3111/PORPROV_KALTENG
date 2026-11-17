@@ -756,7 +756,7 @@ export default function BaganPage() {
                     className="rounded-xl border border-sky-200 bg-sky-50/40 p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5 items-end"
                   >
                     <div className="space-y-1.5">
-                      <Label>Heat / Seri Lomba</Label>
+                      <Label>Grup / Seri Lomba</Label>
                       <Select
                         value={standingForm.group_code}
                         onValueChange={(v) =>
@@ -770,8 +770,8 @@ export default function BaganPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="A">Heat A (Seri 1)</SelectItem>
-                          <SelectItem value="B">Heat B (Seri 2)</SelectItem>
+                          <SelectItem value="A">Grup A (atau Grup Tunggal)</SelectItem>
+                          <SelectItem value="B">Grup B</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1184,7 +1184,11 @@ export default function BaganPage() {
                         >
                           <div className="flex items-center justify-between">
                             <h3 className="font-bold text-base">
-                              {formatGroupDisplayName(scoringRule, group.name)}
+                              {formatGroupDisplayName(
+                                scoringRule,
+                                group.name,
+                                tournament.groups.filter((g) => g.standings.length > 0).length,
+                              )}
                             </h3>
                             <Badge variant="outline">
                               {group.standings.length} Kontingen

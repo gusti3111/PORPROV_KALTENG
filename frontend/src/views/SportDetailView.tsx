@@ -19,6 +19,7 @@ function standingsTable(
   groupName: string,
   standings: SportTournamentStanding[],
   rule: SportScoringRule,
+  totalGroups?: number,
 ) {
   const isTimeOrScore =
     rule.tableType === "TIME_LEADERBOARD" || rule.tableType === "SCORE_LEADERBOARD";
@@ -27,7 +28,7 @@ function standingsTable(
 
   return (
     <div className="sport-standings-group" key={groupName}>
-      <h3>{formatGroupDisplayName(rule, groupName)}</h3>
+      <h3>{formatGroupDisplayName(rule, groupName, totalGroups)}</h3>
       <div className="sport-standings-scroll">
         <table className="sport-standings-table">
           <thead>
@@ -299,8 +300,14 @@ export default function SportDetailView() {
                         </span>
                       </div>
                       <div className="sport-standings-grid">
-                        {tournament.groups.map((group) =>
-                          standingsTable(group.name, group.standings, rule),
+                        {tournament.groups.map((group, _, allGroups) =>
+                          standingsTable(
+                            group.name,
+                            group.standings,
+                            rule,
+                            allGroups.filter((g) => g.standings.length > 0).length ||
+                              allGroups.length,
+                          ),
                         )}
                       </div>
                     </section>

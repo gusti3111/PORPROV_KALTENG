@@ -62,6 +62,7 @@ interface MatchFormState {
 }
 
 const ROUND_OPTIONS = [
+  "Fase Grup",
   "Fase Grup - Grup A",
   "Fase Grup - Grup B",
   "Penyisihan",
@@ -111,6 +112,29 @@ function toApiDateTime(date: string, time: string) {
   return new Date(`${date}T${safeTime}:00+07:00`).toISOString();
 }
 
+function getDateRangeInclusive(startDate: string, endDate: string): string[] {
+  if (!startDate) return [];
+  if (!endDate || endDate <= startDate) return [startDate];
+  const [sy, sm, sd] = startDate.split("-").map(Number);
+  const [ey, em, ed] = endDate.split("-").map(Number);
+  if (!sy || !sm || !sd || !ey || !em || !ed) return [startDate];
+
+  const startMs = Date.UTC(sy, sm - 1, sd);
+  const endMs = Date.UTC(ey, em - 1, ed);
+  if (endMs < startMs) return [startDate];
+
+  const dates: string[] = [];
+  const dayMs = 24 * 60 * 60 * 1000;
+  for (let ms = startMs; ms <= endMs && dates.length <= 32; ms += dayMs) {
+    const dt = new Date(ms);
+    const y = dt.getUTCFullYear();
+    const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(dt.getUTCDate()).padStart(2, "0");
+    dates.push(`${y}-${m}-${d}`);
+  }
+  return dates;
+}
+
 function getScheduleValidationError(form: MatchFormState): string | null {
   if (!form.sport_id) return "Pilih cabang olahraga terlebih dahulu.";
   if (!form.venue_id) return "Pilih tempat / venue pertandingan terlebih dahulu.";
@@ -131,6 +155,9 @@ function getScheduleValidationError(form: MatchFormState): string | null {
   const endComparable = `${form.end_date}T${form.end_time.trim() || "23:59"}`;
   if (endComparable < startComparable) {
     return "Waktu selesai tidak boleh lebih awal dari waktu mulai.";
+  }
+  if (getDateRangeInclusive(form.start_date, form.end_date).length > 31) {
+    return "Rentang tanggal maksimal 31 hari dalam satu kali input.";
   }
   if (!form.status.trim()) return "Pilih status pertandingan.";
   const streamUrl = form.live_stream_url.trim();
@@ -356,13 +383,13 @@ export default function JadwalPage() {
       .join("|");
 
   const findDuplicateSchedule = (
+    targetDate: string,
     computedTitle: string,
     selectedParticipantsList: Array<{ contingent_id: number; athlete_name: string }>,
   ) => {
     const targetSport = sports.find((s) => s.id === form.sport_id);
     const targetSportName = (targetSport?.name || "").trim().toLowerCase();
     const targetRound = form.round_name.trim().toLowerCase();
-    const targetDate = form.start_date.trim();
     const targetTime = form.start_time.trim() || "00:00";
     const targetEvent = (
       events.find((ev) => ev.id === form.event_id)?.name ||
@@ -463,17 +490,39 @@ export default function JadwalPage() {
               ? `${selectedNames[0]} vs ${selectedNames[1]}${roundSuffix}`
               : `${selectedNames.slice(0, 2).join(", ")} +${selectedNames.length - 2} Kontingen${roundSuffix}`;
     const computedTitle = form.title.trim() || defaultTitle;
+    const participantSigItems = selectedParticipants.map((p) => ({
+      contingent_id: p.cid,
+      athlete_name: p.athleteName,
+    }));
 
-    const duplicateMatch = findDuplicateSchedule(
-      computedTitle,
-      selectedParticipants.map((p) => ({
-        contingent_id: p.cid,
-        athlete_name: p.athleteName,
-      })),
-    );
-    if (duplicateMatch) {
+    if (editing?.match_id) {
+      const duplicateMatch = findDuplicateSchedule(
+        form.start_date.trim(),
+        computedTitle,
+        participantSigItems,
+      );
+      if (duplicateMatch) {
+        alert(
+          `Jadwal ganda terdeteksi: "${duplicateMatch.sport_name} - ${duplicateMatch.title}" pada ${duplicateMatch.date} sudah ada di daftar.`,
+        );
+        return;
+      }
+    }
+
+    const targetDates = editing?.match_id
+      ? [form.start_date.trim()]
+      : getDateRangeInclusive(form.start_date.trim(), form.end_date.trim());
+
+    const datesToCreate = editing?.match_id
+      ? targetDates
+      : targetDates.filter(
+          (dateStr) =>
+            !findDuplicateSchedule(dateStr, computedTitle, participantSigItems),
+        );
+
+    if (!editing?.match_id && datesToCreate.length === 0) {
       alert(
-        `Jadwal ganda terdeteksi: "${duplicateMatch.sport_name} - ${duplicateMatch.title}" pada ${duplicateMatch.date} sudah ada di daftar. Gunakan tombol Edit jika ingin memperbarui.`,
+        "Semua jadwal pada rentang tanggal tersebut sudah ada di daftar (duplikat). Gunakan tombol Edit jika ingin memperbarui.",
       );
       return;
     }
@@ -481,7 +530,7 @@ export default function JadwalPage() {
     setIsSubmitting(true);
     const previousIds = new Set(matches.map((m) => m.id));
     try {
-      const payload = {
+      const basePayload = {
         sport_id: form.sport_id,
         event_id: form.event_id,
         event_name: form.custom_event_name.trim(),
@@ -489,8 +538,6 @@ export default function JadwalPage() {
         venue_id: form.venue_id,
         title: computedTitle,
         round_name: form.round_name,
-        start_time: toApiDateTime(form.start_date, form.start_time),
-        end_time: toApiDateTime(form.end_date, form.end_time),
         status: form.status,
         contingent_ids: selectedContingentIds,
         athlete_names: selectedAthleteNames,
@@ -498,22 +545,23 @@ export default function JadwalPage() {
         winner_contingent_id: form.winner_contingent_id,
         live_stream_url: form.live_stream_url.trim(),
       };
-      const url = editing?.match_id
-        ? `${API_BASE_URL}/matches/${editing.match_id}`
-        : `${API_BASE_URL}/matches`;
-      const method = editing ? "PUT" : "POST";
-      const response = await fetch(url, {
-        method,
-        headers: getAuthHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) {
-        throw new Error(
-          await readResponseError(response, "Gagal menyimpan jadwal"),
-        );
-      }
 
       if (editing?.match_id) {
+        const response = await fetch(`${API_BASE_URL}/matches/${editing.match_id}`, {
+          method: "PUT",
+          headers: getAuthHeaders({ "Content-Type": "application/json" }),
+          body: JSON.stringify({
+            ...basePayload,
+            start_time: toApiDateTime(form.start_date, form.start_time),
+            end_time: toApiDateTime(form.end_date, form.end_time),
+          }),
+        });
+        if (!response.ok) {
+          throw new Error(
+            await readResponseError(response, "Gagal menyimpan jadwal"),
+          );
+        }
+
         const hasScores =
           selectedScores.some((s) => s.trim() !== "") ||
           form.status === "FINISHED";
@@ -534,6 +582,26 @@ export default function JadwalPage() {
           if (!resultRes.ok) {
             throw new Error(
               await readResponseError(resultRes, "Gagal menyimpan hasil"),
+            );
+          }
+        }
+      } else {
+        for (const dateStr of datesToCreate) {
+          const response = await fetch(`${API_BASE_URL}/matches`, {
+            method: "POST",
+            headers: getAuthHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify({
+              ...basePayload,
+              start_time: toApiDateTime(dateStr, form.start_time),
+              end_time: toApiDateTime(dateStr, form.end_time),
+            }),
+          });
+          if (!response.ok) {
+            throw new Error(
+              await readResponseError(
+                response,
+                `Gagal menyimpan jadwal tanggal ${dateStr}`,
+              ),
             );
           }
         }
@@ -567,10 +635,13 @@ export default function JadwalPage() {
         }
       }
 
+      const skippedCount = targetDates.length - datesToCreate.length;
       setFeedbackMsg(
         editing
           ? "Jadwal, kontingen, skor, klasemen & bagan berhasil diperbarui!"
-          : "Jadwal pertandingan baru berhasil ditambahkan dan disinkronkan ke web utama!",
+          : datesToCreate.length > 1
+            ? `${datesToCreate.length} jadwal (${datesToCreate[0]} s/d ${datesToCreate[datesToCreate.length - 1]}) berhasil dibuat otomatis!${skippedCount > 0 ? ` (${skippedCount} tanggal duplikat dilewati)` : ""}`
+            : "Jadwal pertandingan baru berhasil ditambahkan dan disinkronkan ke web utama!",
       );
       setEditing(null);
       setUseCustomEvent(false);
@@ -1114,6 +1185,14 @@ export default function JadwalPage() {
                   />
                 </div>
               </div>
+
+              {!editing &&
+                getDateRangeInclusive(form.start_date, form.end_date).length > 1 && (
+                  <p className="text-xs font-medium text-primary">
+                    Rentang {getDateRangeInclusive(form.start_date, form.end_date).length} hari ({form.start_date} s/d {form.end_date}) — otomatis membuat{" "}
+                    {getDateRangeInclusive(form.start_date, form.end_date).length} jadwal harian di daftar.
+                  </p>
+                )}
 
               <div className="grid gap-2">
                 <Label htmlFor="match-live-stream-url">

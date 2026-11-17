@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import SiteHeader from "../components/SiteHeader";
 import { useCompetitionStore } from "../stores/competitionStore";
 import { isGroupPhaseNonHeadToHeadMatch } from "../utils/sportScoringConfig";
 import { formatParticipantName } from "../utils/participantDisplay";
-import { SlidersHorizontal } from "lucide-react";
+import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 
 const AGENDA_EVENT_PATTERN =
   /upacara|pembukaan|penutupan|kepulangan|technical\s*meeting|manager\s*meeting|penyegaran\s*wasit|\bopening\b|\bclosing\b/i;
@@ -95,6 +95,16 @@ export default function ScheduleView() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const dayStripRef = useRef<HTMLDivElement>(null);
+
+  const scrollDayStrip = (direction: -1 | 1) => {
+    const strip = dayStripRef.current;
+    if (!strip) return;
+    strip.scrollBy({
+      left: direction * Math.max(220, strip.clientWidth * 0.65),
+      behavior: "smooth",
+    });
+  };
 
   useEffect(() => {
     void fetchMatches();
@@ -146,16 +156,36 @@ export default function ScheduleView() {
   );
   const firstScheduleDate = scheduleDates[0] ?? "";
   const requestedDate = searchParams.get("tanggal");
+  const selectedSport = searchParams.get("cabor") ?? "";
+  const selectedVenue = searchParams.get("venue") ?? "";
   const todayJakarta = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Jakarta",
   }).format(new Date());
-  const selectedDate = requestedDate
-    ? requestedDate
-    : scheduleDates.includes(todayJakarta)
-      ? todayJakarta
-      : firstScheduleDate || todayJakarta;
-  const selectedSport = searchParams.get("cabor") ?? "";
-  const selectedVenue = searchParams.get("venue") ?? "";
+  const filteredFirstDate = useMemo(() => {
+    if (!selectedSport && !selectedVenue) return firstScheduleDate;
+    const dates = getScheduleDates(
+      scheduleEvents.filter(
+        (ev) =>
+          (!selectedSport || ev.sport === selectedSport) &&
+          (!selectedVenue || ev.venue === selectedVenue),
+      ),
+    );
+    return dates[0] ?? firstScheduleDate;
+  }, [firstScheduleDate, scheduleEvents, selectedSport, selectedVenue]);
+  const selectedDate = requestedDate || filteredFirstDate || todayJakarta;
+
+  useEffect(() => {
+    const strip = dayStripRef.current;
+    if (!strip || !selectedDate) return;
+    const activeBtn = strip.querySelector<HTMLButtonElement>(
+      `button[data-date="${selectedDate}"]`,
+    );
+    activeBtn?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }, [selectedDate, scheduleDates.length]);
 
   const visibleEvents = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("id");
@@ -247,21 +277,52 @@ export default function ScheduleView() {
             </label>
           </div>
 
-          <div className="schedule-day-strip" aria-label="Pilih hari pertandingan">
-            {scheduleDates.map((date) => (
+          <div className="flex items-center gap-2">
+            {scheduleDates.length > 1 && (
               <Button
-                key={date}
-                variant={selectedDate === date ? "default" : "outline"}
-                className="h-auto min-h-20 min-w-16 flex-col gap-1 py-2"
                 type="button"
-                aria-pressed={selectedDate === date}
-                onClick={() => selectDate(date)}
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 shrink-0 rounded-full"
+                aria-label="Geser tanggal ke kiri"
+                onClick={() => scrollDayStrip(-1)}
               >
-                <span>{formatDate(date, { weekday: "short" })}</span>
-                <strong>{formatDate(date, { day: "2-digit" })}</strong>
-                <small>{formatDate(date, { month: "short" })}</small>
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               </Button>
-            ))}
+            )}
+            <div
+              ref={dayStripRef}
+              className="schedule-day-strip flex-1 scroll-smooth"
+              aria-label="Pilih hari pertandingan"
+            >
+              {scheduleDates.map((date) => (
+                <Button
+                  key={date}
+                  data-date={date}
+                  variant={selectedDate === date ? "default" : "outline"}
+                  className="h-auto min-h-20 min-w-16 shrink-0 flex-col gap-1 py-2"
+                  type="button"
+                  aria-pressed={selectedDate === date}
+                  onClick={() => selectDate(date)}
+                >
+                  <span>{formatDate(date, { weekday: "short" })}</span>
+                  <strong>{formatDate(date, { day: "2-digit" })}</strong>
+                  <small>{formatDate(date, { month: "short" })}</small>
+                </Button>
+              ))}
+            </div>
+            {scheduleDates.length > 1 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 shrink-0 rounded-full"
+                aria-label="Geser tanggal ke kanan"
+                onClick={() => scrollDayStrip(1)}
+              >
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            )}
           </div>
 
           {loading && <p role="status">Memuat jadwal pertandingan...</p>}

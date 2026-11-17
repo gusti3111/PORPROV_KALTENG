@@ -138,8 +138,8 @@ const RULES: Record<SportScoringMode, SportScoringRule> = {
     drawPoints: 0,
     lossPoints: 0,
     allowDraw: false,
-    sectionTitle: "Hasil Catatan Waktu (Heat / Kualifikasi)",
-    groupLabel: "Heat",
+    sectionTitle: "Hasil Catatan Waktu (Grup / Kualifikasi)",
+    groupLabel: "Grup",
     valueColumnLabel: "Catatan Waktu",
     scoreUnitLabel: "Waktu (detik)",
     scorePlaceholderHome: "mis. 10.42 detik",
@@ -407,17 +407,18 @@ export function decodeScoreFromStanding(row: SportTournamentStanding): number {
 export function formatGroupDisplayName(
   rule: SportScoringRule,
   groupName: string,
+  totalGroups?: number,
 ): string {
-  if (rule.tableType === "TIME_LEADERBOARD") {
-    return groupName.replace(/^Grup\s+/i, "Heat ");
-  }
+  let formatted = groupName;
   if (rule.tableType === "SCORE_LEADERBOARD") {
-    return groupName.replace(/^Grup\s+/i, "Sesi ");
+    formatted = groupName.replace(/^Grup\s+/i, "Sesi ");
+  } else if (rule.mode === "GROUP_VOLLEY" || rule.mode === "GROUP_RACKET_2_0") {
+    formatted = groupName.replace(/^Grup\s+/i, "Pool ");
   }
-  if (rule.mode === "GROUP_VOLLEY" || rule.mode === "GROUP_RACKET_2_0") {
-    return groupName.replace(/^Grup\s+/i, "Pool ");
+  if (totalGroups === 1) {
+    formatted = formatted.replace(/\s+A$/i, "");
   }
-  return groupName;
+  return formatted;
 }
 
 const KNOCKOUT_ROUND_PATTERN =
