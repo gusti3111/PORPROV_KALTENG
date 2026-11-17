@@ -29,7 +29,13 @@ import {
   Trophy,
   X,
 } from "lucide-react";
-import { API_BASE_URL, getAPIData, getAuthHeaders } from "../../api/client";
+import {
+  API_BASE_URL,
+  getAPIData,
+  getAPIErrorMessage,
+  getAuthHeaders,
+  readResponseError,
+} from "../../api/client";
 import { getContingentLogoUrl } from "../../utils/contingentLogo";
 import {
   calculateStandingPoints,
@@ -194,7 +200,9 @@ export default function BaganPage() {
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        throw new Error("Failed to update bracket match");
+        throw new Error(
+          await readResponseError(res, "Gagal menyimpan pertandingan bagan"),
+        );
       }
       closeEditForm();
       await Promise.all([
@@ -206,8 +214,8 @@ export default function BaganPage() {
       setFeedbackMsg(
         `Bagan "${editingMatch.label}" berhasil diperbarui! Pemenang otomatis dimajukan ke babak selanjutnya dan disinkronkan ke web utama.`,
       );
-    } catch {
-      alert("Gagal menyimpan pertandingan bagan.");
+    } catch (err) {
+      alert(getAPIErrorMessage(err));
     }
   };
 
@@ -253,7 +261,9 @@ export default function BaganPage() {
         },
       );
       if (!res.ok) {
-        throw new Error("Failed to update standing");
+        throw new Error(
+          await readResponseError(res, "Gagal menyimpan data klasemen"),
+        );
       }
       await loadSportTournamentData(selectedSportId);
       setStandingForm((prev) => ({
@@ -271,8 +281,8 @@ export default function BaganPage() {
       setFeedbackMsg(
         `${scoringRule.sectionTitle} (${scoringRule.groupLabel} ${standingForm.group_code}) berhasil diperbarui dan diurutkan otomatis di web utama!`,
       );
-    } catch {
-      alert("Gagal menyimpan data klasemen.");
+    } catch (err) {
+      alert(getAPIErrorMessage(err));
     }
   };
 
@@ -310,13 +320,18 @@ export default function BaganPage() {
       return;
     }
     try {
-      await fetch(
+      const res = await fetch(
         `${API_BASE_URL}/sports/${selectedSportId}/standings?group_code=${groupCode}&contingent_id=${cid}`,
         { method: "DELETE", headers: getAuthHeaders() },
       );
+      if (!res.ok) {
+        throw new Error(
+          await readResponseError(res, "Gagal menghapus kontingen dari grup"),
+        );
+      }
       await loadSportTournamentData(selectedSportId);
-    } catch {
-      alert("Gagal menghapus kontingen dari grup.");
+    } catch (err) {
+      alert(getAPIErrorMessage(err));
     }
   };
 
@@ -326,13 +341,17 @@ export default function BaganPage() {
         `${API_BASE_URL}/sports/${selectedSportId}/promote-groups`,
         { method: "POST", headers: getAuthHeaders() },
       );
-      if (!res.ok) throw new Error("Failed to promote");
+      if (!res.ok) {
+        throw new Error(
+          await readResponseError(res, "Gagal mempromosikan juara grup ke bagan"),
+        );
+      }
       await loadSportTournamentData(selectedSportId);
       setFeedbackMsg(
         "Juara & Runner-up Grup A dan Grup B berhasil dimasukkan otomatis ke Bagan Penyisihan!",
       );
-    } catch {
-      alert("Gagal mempromosikan juara grup ke bagan.");
+    } catch (err) {
+      alert(getAPIErrorMessage(err));
     }
   };
 

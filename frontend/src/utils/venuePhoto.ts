@@ -102,12 +102,16 @@ const venuePhotoMap: Array<[string, string]> = [
   ["mma", "/venues2/pangkalanbunpark.JPG"],
   ["panjat tebing", "/venues2/pangkalanbunpark.JPG"],
 
-  // --- Venue: Sirkuit Sabaru / Arena Motocross (Bermotor) ---
-  ["sabaru", "/venues2/SportCenterMotorCross.jpeg"],
-  ["sirkuit", "/venues2/SportCenterMotorCross.jpeg"],
-  ["balap motor", "/venues2/SportCenterMotorCross.jpeg"],
-  ["motoprix", "/venues2/SportCenterMotorCross.jpeg"],
+  // --- Venue Motor Grass Sport Center ---
+  ["motocross", "/venues2/SportCenterMotorCross.jpeg"],
+  ["sport center motor", "/venues2/SportCenterMotorCross.jpeg"],
 
+  // --- Venue: Sirkuit Sabaru (Bermotor Motoprix - belum ada foto) ---
+  ["sabaru", "/venues2/sirkuitsabaru.jpeg"],
+  ["sirkuit", "/venues2/sirkuitsabaru.jpeg"],
+  ["balap motor", "/venues2/sirkuitsabaru.jpeg"],
+  ["motoprix", "/venues2/sirkuitsabaru.jpeg"],
+  ["motor prix", "/venues2/sirkuitsabaru.jpeg"],
   // --- Venue: Minisoccer R88 (Sepak Bola Mini / KSMI) ---
   ["minisoccer", "/venues2/soccer88.jpeg"],
   ["mini soccer", "/venues2/soccer88.jpeg"],
@@ -135,9 +139,9 @@ const venuePhotoMap: Array<[string, string]> = [
 
   // --- Fallback Lapangan Voli & Kompleks Sport Center Pangkalan Bun ---
   ["lapangan voli", "/venues2/LapanganVoli.jpeg"],
-  ["voli", "/venues2/LapanganVoli.jpeg"],
+  ["voli", "x/venues2/LapanganVoli.jpeg"],
   ["indoor", "/venues2/sportCenter.jpg"],
-  ["sport center", "/venues2/sportCenter.jpg"],
+  ["sport center", "/venues2/SportCenterMotorCross.jpeg"],
 ];
 
 export function getVenuePhotoUrl(venueName?: string, additionalText?: string): string {

@@ -103,6 +103,7 @@ export type ScheduleMatch = {
   start_time: string;
   status: MatchStatus;
   live_stream_url?: string;
+  next_match_id?: string | null;
   participants: MatchParticipant[];
 };
 

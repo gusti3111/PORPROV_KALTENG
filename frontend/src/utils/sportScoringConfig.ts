@@ -256,6 +256,8 @@ export function getSportScoringRule(
     lower.includes("dayung") ||
     lower.includes("canoeing") ||
     lower.includes("ergometer") ||
+    lower.includes("egrometer") ||
+    lower.includes("agrometer") ||
     lower.includes("sepeda") ||
     lower.includes("sepatu roda") ||
     lower.includes("skateboard") ||
@@ -282,6 +284,7 @@ export function getSportScoringRule(
     lower.includes("binaraga") ||
     lower.includes("bermotor") ||
     lower.includes("motoprix") ||
+    lower.includes("motor prix") ||
     lower.includes("grass track") ||
     lower.includes("aerosport") ||
     lower.includes("panahan")

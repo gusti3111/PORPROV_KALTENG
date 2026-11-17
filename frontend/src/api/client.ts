@@ -101,6 +101,41 @@ export async function getAPIData<T>(path: string): Promise<T> {
   return response.data.data;
 }
 
+export async function readResponseError(
+  response: Response,
+  fallback: string,
+): Promise<string> {
+  if (response.status === 401) {
+    try {
+      localStorage.removeItem("porprov_admin_token");
+      localStorage.removeItem("porprov_admin_user");
+    } catch {
+      // Ignore storage errors
+    }
+    if (
+      typeof window !== "undefined" &&
+      window.location.pathname.startsWith("/admin") &&
+      window.location.pathname !== "/admin/login"
+    ) {
+      window.location.replace("/admin/login");
+    }
+    return "Sesi login habis (401). Silakan login ulang.";
+  }
+  try {
+    const body = (await response.json()) as {
+      success?: boolean;
+      error?: APIErrorPayload;
+      message?: string;
+    };
+    const extracted =
+      extractAPIErrorText(body?.error) || extractAPIErrorText(body?.message);
+    if (extracted) return extracted;
+  } catch {
+    // Ignore non-JSON error body
+  }
+  return `${fallback} (${response.status})`;
+}
+
 export function getAPIErrorMessage(error: unknown): string {
   if (axios.isAxiosError<{ error?: APIErrorPayload; message?: string }>(error)) {
     return (

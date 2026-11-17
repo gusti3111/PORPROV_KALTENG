@@ -18,6 +18,23 @@ import { isGroupPhaseNonHeadToHeadMatch } from "../utils/sportScoringConfig";
 import { formatParticipantName } from "../utils/participantDisplay";
 import { SlidersHorizontal } from "lucide-react";
 
+const AGENDA_EVENT_PATTERN =
+  /upacara|pembukaan|penutupan|kepulangan|technical\s*meeting|manager\s*meeting|penyegaran\s*wasit|\bopening\b|\bclosing\b/i;
+
+const CEREMONY_EVENT_PATTERN =
+  /upacara|pembukaan|penutupan|kepulangan|\bopening\b|\bclosing\b/i;
+
+function isAgendaOnlyEvent(event: {
+  eventName?: string;
+  title?: string;
+  roundName?: string;
+  participantsSummary?: string;
+}): boolean {
+  if (event.participantsSummary) return false;
+  const text = `${event.eventName || ""} ${event.title || ""} ${event.roundName || ""}`;
+  return AGENDA_EVENT_PATTERN.test(text);
+}
+
 type ScheduleEvent = {
   id: string;
   date: string;
@@ -128,13 +145,15 @@ export default function ScheduleView() {
     [scheduleEvents],
   );
   const firstScheduleDate = scheduleDates[0] ?? "";
-  const lastScheduleDate = scheduleDates[scheduleDates.length - 1] ?? "";
   const requestedDate = searchParams.get("tanggal");
-  const selectedDate = scheduleDates.includes(requestedDate ?? "")
-    ? requestedDate!
-    : scheduleDates.includes(new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date()))
-      ? new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date())
-      : firstScheduleDate || new Date().toISOString().slice(0, 10);
+  const todayJakarta = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+  }).format(new Date());
+  const selectedDate = requestedDate
+    ? requestedDate
+    : scheduleDates.includes(todayJakarta)
+      ? todayJakarta
+      : firstScheduleDate || todayJakarta;
   const selectedSport = searchParams.get("cabor") ?? "";
   const selectedVenue = searchParams.get("venue") ?? "";
 
@@ -217,11 +236,9 @@ export default function ScheduleView() {
               <span>Pilih tanggal</span>
               <Input
                 type="date"
-                min={firstScheduleDate}
-                max={lastScheduleDate}
                 value={selectedDate}
                 onChange={(event) => {
-                  if (scheduleDates.includes(event.target.value)) {
+                  if (event.target.value) {
                     selectDate(event.target.value);
                   }
                 }}
@@ -289,9 +306,26 @@ export default function ScheduleView() {
                 <span>Cabang olahraga</span>
                 <Select
                   value={selectedSport || "all"}
-                  onValueChange={(value) =>
-                    updateParams({ cabor: value === "all" ? null : value })
-                  }
+                  onValueChange={(value) => {
+                    if (!value || value === "all") {
+                      updateParams({ cabor: null });
+                      return;
+                    }
+                    const sportDates = getScheduleDates(
+                      scheduleEvents.filter(
+                        (ev) =>
+                          ev.sport === value &&
+                          (!selectedVenue || ev.venue === selectedVenue),
+                      ),
+                    );
+                    const nextDate = sportDates.includes(selectedDate)
+                      ? selectedDate
+                      : sportDates[0] ?? null;
+                    updateParams({
+                      cabor: value,
+                      ...(nextDate ? { tanggal: nextDate } : {}),
+                    });
+                  }}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Pilih cabang olahraga" />
@@ -310,9 +344,26 @@ export default function ScheduleView() {
                 <span>Tempat</span>
                 <Select
                   value={selectedVenue || "all"}
-                  onValueChange={(value) =>
-                    updateParams({ venue: value === "all" ? null : value })
-                  }
+                  onValueChange={(value) => {
+                    if (!value || value === "all") {
+                      updateParams({ venue: null });
+                      return;
+                    }
+                    const venueDates = getScheduleDates(
+                      scheduleEvents.filter(
+                        (ev) =>
+                          ev.venue === value &&
+                          (!selectedSport || ev.sport === selectedSport),
+                      ),
+                    );
+                    const nextDate = venueDates.includes(selectedDate)
+                      ? selectedDate
+                      : venueDates[0] ?? null;
+                    updateParams({
+                      venue: value,
+                      ...(nextDate ? { tanggal: nextDate } : {}),
+                    });
+                  }}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Pilih tempat" />
@@ -351,14 +402,22 @@ export default function ScheduleView() {
               <div className="schedule-event-list">
                 {visibleEvents.map((event) => {
                   const isOngoing = event.status === "ONGOING";
+                  const isAgenda = isAgendaOnlyEvent(event);
+                  const isCeremony =
+                    isAgenda &&
+                    CEREMONY_EVENT_PATTERN.test(
+                      `${event.eventName || ""} ${event.title || ""} ${event.roundName || ""}`,
+                    );
                   const liveStreamHref =
                     event.liveStreamUrl?.trim() ||
                     `https://www.youtube.com/results?search_query=${encodeURIComponent(
-                      `PORPROV XIII Kalimantan Tengah ${event.sport} Live`,
+                      `PORPROV XIII Kalimantan Tengah ${isCeremony ? event.title : event.sport} Live`,
                     )}`;
                   const handleCardActivate = () => {
                     if (isOngoing) {
                       window.open(liveStreamHref, "_blank", "noopener,noreferrer");
+                    } else if (isAgenda) {
+                      navigate(`/venue?venue=${encodeURIComponent(event.venue)}`);
                     } else {
                       navigate(`/hasil?cabor=${encodeURIComponent(event.sport)}`);
                     }
@@ -372,7 +431,9 @@ export default function ScheduleView() {
                       aria-label={
                         isOngoing
                           ? `Tonton live YouTube: ${event.title}`
-                          : `Lihat hasil pertandingan ${event.sport}: ${event.title}`
+                          : isAgenda
+                            ? `Lihat lokasi ${event.venue}: ${event.title}`
+                            : `Lihat hasil pertandingan ${event.sport}: ${event.title}`
                       }
                       onClick={handleCardActivate}
                       onKeyDown={(e) => {
@@ -391,11 +452,13 @@ export default function ScheduleView() {
                       </time>
                       <div>
                         <strong>
-                          {event.sport}
+                          {isCeremony ? "Agenda Resmi PORPROV XIII" : event.sport}
                           {event.roundName ? ` · ${event.roundName}` : ""}
                         </strong>
                         <span className="schedule-event-title">
-                          {event.eventName ? `${event.eventName} — ` : ""}
+                          {event.eventName && event.eventName !== event.title
+                            ? `${event.eventName} — `
+                            : ""}
                           {event.title || "-"}
                         </span>
                         {event.participantsSummary && (
@@ -407,6 +470,10 @@ export default function ScheduleView() {
                         {isOngoing ? (
                           <span className="schedule-live-link" aria-hidden="true">
                             Tonton live di YouTube
+                          </span>
+                        ) : isAgenda ? (
+                          <span className="text-xs text-primary font-medium mt-0.5 inline-block" aria-hidden="true">
+                            Agenda acara · Lihat lokasi venue →
                           </span>
                         ) : (
                           <span className="text-xs text-primary font-medium mt-0.5 inline-block" aria-hidden="true">

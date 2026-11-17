@@ -73,6 +73,37 @@ const initialLoading: Record<Resource, boolean> = {
 const RATU_ALAMSYAH_NOTE =
   "Venue di dalam GOR Sport Center Ratu Alamsyah untuk pertandingan Basket, Bola Voli Indoor, Futsal, dan Sepak Takraw.";
 
+function formatJakartaDateTime(startTime?: string, fallbackDate?: string, fallbackTime?: string) {
+  if (!startTime) {
+    return { date: fallbackDate || "", time: fallbackTime || "" };
+  }
+  const parsed = new Date(startTime);
+  if (Number.isNaN(parsed.getTime())) {
+    return { date: fallbackDate || "", time: fallbackTime || "" };
+  }
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(parsed);
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  return {
+    date: `${values.year}-${values.month}-${values.day}`,
+    time: `${values.hour}:${values.minute}`,
+  };
+}
+
+function normalizeSportDisplayName(name: string) {
+  return name
+    .replace(/\b(ergometer|egrometer)\b/gi, "Agrometer")
+    .replace(/\bmotoprix\b/gi, "Motoprixx")
+    .replace(/\bmotor\s*prix\b/gi, "Motor Prixx");
+}
+
 function normalizeVenueText(value?: string) {
   return (value || "")
     .normalize("NFD")
@@ -144,7 +175,12 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
       errors: { ...state.errors, sports: undefined },
     }));
     try {
-      const sports = await getAPIData<Sport[]>("/sports");
+      const rawSports = await getAPIData<Sport[]>("/sports");
+      const sports = rawSports.map((sport) => ({
+        ...sport,
+        name: normalizeSportDisplayName(sport.name),
+        description: normalizeSportDisplayName(sport.description),
+      }));
       set({ sports });
     } catch (error) {
       set((state) => ({
@@ -190,10 +226,20 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
     try {
       const rawMatches = await getAPIData<ScheduleMatch[]>("/matches");
       const currentVenues = get().venues;
+      const mappedMatches = rawMatches.map((m) => {
+        const jakarta = formatJakartaDateTime(m.start_time, m.date, m.time);
+        return {
+          ...m,
+          date: jakarta.date,
+          time: jakarta.time,
+          sport_name: normalizeSportDisplayName(m.sport_name),
+          event_name: normalizeSportDisplayName(m.event_name),
+        };
+      });
       const matches =
         currentVenues.length > 0
-          ? rawMatches.map((m) => normalizeMatchVenue(m, currentVenues))
-          : rawMatches;
+          ? mappedMatches.map((m) => normalizeMatchVenue(m, currentVenues))
+          : mappedMatches;
       set({ matches });
     } catch (error) {
       set((state) => ({

@@ -30,7 +30,13 @@ import {
   Trash2,
   Trophy,
 } from "lucide-react";
-import { API_BASE_URL, getAPIData, getAuthHeaders } from "../../api/client";
+import {
+  API_BASE_URL,
+  getAPIData,
+  getAPIErrorMessage,
+  getAuthHeaders,
+  readResponseError,
+} from "../../api/client";
 import type { ScheduleMatch } from "../../api/types";
 import { getSportScoringRule } from "../../utils/sportScoringConfig";
 
@@ -107,13 +113,6 @@ function toApiDateTime(date: string, time: string) {
 
 function getScheduleValidationError(form: MatchFormState): string | null {
   if (!form.sport_id) return "Pilih cabang olahraga terlebih dahulu.";
-  if (
-    form.status !== "SCHEDULED" &&
-    !form.event_id &&
-    !form.custom_event_name.trim()
-  ) {
-    return "Pilih atau isi nomor pertandingan terlebih dahulu.";
-  }
   if (!form.venue_id) return "Pilih tempat / venue pertandingan terlebih dahulu.";
   const participantEntries = form.contingent_ids.map((cid, idx) => ({
     contingent_id: cid,
@@ -163,11 +162,24 @@ export default function JadwalPage() {
   const [filterDate, setFilterDate] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterSport, setFilterSport] = useState("all");
+  const [filterRecentOnly, setFilterRecentOnly] = useState(false);
+  const [sortOrder, setSortOrder] = useState<"newest" | "schedule">("newest");
+  const [recentlyAddedIds, setRecentlyAddedIds] = useState<string[]>(() => {
+    try {
+      const raw = sessionStorage.getItem("porprov_recently_added_match_ids");
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.filter((id) => typeof id === "string") : [];
+    } catch {
+      return [];
+    }
+  });
   const [showForm, setShowForm] = useState(true);
   const [useCustomEvent, setUseCustomEvent] = useState(false);
   const [editing, setEditing] = useState<MatchFormState | null>(null);
   const [feedbackMsg, setFeedbackMsg] = useState("");
   const [deletingAll, setDeletingAll] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const today = getTodayJakarta();
 
@@ -216,12 +228,25 @@ export default function JadwalPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editIdParam, matches]);
 
-  const filteredMatches = matches.filter((m) => {
-    if (filterDate && m.date !== filterDate) return false;
-    if (filterStatus !== "all" && m.status !== filterStatus) return false;
-    if (filterSport !== "all" && m.sport_name !== filterSport) return false;
-    return true;
-  });
+  const recentIndexMap = new Map(recentlyAddedIds.map((id, idx) => [id, idx]));
+
+  const filteredMatches = matches
+    .filter((m) => {
+      if (filterRecentOnly && !recentIndexMap.has(m.id)) return false;
+      if (filterDate && m.date !== filterDate) return false;
+      if (filterStatus !== "all" && m.status !== filterStatus) return false;
+      if (filterSport !== "all" && m.sport_name !== filterSport) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortOrder === "schedule") return 0;
+      const aRecent = recentIndexMap.get(a.id);
+      const bRecent = recentIndexMap.get(b.id);
+      if (aRecent !== undefined && bRecent !== undefined) return aRecent - bRecent;
+      if (aRecent !== undefined) return -1;
+      if (bRecent !== undefined) return 1;
+      return 0;
+    });
 
   const openAddForm = () => {
     setEditing(null);
@@ -318,8 +343,73 @@ export default function JadwalPage() {
     }
   };
 
+  const buildParticipantSignature = (
+    items: Array<{ contingent_id: number; athlete_name?: string }>,
+  ) =>
+    items
+      .filter((item) => item.contingent_id > 0)
+      .map(
+        (item) =>
+          `${item.contingent_id}:${(item.athlete_name ?? "").trim().toLowerCase()}`,
+      )
+      .sort()
+      .join("|");
+
+  const findDuplicateSchedule = (
+    computedTitle: string,
+    selectedParticipantsList: Array<{ contingent_id: number; athlete_name: string }>,
+  ) => {
+    const targetSport = sports.find((s) => s.id === form.sport_id);
+    const targetSportName = (targetSport?.name || "").trim().toLowerCase();
+    const targetRound = form.round_name.trim().toLowerCase();
+    const targetDate = form.start_date.trim();
+    const targetTime = form.start_time.trim() || "00:00";
+    const targetEvent = (
+      events.find((ev) => ev.id === form.event_id)?.name ||
+      form.custom_event_name.trim() ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
+    const targetTitle = computedTitle.trim().toLowerCase();
+    const targetPartSig = buildParticipantSignature(selectedParticipantsList);
+
+    return matches.find((existing) => {
+      if (editing?.match_id && existing.id === editing.match_id) return false;
+
+      const sameSport =
+        existing.sport_id && form.sport_id
+          ? existing.sport_id === form.sport_id
+          : existing.sport_name.trim().toLowerCase() === targetSportName;
+      if (!sameSport) return false;
+      if ((existing.date || "").trim() !== targetDate) return false;
+      if ((existing.round_name || "").trim().toLowerCase() !== targetRound) {
+        return false;
+      }
+
+      const existingEvent = (existing.event_name || "").trim().toLowerCase();
+      if (targetEvent && existingEvent && targetEvent !== existingEvent) {
+        return false;
+      }
+
+      const existingPartSig = buildParticipantSignature(existing.participants || []);
+      if (targetPartSig || existingPartSig) {
+        return targetPartSig === existingPartSig;
+      }
+
+      const existingTime =
+        !existing.time || existing.time === "00:00" ? "00:00" : existing.time;
+      return (
+        (existing.title || "").trim().toLowerCase() === targetTitle &&
+        (existing.venue_id ? existing.venue_id === form.venue_id : true) &&
+        existingTime === targetTime
+      );
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setFeedbackMsg("");
 
     const validationError = getScheduleValidationError(form);
@@ -374,6 +464,22 @@ export default function JadwalPage() {
               : `${selectedNames.slice(0, 2).join(", ")} +${selectedNames.length - 2} Kontingen${roundSuffix}`;
     const computedTitle = form.title.trim() || defaultTitle;
 
+    const duplicateMatch = findDuplicateSchedule(
+      computedTitle,
+      selectedParticipants.map((p) => ({
+        contingent_id: p.cid,
+        athlete_name: p.athleteName,
+      })),
+    );
+    if (duplicateMatch) {
+      alert(
+        `Jadwal ganda terdeteksi: "${duplicateMatch.sport_name} - ${duplicateMatch.title}" pada ${duplicateMatch.date} sudah ada di daftar. Gunakan tombol Edit jika ingin memperbarui.`,
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    const previousIds = new Set(matches.map((m) => m.id));
     try {
       const payload = {
         sport_id: form.sport_id,
@@ -402,7 +508,9 @@ export default function JadwalPage() {
         body: JSON.stringify(payload),
       });
       if (!response.ok) {
-        throw new Error(`Gagal menyimpan jadwal (${response.status})`);
+        throw new Error(
+          await readResponseError(response, "Gagal menyimpan jadwal"),
+        );
       }
 
       if (editing?.match_id) {
@@ -410,15 +518,24 @@ export default function JadwalPage() {
           selectedScores.some((s) => s.trim() !== "") ||
           form.status === "FINISHED";
         if (hasScores) {
-          await fetch(`${API_BASE_URL}/matches/${editing.match_id}/result`, {
-            method: "PUT",
-            headers: getAuthHeaders({ "Content-Type": "application/json" }),
-            body: JSON.stringify({
-              status: form.status,
-              scores: selectedScores,
-              winner_contingent_id: form.winner_contingent_id,
-            }),
-          });
+          const resultRes = await fetch(
+            `${API_BASE_URL}/matches/${editing.match_id}/result`,
+            {
+              method: "PUT",
+              headers: getAuthHeaders({ "Content-Type": "application/json" }),
+              body: JSON.stringify({
+                status: form.status,
+                scores: selectedScores,
+                winner_contingent_id: form.winner_contingent_id,
+                live_stream_url: form.live_stream_url.trim(),
+              }),
+            },
+          );
+          if (!resultRes.ok) {
+            throw new Error(
+              await readResponseError(resultRes, "Gagal menyimpan hasil"),
+            );
+          }
         }
       }
 
@@ -432,6 +549,24 @@ export default function JadwalPage() {
           : Promise.resolve(null),
       ]);
 
+      const refreshedMatches = useCompetitionStore.getState().matches;
+      if (!editing?.match_id) {
+        const newlyAdded = refreshedMatches
+          .filter((m) => !previousIds.has(m.id))
+          .map((m) => m.id);
+        if (newlyAdded.length > 0) {
+          setRecentlyAddedIds((prev) => {
+            const next = [...newlyAdded, ...prev.filter((id) => !newlyAdded.includes(id))].slice(0, 50);
+            try {
+              sessionStorage.setItem("porprov_recently_added_match_ids", JSON.stringify(next));
+            } catch {
+              // Ignore storage errors
+            }
+            return next;
+          });
+        }
+      }
+
       setFeedbackMsg(
         editing
           ? "Jadwal, kontingen, skor, klasemen & bagan berhasil diperbarui!"
@@ -442,7 +577,9 @@ export default function JadwalPage() {
       setForm(createEmptyMatchForm());
     } catch (err) {
       console.error("Failed to save match:", err);
-      alert("Gagal menyimpan pertandingan. Pastikan data sudah lengkap.");
+      alert(getAPIErrorMessage(err));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -488,7 +625,17 @@ export default function JadwalPage() {
     }
   };
 
-  const formEvents = events.filter((event) => event.sport_id === form.sport_id);
+  const compareAlpha = (a: string, b: string) =>
+    a.localeCompare(b, "id", { sensitivity: "base" });
+  const sortedSports = [...sports].sort((a, b) => compareAlpha(a.name, b.name));
+  const sortedVenues = [...venues].sort((a, b) => compareAlpha(a.name, b.name));
+  const sortedContingents = [...contingents].sort((a, b) =>
+    compareAlpha(a.name, b.name),
+  );
+  const sortedRoundOptions = [...ROUND_OPTIONS].sort(compareAlpha);
+  const formEvents = events
+    .filter((event) => event.sport_id === form.sport_id)
+    .sort((a, b) => compareAlpha(a.name, b.name));
   const selectedSportObj = sports.find((s) => s.id === form.sport_id);
   const scoringRule = getSportScoringRule(form.sport_id, selectedSportObj?.name);
   const scheduleValidationError = getScheduleValidationError(form);
@@ -612,7 +759,7 @@ export default function JadwalPage() {
                       <SelectValue placeholder="Pilih cabang olahraga" />
                     </SelectTrigger>
                     <SelectContent>
-                      {sports.map((sport) => (
+                      {sortedSports.map((sport) => (
                         <SelectItem key={sport.id} value={String(sport.id)}>
                           {sport.name}
                         </SelectItem>
@@ -624,8 +771,7 @@ export default function JadwalPage() {
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
                     <Label>
-                      2. Nomor Pertandingan
-                      {form.status === "SCHEDULED" ? " (Opsional)" : ""}
+                      2. Nomor Pertandingan (Opsional)
                     </Label>
                     <button
                       type="button"
@@ -661,7 +807,7 @@ export default function JadwalPage() {
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Pilih nomor pertandingan (opsional jika terjadwal)" />
+                        <SelectValue placeholder="Belum ditentukan (Opsional)" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="0">
@@ -697,7 +843,7 @@ export default function JadwalPage() {
                       <SelectItem value="__EMPTY__">
                         Belum ditentukan (Opsional)
                       </SelectItem>
-                      {ROUND_OPTIONS.map((round) => (
+                      {sortedRoundOptions.map((round) => (
                         <SelectItem key={round} value={round}>
                           {round}
                         </SelectItem>
@@ -716,7 +862,7 @@ export default function JadwalPage() {
                       <SelectValue placeholder="Pilih Venue" />
                     </SelectTrigger>
                     <SelectContent>
-                      {venues.map((v) => (
+                      {sortedVenues.map((v) => (
                         <SelectItem key={v.id} value={String(v.id)}>
                           {v.name}
                         </SelectItem>
@@ -793,7 +939,7 @@ export default function JadwalPage() {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="0">Belum dipilih (TBA)</SelectItem>
-                              {contingents.map((contingent) => (
+                              {sortedContingents.map((contingent) => (
                                 <SelectItem
                                   key={contingent.id}
                                   value={String(contingent.id)}
@@ -994,13 +1140,15 @@ export default function JadwalPage() {
                 <Button
                   type="submit"
                   className="gap-2"
-                  disabled={Boolean(scheduleValidationError)}
+                  disabled={Boolean(scheduleValidationError) || isSubmitting}
                   title={scheduleValidationError || "Simpan jadwal pertandingan"}
                 >
                   <LayoutGrid className="h-4 w-4" />
-                  {editing
-                    ? "Update Jadwal & Sinkronkan Web Utama"
-                    : "Simpan Jadwal & Sinkronkan Web Utama"}
+                  {isSubmitting
+                    ? "Menyimpan..."
+                    : editing
+                      ? "Update Jadwal & Sinkronkan Web Utama"
+                      : "Simpan Jadwal & Sinkronkan Web Utama"}
                 </Button>
                 {editing && (
                   <Button type="button" variant="outline" onClick={openAddForm}>
@@ -1038,7 +1186,7 @@ export default function JadwalPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Semua Cabang</SelectItem>
-                  {sports.map((sp) => (
+                  {sortedSports.map((sp) => (
                     <SelectItem key={sp.id} value={sp.name}>
                       {sp.name}
                     </SelectItem>
@@ -1065,12 +1213,39 @@ export default function JadwalPage() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex-1 min-w-[180px]">
+              <Label>Urutkan</Label>
+              <Select
+                value={sortOrder}
+                onValueChange={(v) =>
+                  setSortOrder((v as "newest" | "schedule") ?? "newest")
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Baru Saja Dimasukkan</SelectItem>
+                  <SelectItem value="schedule">Urutan Jadwal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              type="button"
+              variant={filterRecentOnly ? "default" : "outline"}
+              onClick={() => setFilterRecentOnly((v) => !v)}
+              disabled={recentlyAddedIds.length === 0 && !filterRecentOnly}
+            >
+              Baru Dimasukkan ({recentlyAddedIds.length})
+            </Button>
             <Button
               variant="outline"
               onClick={() => {
                 setFilterDate("");
                 setFilterStatus("all");
                 setFilterSport("all");
+                setFilterRecentOnly(false);
+                setSortOrder("newest");
               }}
             >
               Reset Filter
@@ -1121,7 +1296,14 @@ export default function JadwalPage() {
                           </div>
                         </td>
                         <td className="p-2">
-                          <div className="font-semibold">{match.sport_name}</div>
+                          <div className="flex items-center gap-1.5 font-semibold">
+                            <span>{match.sport_name}</span>
+                            {recentIndexMap.has(match.id) && (
+                              <Badge className="bg-emerald-600 text-white text-[10px] px-1.5 py-0">
+                                Baru
+                              </Badge>
+                            )}
+                          </div>
                           <div className="text-xs text-muted-foreground">
                             {match.event_name || "-"}
                             {match.title ? ` · ${match.title}` : ""}
