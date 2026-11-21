@@ -1,3 +1,10 @@
+import { apiClient, getAPIErrorMessage } from "../api/client";
+
+/**
+ * Direktori Destinasi Wisata Kotawaringin Barat - PORPROV XIII Kalteng
+ * Data diambil secara dinamis dari backend API `/api/v1/wisata`.
+ */
+
 export type WisataItem = {
   id: number;
   name: string;
@@ -10,270 +17,140 @@ export type WisataItem = {
   openInfo: string;
 };
 
-export const wisataKobarData: WisataItem[] = [
-  {
-    id: 1,
-    name: "Taman Nasional Tanjung Puting",
-    category: "EKOWISATA DUNIA & KONSERVASI",
-    district: "Kecamatan Kumai",
-    description: "Cagar biosfer dunia dan habitat alami orangutan liar terbesar di bumi, menyuguhkan petualangan susur Sungai Sekonyer dengan kapal klotok tradisional.",
-    highlights: "Camp Leakey, Feeding Orangutan, Hutan Hujan Tropis Basah & Kunang-kunang Malam",
-    image: "/wisata_real/tanjungputing.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Taman+Nasional+Tanjung+Puting",
-    openInfo: "Akses via Pelabuhan Kumai (Pintu Masuk Utama)",
-  },
-  {
-    id: 2,
-    name: "Pantai Kubu",
-    category: "WISATA BAHARI & PESISIR",
-    district: "Desa Kubu, Kecamatan Kumai",
-    description: "Pantai berpasir putih luas yang populer dengan jembatan dermaga kayu ulin estetik menjorok ke Laut Jawa serta deretan kuliner seafood segar.",
-    highlights: "Dermaga Ulin Panjang, Sunset Spektakuler, Spot Foto Estetik & Ikan Bakar Pesisir",
-    image: "/wisata_real/pantai_keraya.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Pantai+Kubu+Kumai+Kotawaringin+Barat",
-    openInfo: "± 30 Menit dari Pusat Kota / Buka Setiap Hari",
-  },
-  {
-    id: 9,
-    name: "Pantai Teluk Bogam",
-    category: "WISATA BAHARI & PESISIR",
-    district: "Desa Teluk Bogam, Kecamatan Kumai",
-    description: "Destinasi pantai yang tenang dengan hamparan pasir landai, deretan pohon cemara laut yang teduh, serta suasana kampung nelayan khas pesisir Kumai.",
-    highlights: "Hamparan Pasir Tenang, Cemara Laut Rindang, Panorama Laut Jawa & Wisata Keluarga",
-    image: "/wisata_real/bogamRaya.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Pantai+Teluk+Bogam+Kumai+Kotawaringin+Barat",
-    openInfo: "± 40 Menit dari Pusat Kota / Buka Setiap Hari",
-  },
-  {
-    id: 3,
-    name: "Istana Kuning Pangkalan Bun",
-    category: "CAGAR BUDAYA & KESULTANAN",
-    district: "Arut Selatan (Pusat Kota)",
-    description: "Istana peninggalan Kesultanan Kutaringin yang dibangun pada abad ke-18 sepenuhnya dari kayu ulin, menyimpan benda pusaka kerajaan dan meriam kuno.",
-    highlights: "Arsitektur Kayu Ulin Kuno, Balairung Kerajaan, Artefak Pusaka & Sejarah Kutaringin",
-    image: "/wisata_real/istanaKuning.jpeg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Istana+Kuning+Pangkalan+Bun",
-    openInfo: "Kelurahan Raja, Arut Selatan / Area Bersejarah",
-  },
-  {
-    id: 4,
-    name: "Rumah Betang Pasir Panjang",
-    category: "ADAT DAYAK TOMUN & SENI",
-    district: "Desa Adat Pasir Panjang",
-    description: "Rumah panggung tradisional suku Dayak Tomun yang kokoh dan megah, pusat pelestarian kesenian tari, upacara adat, dan kerajinan anyaman tradisional.",
-    highlights: "Rumah Panjang Asli Dayak, Pagelaran Tari Tradisional, Ukiran Etnik & Suasana Rindang",
-    image: "/wisata_real/Rumah_Betang.JPG",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Rumah+Betang+Pasir+Panjang",
-    openInfo: "± 10 Menit dari Pusat Kota Pangkalan Bun",
-  },
-  {
-    id: 5,
-    name: "Susur Sungai Arut & Kampung Sega",
-    category: "WISATA AIR & RUMAH LANTING",
-    district: "Mendawai, Pangkalan Bun",
-    description: "Nikmati denyut nadi masyarakat tepi air Pangkalan Bun dengan getek / perahu kelotok tradisional melintasi deretan rumah lanting terapung.",
-    highlights: "Rumah Lanting Apung, Kelotok Tradisional, Kuliner Tepi Sungai & Arena Dayung PORPROV",
-    image: "/wisata_real/kampungsega.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Kampung+Sega+Sungai+Arut",
-    openInfo: "Venue Resmi Cabang Olahraga Dayung PORPROV XIII",
-  },
-  {
-    id: 6,
-    name: "Kotawaringin Lama & Masjid Kyai Gede",
-    category: "SEJARAH ISLAM & ZIARAH",
-    district: "Kecamatan Kotawaringin Lama",
-    description: "Pusat peradaban Islam tertua di Kalimantan Tengah dengan Masjid Kyai Gede berkonstruksi kayu belian berusia ratusan tahun dan Astana Al-Nursari.",
-    highlights: "Masjid Tertua Kalteng (>300 Tahun), Tiang Soko Guru Kayu Ulin Asli & Makam Ulama",
-    image: "/wisata_real/Masjid_Kiai_Gede.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Masjid+Kyai+Gede+Kotawaringin+Lama",
-    openInfo: "Cagar Budaya Nasional / Terhubung Jalur Trans",
-  },
-  {
-    id: 7,
-    name: "Pangkalan Bun Park & Taman Kota",
-    category: "TAMAN KOTA & RUANG TERBUKA",
-    district: "Jl. HM. Rafii, Pangkalan Bun",
-    description: "Kawasan ruang terbuka hijau favorit warga dengan pepohonan rindang, sarana olahraga santai, penangkaran rusa, dan deretan kafe kuliner malam.",
-    highlights: "Jogging Track Rindang, Penangkaran Rusa, Area Bermain Keluarga & Wisata Kuliner Malam",
-    image: "/venues2/pangakalnbunpark.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Pangkalan+Bun+Park",
-    openInfo: "Pusat Kota / Terbuka 24 Jam",
-  },
-  {
-    id: 8,
-    name: "Gosong Senggora & Gugusan Karang",
-    category: "BAHARI & SNORKELING",
-    district: "Perairan Laut Kumai",
-    description: "Taman wisata perairan berupa pulau pasir timbul eksotis di tengah laut dengan gugusan terumbu karang alami yang menjadi tempat bertelur penyu hijau.",
-    highlights: "Pulau Pasir Putih Timbul, Snorkeling Air Jernih, Terumbu Karang Sehat & Habitat Penyu",
-    image: "/wisata_real/gosong.webp",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Gosong+Senggora+Kumai",
-    openInfo: "Perjalanan Kapal Wisata dari Pelabuhan Kumai",
-  },
-  {
-    id: 10,
-    name: "TWA Tanjung Keluang",
-    category: "WISATA ALAM & KONSERVASI PENYU",
-    district: "Kecamatan Kumai",
-    description: "Taman Wisata Alam berbentuk semenanjung berpasir putih di seberang Pantai Kubu, menjadi kawasan konservasi penyu dan destinasi bahari unggulan.",
-    highlights: "Penangkaran Penyu, Pasir Putih Alami, Penyebrangan Klotok & Panorama Laut",
-    image: "/wisata_real/tanjung_keluang.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Taman+Wisata+Alam+Tanjung+Keluang+Kumai",
-    openInfo: "± 15–20 Menit Perahu Klotok dari Pantai Kubu",
-  },
-  {
-    id: 11,
-    name: "Pantai Keraya & Sabuai",
-    category: "WISATA ALAM & PESISIR",
-    district: "Kecamatan Kumai",
-    description: "Pantai berpasir putih bersih dengan deretan pohon cemara laut dan sajian kuliner tepi pantai yang terkenal dengan panorama matahari terbenamnya.",
-    highlights: "Sunset Pantai Keraya, Pohon Cemara Pesisir, Kuliner Tepi Laut & Spot Santai",
-    image: "/wisata_real/pantai_keraya.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Pantai+Keraya+Kumai+Kotawaringin+Barat",
-    openInfo: "Pesisir Selatan Kumai / Buka Setiap Hari",
-  },
-  {
-    id: 12,
-    name: "Suaka Margasatwa Lamandau",
-    category: "WISATA ALAM & KONSERVASI",
-    district: "Arut Selatan – Lamandau",
-    description: "Kawasan konservasi penting di Kalimantan Tengah yang menjadi habitat orangutan dan berbagai satwa liar endemik dengan pengalaman susur sungai.",
-    highlights: "Konservasi Orangutan, Ekosistem Rawa Gambut, Pengamatan Satwa & Edukasi Alam",
-    image: "/wisata_real/sm_lamandau.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Suaka+Margasatwa+Sungai+Lamandau",
-    openInfo: "Akses Perahu dari Dermaga Kampung Sega",
-  },
-  {
-    id: 13,
-    name: "Sungai Fortuna",
-    category: "WISATA ALAM & PERAIRAN",
-    district: "Kotawaringin Barat",
-    description: "Destinasi wisata alam perairan dengan aliran sungai yang tenang, udara segar, dan vegetasi asri untuk rekreasi santai serta berfoto.",
-    highlights: "Panorama Sungai Alami, Udara Segar, Rekreasi Keluarga & Spot Foto Alam",
-    image: "/wisata_real/sungai_fortuna.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Sungai+Fortuna+Kotawaringin+Barat",
-    openInfo: "Wisata Alam Kotawaringin Barat",
-  },
-  {
-    id: 14,
-    name: "Danau Masoraian",
-    category: "WISATA ALAM & REKREASI",
-    district: "Kotawaringin Barat",
-    description: "Danau alami yang tenang dikelilingi vegetasi hijau asri, cocok untuk bersantai menikmati ketenangan alam dan berfoto.",
-    highlights: "Panorama Danau Tenang, Vegetasi Hijau Asri, Spot Foto & Rekreasi Alam",
-    image: "/wisata_real/danau_masoraian.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Danau+Masoraian+Kotawaringin+Barat",
-    openInfo: "Wisata Alam Kotawaringin Barat",
-  },
-  {
-    id: 15,
-    name: "Danau Limau Desa Lalang",
-    category: "DESA WISATA & PETUALANGAN",
-    district: "Desa Lalang, Kotawaringin Lama",
-    description: "Destinasi danau unggulan di Desa Wisata Lalang yang tertata rapi dengan suasana pedesaan asri serta beragam aktivitas rekreasi air.",
-    highlights: "Danau Asri Desa Lalang, Wisata Perahu, Suasana Pedesaan & Kuliner Lokal",
-    image: "/wisata_real/danau_limau.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Danau+Limau+Desa+Lalang+Kotawaringin+Lama",
-    openInfo: "Desa Wisata Kecamatan Kotawaringin Lama",
-  },
-  {
-    id: 16,
-    name: "Taman Wisata Hutan Jurung Tiga",
-    category: "WISATA HUTAN & OUTBOUND",
-    district: "Desa Adat Pasir Panjang",
-    description: "Kawasan wisata hutan edukatif dengan jalur trekking flora khas Kalimantan, dilengkapi wahana outbound, flying fox, kolam ikan, dan ATV.",
-    highlights: "Trekking Hutan Kalimantan, Flora Langka, Flying Fox, ATV & Area Outbound",
-    image: "/wisata_real/twh_jurung_tiga.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Taman+Wisata+Hutan+Jurung+Tiga+Pasir+Panjang",
-    openInfo: "Desa Wisata Pasir Panjang, Arut Selatan",
-  },
-  {
-    id: 17,
-    name: "Agrowisata Tani Subur",
-    category: "AGROWISATA & DESA WISATA",
-    district: "Desa Pangkalan Tiga, Pangkalan Lada",
-    description: "Wisata agro dan edukasi integrasi sawit–sapi yang dilengkapi kolam renang, bebek gowes, flying fox, serta aula pertemuan keluarga.",
-    highlights: "Edukasi Agro Sawit–Sapi, Kolam Renang, Bebek Gowes & Flying Fox",
-    image: "/wisata_real/agrowisata_tani_subur.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Agrowisata+Tani+Subur+Kotawaringin+Barat",
-    openInfo: "Kecamatan Pangkalan Lada / Wisata Keluarga",
-  },
-  {
-    id: 18,
-    name: "Kebun Buah Pehonda Hati",
-    category: "AGROWISATA & ALAM",
-    district: "Kecamatan Kotawaringin Lama",
-    description: "Kebun wisata buah dengan suasana alam pedesaan yang sejuk dan asri, menghadirkan pengalaman petik buah serta edukasi pertanian.",
-    highlights: "Kebun Buah Tropis, Suasana Alami Sejuk, Wisata Edukasi & Rekreasi Keluarga",
-    image: "/wisata_real/pehonda_hati.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Kebun+Buah+Pehonda+Hati+Kotawaringin+Lama",
-    openInfo: "± 30–45 Menit dari Pangkalan Bun",
-  },
-  {
-    id: 19,
-    name: "Istana Pangeran Mangkubumi",
-    category: "CAGAR BUDAYA & SEJARAH",
-    district: "Arut Selatan (Pusat Kota)",
-    description: "Situs rumah tua bersejarah peninggalan Kesultanan Kutaringin yang dahulu menjadi kediaman Pangeran Mangkubumi dengan halaman luas.",
-    highlights: "Arsitektur Kayu Bersejarah, Kediaman Bangsawan Kutaringin & Koleksi Sejarah",
-    image: "/wisata_real/istana_mangkubumi.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Astana+Pangeran+Mangkubumi+Pangkalan+Bun",
-    openInfo: "City Tour Sejarah Pangkalan Bun",
-  },
-  {
-    id: 20,
-    name: "Astana Al-Nursari & Makam Kuta Tanah",
-    category: "WISATA SEJARAH & RELIGI",
-    district: "Kecamatan Kotawaringin Lama",
-    description: "Kompleks kediaman bangsawan keturunan Sultan Kutaringin dan makam bersejarah yang menjadi saksi peradaban Islam serta kerajaan di Kotawaringin Lama.",
-    highlights: "Situs Kesultanan Kutaringin, Wisata Ziarah Sejarah & Cagar Budaya Lokal",
-    image: "/wisata_real/astana_al_nursari.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Astana+Al+Nursari+Kotawaringin+Lama",
-    openInfo: "Kawasan Cagar Budaya Kotawaringin Lama",
-  },
-  {
-    id: 21,
-    name: "Museum Heritage Cornelius Willem",
-    category: "WISATA SEJARAH & CITY TOUR",
-    district: "Arut Selatan, Pangkalan Bun",
-    description: "Museum sejarah yang merekam jejak perjuangan AURI dan peristiwa penerjunan pertama pasukan udara Republik Indonesia pada 17 Oktober 1947.",
-    highlights: "Sejarah Penerjunan Pertama AURI, Koleksi Heritage & Edukasi Kebangsaan",
-    image: "/wisata_real/museum_c_willem.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Museum+Cornelius+Willem+Pangkalan+Bun",
-    openInfo: "City Tour Sejarah Pangkalan Bun",
-  },
-  {
-    id: 22,
-    name: "Monumen Palagan Sambi",
-    category: "WISATA SEJARAH & CITY TOUR",
-    district: "Bundaran Pancasila, Pangkalan Bun",
-    description: "Tugu peringatan bersejarah di kawasan Bundaran Pancasila untuk mengenang operasi penerjunan pertama Pasukan Khas AURI di Kalimantan Tengah.",
-    highlights: "Monumen Perjuangan 17 Oktober 1947, Ikon Sejarah Kobar & Area Bundaran Pancasila",
-    image: "/wisata_real/monumen_palagan_sambi.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Monumen+Palagan+Sambi+Pangkalan+Bun",
-    openInfo: "Pusat Kota Pangkalan Bun / Terbuka 24 Jam",
-  },
-  {
-    id: 23,
-    name: "Kawasan Bundaran Pancasila",
-    category: "IKON KOTA & CITY TOUR",
-    district: "Pusat Kota Pangkalan Bun",
-    description: "Landmark ikonik di jantung Kota Pangkalan Bun yang hanya berjarak sekitar 7 menit dari Bandara Iskandar dan menjadi pusat aktivitas warga.",
-    highlights: "Landmark Utama Pangkalan Bun, Ruang Publik Kota & Spot Foto Malam",
-    image: "/wisata_real/bundaran_pancasila.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Bundaran+Pancasila+Pangkalan+Bun",
-    openInfo: "± 7 Menit dari Bandara Iskandar / 24 Jam",
-  },
-  {
-    id: 24,
-    name: "Kampung Pecinan Raja Seberang",
-    category: "HERITAGE & CITY TOUR",
-    district: "Raja Seberang, Arut Selatan",
-    description: "Kampung tua bersejarah di seberang Sungai Arut dengan deretan bangunan kayu berusia puluhan hingga ratusan tahun yang masih lestari.",
-    highlights: "Rumah Kayu Tua Bersejarah, Suasana Tepi Sungai Arut & Wisata Heritage",
-    image: "/wisata_real/kampung_pecinan.jpg",
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Kampung+Pecinan+Raja+Seberang+Pangkalan+Bun",
-    openInfo: "Akses Penyeberangan dari Bantaran Sungai Arut",
-  },
-];
+export type WisataPayload = {
+  name: string;
+  category: string;
+  district: string;
+  description: string;
+  highlights: string;
+  image: string;
+  mapsUrl: string;
+  openInfo: string;
+};
 
+export type WisataFilterParams = {
+  category?: string;
+  district?: string;
+  search?: string;
+};
+
+type WisataAPIResponse<T> = {
+  success: boolean;
+  data?: T;
+  error?: string | { message?: string };
+};
+
+function extractAPIError(err: unknown, fallback: string): string {
+  if (typeof err === "string" && err.trim()) return err.trim();
+  if (err && typeof err === "object") {
+    const msg = (err as { message?: unknown }).message;
+    if (typeof msg === "string" && msg.trim()) return msg.trim();
+  }
+  return fallback;
+}
+
+function normalizeWisataItem(raw: Partial<WisataItem>, idx = 0): WisataItem {
+  return {
+    id: Number(raw.id ?? idx + 1),
+    name: (raw.name ?? "").trim(),
+    category: (raw.category ?? "").trim(),
+    district: (raw.district ?? "").trim(),
+    description: (raw.description ?? "").trim(),
+    highlights: (raw.highlights ?? "").trim(),
+    image: (raw.image ?? "").trim(),
+    mapsUrl: (raw.mapsUrl ?? "").trim(),
+    openInfo: (raw.openInfo ?? "").trim(),
+  };
+}
+
+export async function fetchWisata(
+  filters?: WisataFilterParams,
+): Promise<WisataItem[]> {
+  const params: Record<string, string> = {};
+  if (filters?.category && filters.category !== "Semua") {
+    params.category = filters.category;
+  }
+  if (filters?.district && filters.district !== "Semua") {
+    params.district = filters.district;
+  }
+  if (filters?.search && filters.search.trim()) {
+    params.search = filters.search.trim();
+  }
+
+  try {
+    const response = await apiClient.get<
+      WisataAPIResponse<Partial<WisataItem>[]>
+    >("/wisata", { params });
+    if (!response.data?.success) {
+      throw new Error(
+        extractAPIError(
+          response.data?.error,
+          "Gagal memuat data destinasi wisata.",
+        ),
+      );
+    }
+    const rows = Array.isArray(response.data.data) ? response.data.data : [];
+    return rows.map((row, idx) => normalizeWisataItem(row, idx));
+  } catch (err) {
+    throw new Error(getAPIErrorMessage(err));
+  }
+}
+
+export async function createWisata(payload: WisataPayload): Promise<WisataItem> {
+  try {
+    const response = await apiClient.post<
+      WisataAPIResponse<Partial<WisataItem>>
+    >("/wisata", payload);
+    if (!response.data?.success) {
+      throw new Error(
+        extractAPIError(
+          response.data?.error,
+          "Gagal menambahkan destinasi wisata.",
+        ),
+      );
+    }
+    return normalizeWisataItem(response.data.data ?? payload);
+  } catch (err) {
+    throw new Error(getAPIErrorMessage(err));
+  }
+}
+
+export async function updateWisata(
+  id: number,
+  payload: WisataPayload,
+): Promise<WisataItem> {
+  try {
+    const response = await apiClient.put<
+      WisataAPIResponse<Partial<WisataItem>>
+    >(`/wisata/${id}`, payload);
+    if (!response.data?.success) {
+      throw new Error(
+        extractAPIError(
+          response.data?.error,
+          "Gagal memperbarui destinasi wisata.",
+        ),
+      );
+    }
+    return normalizeWisataItem(response.data.data ?? { ...payload, id });
+  } catch (err) {
+    throw new Error(getAPIErrorMessage(err));
+  }
+}
+
+export async function deleteWisata(id: number): Promise<void> {
+  try {
+    const response = await apiClient.delete<WisataAPIResponse<unknown>>(
+      `/wisata/${id}`,
+    );
+    if (!response.data?.success) {
+      throw new Error(
+        extractAPIError(
+          response.data?.error,
+          "Gagal menghapus destinasi wisata.",
+        ),
+      );
+    }
+  } catch (err) {
+    throw new Error(getAPIErrorMessage(err));
+  }
+}

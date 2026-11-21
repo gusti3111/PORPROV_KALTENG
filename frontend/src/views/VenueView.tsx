@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import ArrowIcon from "../components/ArrowIcon";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import VenueMap from "../components/VenueMap";
@@ -33,7 +34,7 @@ export default function VenueView() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [selectedName, setSelectedName] = useState<string | null>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
+  const [failedImageIds, setFailedImageIds] = useState<Record<number, boolean>>({});
   const mapFrameRef = useRef<HTMLDivElement>(null);
 
   const scrollToMap = () => {
@@ -45,63 +46,11 @@ export default function VenueView() {
     });
   };
 
-  const scrollCarousel = (direction: -1 | 1) => {
-    const carousel = carouselRef.current;
-    if (!carousel) return;
-
-    carousel.scrollBy({
-      left: direction * carousel.clientWidth * 0.82,
-      behavior: "smooth",
-    });
-  };
-
   useEffect(() => {
     void fetchVenues();
   }, [fetchVenues]);
 
-  const displayVenues = useMemo(() => {
-    const result: typeof venues = [];
-    const gorByAddress = new Map<string, number>();
-    const mergedAliases = new Map<string, string[]>();
-
-    for (const venue of venues) {
-      const normName = normalizeText(venue.name);
-      const normAddr = normalizeText(venue.address || "");
-      const isGorSportCenter =
-        normName.includes("gor") && normName.includes("sport center");
-
-      if (isGorSportCenter && normAddr) {
-        const existingIdx = gorByAddress.get(normAddr);
-        if (existingIdx !== undefined) {
-          const existing = result[existingIdx];
-          const extraNote = (venue.note || "").trim();
-          const combinedNotes = [existing.note, extraNote]
-            .filter(Boolean)
-            .filter((val, idx, arr) => arr.indexOf(val) === idx)
-            .join(" ");
-          const preferredName = normName.includes("ratu alamsyah")
-            ? venue.name
-            : existing.name;
-          result[existingIdx] = {
-            ...existing,
-            name: preferredName,
-            note: combinedNotes,
-          };
-          mergedAliases.set(normAddr, [
-            ...(mergedAliases.get(normAddr) ?? []),
-            normName,
-          ]);
-          continue;
-        }
-        gorByAddress.set(normAddr, result.length);
-        mergedAliases.set(normAddr, [normName]);
-      }
-
-      result.push(venue);
-    }
-
-    return result;
-  }, [venues]);
+  const displayVenues = venues;
 
   const categories = useMemo(
     () => [...new Set(displayVenues.map((venue) => venue.category))].sort(),
@@ -174,7 +123,7 @@ export default function VenueView() {
           </div>
           <img
             className="venue-hero-illustration"
-            src="/stadionKera.png"
+            src="/stadionKera.webp"
             alt="Maskot PORPROV berdiri di atas ilustrasi stadion"
           />
           <div className="cabor-hero-number" aria-hidden="true">
@@ -186,78 +135,116 @@ export default function VenueView() {
           </div>
         </section>
 
-        <section className="venue-carousel-section section-wrap" aria-label="Venue pertandingan">
-          <div className="venue-carousel-heading">
+        <section className="cabor-content section-wrap" aria-label="Venue pertandingan">
+          <div className="cabor-section-heading">
             <div>
-              <p className="cabor-section-kicker"><span>01</span> JELAJAHI LOKASI</p>
-              <h2>Venue <span>pertandingan.</span></h2>
+              <p className="cabor-section-kicker">
+                <span>01</span> JELAJAHI LOKASI
+              </p>
+              <h2>
+                Venue
+                <br />
+                <span>pertandingan.</span>
+              </h2>
             </div>
-            <div className="venue-carousel-controls" aria-label="Kontrol carousel venue">
-              <Button type="button" variant="outline" size="icon" aria-label="Venue sebelumnya" onClick={() => scrollCarousel(-1)}>
-                <ChevronLeft aria-hidden="true" />
-              </Button>
-              <Button type="button" variant="outline" size="icon" aria-label="Venue berikutnya" onClick={() => scrollCarousel(1)}>
-                <ChevronRight aria-hidden="true" />
-              </Button>
-            </div>
+            <p className="cabor-intro">
+              Daftar seluruh arena dan venue resmi PORPROV XIII Kalimantan Tengah.
+              Klik salah satu kartu untuk langsung melihat titik lokasinya di peta.
+            </p>
           </div>
+
+          <div className="cabor-count" aria-live="polite">
+            <span>DAFTAR VENUE RESMI PORPROV XIII</span>
+            <span>
+              {String(displayVenues.length).padStart(2, "0")} VENUE TERDAFTAR
+            </span>
+          </div>
+
           {loading && <p className="venue-carousel-status" role="status">Memuat venue...</p>}
-          {error && <p className="venue-carousel-status" role="alert">Venue belum dapat dimuat dari backend.</p>}
+          {error && (
+            <p className="venue-carousel-status" role="alert">
+              Venue belum dapat dimuat dari backend: {error}{" "}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => void fetchVenues()}
+              >
+                Coba lagi
+              </Button>
+            </p>
+          )}
           {!loading && !error && displayVenues.length > 0 && (
-            <div className="venue-carousel-track" ref={carouselRef}>
-              {displayVenues.map((venue, index) => (
-                <button
-                  className={`venue-carousel-card${selectedName === venue.name ? " is-selected" : ""}`}
-                  key={venue.id}
-                  type="button"
-                  aria-pressed={selectedName === venue.name}
-                  onClick={() => {
-                    setQuery("");
-                    setCategory("");
-                    setSelectedName(venue.name);
-                    scrollToMap();
-                  }}
-                >
-                  <div className="relative h-40 w-full overflow-hidden rounded-md mb-3 bg-slate-100 shrink-0">
-                    {(() => {
-                      const photoUrl = getVenuePhotoUrl(
-                        venue.name,
-                        `${venue.category} ${venue.note || ""}`,
-                      );
-                      if (!photoUrl) {
-                        return (
-                          <div className="flex h-full w-full items-center justify-center bg-slate-100 text-xs font-medium text-slate-400">
-                            Foto belum tersedia
-                          </div>
-                        );
-                      }
-                      return (
+            <div className="cabor-grid">
+              {displayVenues.map((venue, index) => {
+                const fallbackLocalPhoto = getVenuePhotoUrl(
+                  venue.name,
+                  `${venue.category} ${venue.note || ""}`,
+                );
+                const photoUrl = venue.image_url?.trim() || fallbackLocalPhoto;
+                const isFailed = Boolean(failedImageIds[venue.id]);
+                const isSelected = selectedName === venue.name;
+
+                return (
+                  <button
+                    key={venue.id}
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => {
+                      setQuery("");
+                      setCategory("");
+                      setSelectedName(venue.name);
+                      scrollToMap();
+                    }}
+                    className={`cabor-card text-left cursor-pointer min-w-0${isSelected ? " ring-2 ring-[var(--green)]" : ""}`}
+                  >
+                    <div className="relative h-40 w-full overflow-hidden rounded-lg mb-3 bg-slate-100 shrink-0">
+                      {!photoUrl || isFailed ? (
+                        <div className="flex h-full w-full flex-col items-center justify-center bg-slate-100 p-3 text-center text-xs font-medium text-slate-400">
+                          <MapPin className="mb-1 h-5 w-5 shrink-0 text-slate-300" aria-hidden="true" />
+                          <span>Foto belum tersedia</span>
+                        </div>
+                      ) : (
                         <img
                           src={photoUrl}
                           alt={venue.name}
                           className="block h-full w-full object-cover object-center transition-transform duration-300 hover:scale-105"
                           loading="lazy"
-                          onError={(e) => {
-                            e.currentTarget.src = "/venues2/sportCenter.jpg";
+                          onError={() => {
+                            setFailedImageIds((prev) => ({
+                              ...prev,
+                              [venue.id]: true,
+                            }));
                           }}
                         />
-                      );
-                    })()}
-                    <span className="absolute top-2 left-2 text-[10px] font-bold text-white bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <span className="absolute top-2 right-2 text-white bg-black/60 backdrop-blur-xs p-1 rounded-full">
-                      <MapPin className="h-3 w-3" aria-hidden="true" />
-                    </span>
-                  </div>
-                  <span className="venue-carousel-copy">
-                    <small>{venue.category}</small>
-                    <strong>{venue.name}</strong>
-                    <span>{venue.note || venue.address || "Lokasi pertandingan PORPROV XIII"}</span>
-                  </span>
-                  <span className="venue-carousel-link mt-2">LIHAT DI PETA <ChevronRight aria-hidden="true" /></span>
-                </button>
-              ))}
+                      )}
+                      <span className="shrink-0 absolute top-2 left-2 text-[10px] font-bold text-white bg-black/65 backdrop-blur-xs px-2 py-0.5 rounded">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span className="shrink-0 absolute top-2 right-2 text-white bg-black/65 backdrop-blur-xs p-1 rounded-full">
+                        <MapPin className="h-3 w-3" aria-hidden="true" />
+                      </span>
+                    </div>
+
+                    <div className="cabor-card-info min-w-0">
+                      <span className="cabor-category min-w-0 truncate">
+                        {venue.category}
+                      </span>
+                      <h3 className="min-w-0 break-words line-clamp-2">
+                        {venue.name}
+                      </h3>
+                      <p className="min-w-0 break-words line-clamp-2">
+                        {venue.note || venue.address || "Lokasi pertandingan PORPROV XIII"}
+                      </p>
+                    </div>
+
+                    <div className="cabor-card-bottom">
+                      <span>LIHAT DI PETA</span>
+                      <ArrowIcon diagonal />
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           )}
         </section>
@@ -386,14 +373,14 @@ export default function VenueView() {
                         scrollToMap();
                       }}
                     >
-                      <span className="venue-list-number">
+                      <span className="venue-list-number shrink-0">
                         {String(index + 1).padStart(2, "0")}
                       </span>
-                      <span className="venue-list-copy">
-                        <strong>{venue.name}</strong>
-                        <small>{venue.note || venue.category}</small>
+                      <span className="venue-list-copy min-w-0 flex-1">
+                        <strong className="min-w-0 break-words line-clamp-1">{venue.name}</strong>
+                        <small className="min-w-0 break-words line-clamp-2">{venue.note || venue.address || venue.category}</small>
                       </span>
-                      <span className="venue-list-arrow" aria-hidden="true">
+                      <span className="venue-list-arrow shrink-0" aria-hidden="true">
                         ↗
                       </span>
                     </Button>

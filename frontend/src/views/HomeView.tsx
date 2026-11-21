@@ -1,82 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Calendar, MapPin } from "lucide-react";
+import { ArrowRight, Calendar, ExternalLink, MapPin, X } from "lucide-react";
 import ArrowIcon from "../components/ArrowIcon";
 import EventCountdown from "../components/EventCountdown";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
+import publicGaleriPhotos from "virtual:galeri-photos";
 import { EVENT_START_LABEL } from "../event-config";
 import { useCompetitionStore } from "../stores/competitionStore";
 import { getSportEmblemInfo } from "../utils/sportEmblem";
+import { getVenuePhotoUrl } from "../utils/venuePhoto";
 
-const featuredStadiums = [
-  {
-    category: "GOR SPORT CENTER",
-    venue: "GOR Sport Center Ratu Alamsyah",
-    address: "Jl. Samudra, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    capacity: "1.500",
-    caborCount: "2 cabang",
-    facilityNote: "Bola Voli Indoor & Futsal",
-    image: "/venues2/gorSportCenter.jpeg",
-  },
-  {
-    category: "LAPANGAN TREK LARI",
-    venue: "Lintasan Atletik Sport Center",
-    address: "Kawasan Sport Center, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    capacity: "2.000",
-    caborCount: "1 cabang",
-    facilityNote: "Lintasan Lari & Lapangan Atletik",
-    image: "/venues2/LintasanAtletik.jpeg",
-  },
-  {
-    category: "STADION",
-    venue: "Stadion Sepak Bola Sport Center",
-    address: "Kawasan Sport Center, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    capacity: "5.000",
-    caborCount: "1 cabang",
-    facilityNote: "Stadion Utama Sepak Bola",
-    image: "/venues2/sportCenter.jpg",
-  },
-];
-
-const fallbackFeaturedSports = [
-  {
-    id: 27,
-    name: "Sepak Bola",
-    category: "Cabang Utama",
-    description: "Pertandingan sepak bola putra antar kabupaten/kota se-Kalimantan Tengah.",
-  },
-  {
-    id: 9,
-    name: "Bola Voli",
-    category: "Cabang Utama",
-    description: "Nomor pertandingan bola voli indoor putra dan putri di GOR Sport Center.",
-  },
-  {
-    id: 2,
-    name: "Atletik",
-    category: "Cabang Utama",
-    description: "Nomor lari, lompat, dan lempar pada lintasan atletik standar provinsi.",
-  },
-];
-
-const featuredGallery = [
-  {
-    title: "GOR Basket Indoor Pangkalan Bun",
-    category: "Venue",
-    image: "/galeri/gor-basket-indoor.jpg",
-  },
-  {
-    title: "Arena Panjat Tebing PORPROV XIII",
-    category: "Venue",
-    image: "/galeri/arena-panjat-tebing.jpg",
-  },
-  {
-    title: "Lapangan Tenis Kota Manis",
-    category: "Venue",
-    image: "/galeri/lapangan-tenis-kota-manis.jpg",
-  },
-];
+const featuredGallery = publicGaleriPhotos.slice(0, 3).map((item) => ({
+  title: item.title,
+  category: item.category,
+  image: item.src,
+}));
 
 type HomeNewsCard = {
   id: string;
@@ -84,86 +23,86 @@ type HomeNewsCard = {
   date: string;
   category: string;
   excerpt: string;
+  fullHtml: string;
+  slug?: string;
   image: string;
 };
 
-const fallbackNewsCards: HomeNewsCard[] = [
-  {
-    id: "fallback-1",
-    title: "Bupati Kobar Dampingi Gubernur Kalteng Tinjau Kesiapan Arena PORPROV XIII 2026",
-    date: "November 2026",
-    category: "PEMKAB KOBAR",
-    excerpt: "Peninjauan langsung sejumlah venue utama di Pangkalan Bun untuk memastikan kesiapan teknis penyelenggaraan PORPROV XIII Kalimantan Tengah.",
-    image: "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/gub.jpeg",
-  },
-  {
-    id: "fallback-2",
-    title: "Buka CdM Meeting PORPROV XIII, Wabup Kobar Tekankan Sportivitas dan Keselamatan Atlet",
-    date: "November 2026",
-    category: "CDM MEETING",
-    excerpt: "Pertemuan Chef de Mission membahas kesiapan kontingen, jadwal pertandingan, layanan kesehatan, serta tata tertib arena.",
-    image: "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/dci.jpeg",
-  },
-  {
-    id: "fallback-3",
-    title: "Dorong Pemulihan Ekonomi Daerah, Pemkab Kobar Integrasikan PORPROV XIII dan Kobar Expo 2026",
-    date: "November 2026",
-    category: "EKONOMI & UMKM",
-    excerpt: "Ribuan atlet, ofisial, dan pengunjung PORPROV XIII diharapkan menggerakkan sektor kuliner, perhotelan, dan UMKM lokal.",
-    image: "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/expo.jpeg",
-  },
-  {
-    id: "fallback-4",
-    title: "Pemkab Kobar Resmi Tetapkan Jadwal PORPROV XIII Kalteng 28 November Hingga 8 Desember 2026",
-    date: "November 2026",
-    category: "JADWAL RESMI",
-    excerpt: "Penetapan jadwal resmi pelaksanaan pekan olahraga provinsi di Kotawaringin Barat untuk seluruh cabang olahraga.",
-    image: "https://kotawaringinbaratkab.go.id/sites/default/files/2026-11/jadwal.jpeg",
-  },
-  {
-    id: "fallback-5",
-    title: "Kesiapan Venue dan Infrastruktur Pendukung PORPROV XIII Terus Dimatangkan",
-    date: "November 2026",
-    category: "PERSIAPAN",
-    excerpt: "Pemerintah daerah bersama panitia pelaksana memastikan seluruh arena pertandingan siap menyambut kontingen se-Kalimantan Tengah.",
-    image: "https://mmc.kotawaringinbaratkab.go.id/assets/foto_berita/6d322bc14b14ff1d2b16850108b94062.jpg",
-  },
-];
+function decodeHtmlContent(rawStr: string): string {
+  if (!rawStr) return "";
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(rawStr, "text/html");
+    return doc.body.textContent || rawStr;
+  } catch {
+    return rawStr
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&ndash;/g, "–")
+      .replace(/&nbsp;/g, " ");
+  }
+}
 
 function stripHtmlTags(raw: string): string {
   if (!raw) return "";
-  const decoded = raw
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/&ndash;/g, "–")
-    .replace(/&nbsp;/g, " ");
-  return decoded
+  return decodeHtmlContent(raw)
     .replace(/<[^>]*>?/gm, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
 export default function HomeView() {
-  const [latestNews, setLatestNews] = useState<HomeNewsCard[]>(fallbackNewsCards);
+  const [latestNews, setLatestNews] = useState<HomeNewsCard[]>([]);
+  const [selectedNews, setSelectedNews] = useState<HomeNewsCard | null>(null);
+  const [newsLoading, setNewsLoading] = useState(true);
+  const [newsError, setNewsError] = useState("");
   const sports = useCompetitionStore((state) => state.sports);
+  const sportsLoading = useCompetitionStore((state) => state.loading.sports);
+  const sportsError = useCompetitionStore((state) => state.errors.sports);
+  const venues = useCompetitionStore((state) => state.venues);
+  const venuesLoading = useCompetitionStore((state) => state.loading.venues);
+  const venuesError = useCompetitionStore((state) => state.errors.venues);
 
   useEffect(() => {
-    void useCompetitionStore.getState().fetchSports();
+    const store = useCompetitionStore.getState();
+    void store.fetchSports();
+    void store.fetchVenues();
   }, []);
 
-  const featuredSports = (sports.length > 0 ? sports.slice(0, 3) : fallbackFeaturedSports);
+  const mappedVenues = venues.map((v) => ({
+    category: v.category || "VENUE",
+    venue: v.name,
+    address: v.address || "Kab. Kotawaringin Barat",
+    caborCount: v.category || "Venue Resmi",
+    facilityNote: v.note || v.category,
+    image:
+      v.image_url?.trim() ||
+      getVenuePhotoUrl(v.name, `${v.category} ${v.note || ""}`),
+  }));
+
+  const venuesWithPhotos = mappedVenues.filter((item) => Boolean(item.image));
+  const displayedStadiums = (
+    venuesWithPhotos.length > 0 ? venuesWithPhotos : mappedVenues
+  ).slice(0, 3);
+
+  const featuredSports = sports.slice(0, 3);
 
   useEffect(() => {
     let cancelled = false;
     const loadLatestNews = async () => {
+      setNewsLoading(true);
+      setNewsError("");
       try {
         const res = await fetch(
           "https://mmc.apikobar.id/api/berita?search=porprov%20xiii",
         );
-        if (!res.ok) return;
+        if (!res.ok) {
+          if (!cancelled) setNewsError(`Gagal memuat berita (HTTP ${res.status})`);
+          return;
+        }
         const json = (await res.json()) as {
           data?: Array<{
             id_berita?: number;
@@ -177,7 +116,7 @@ export default function HomeView() {
           }>;
         };
         const items = Array.isArray(json.data) ? json.data.slice(0, 5) : [];
-        if (cancelled || items.length === 0) return;
+        if (cancelled) return;
 
         const slugImageMap: Record<string, string> = {
           "pemkab-kobar-resmi-tetapkan-jadwal-porprov-xiii-kalteng-28-november-hingga-8-desember-2026":
@@ -193,24 +132,24 @@ export default function HomeView() {
         setLatestNews(
           items.map((item, idx) => ({
             id: String(item.id_berita ?? idx),
-            title: item.judul || fallbackNewsCards[idx]?.title || "Berita PORPROV XIII",
+            title: decodeHtmlContent(item.judul || "") || "Berita PORPROV XIII",
             date: item.set_tanggal_publish || "Terbaru",
             category: item.sopd || "BERITA PORPROV",
-            excerpt:
-              stripHtmlTags(item.sub_judul || item.deskripsi || "") ||
-              fallbackNewsCards[idx]?.excerpt ||
-              "",
+            excerpt: stripHtmlTags(item.sub_judul || item.deskripsi || ""),
+            fullHtml: decodeHtmlContent(item.deskripsi || item.sub_judul || ""),
+            slug: item.slug_berita,
             image:
               (item.filename1
                 ? `https://mmc.kotawaringinbaratkab.go.id/assets/foto_berita/${item.filename1}`
                 : "") ||
               (item.slug_berita && slugImageMap[item.slug_berita]) ||
-              fallbackNewsCards[idx]?.image ||
               "",
           })),
         );
       } catch {
-        // Keep fallbackNewsCards on network/CORS error
+        if (!cancelled) setNewsError("Gagal memuat berita terbaru.");
+      } finally {
+        if (!cancelled) setNewsLoading(false);
       }
     };
     void loadLatestNews();
@@ -226,7 +165,7 @@ export default function HomeView() {
       <main>
         <section
           id="beranda"
-          className="relative flex min-h-[610px] items-center overflow-hidden bg-[var(--green)] text-white max-[900px]:min-h-[570px] max-[620px]:min-h-0 max-[620px]:flex-col max-[620px]:items-stretch max-[620px]:pb-14"
+          className="relative flex min-h-[610px] items-center overflow-hidden bg-[var(--green)] text-white max-[900px]:min-h-[570px] max-[620px]:min-h-0 max-[620px]:flex-col max-[620px]:items-stretch"
         >
           <img
             className="home-hero-photo"
@@ -275,7 +214,7 @@ export default function HomeView() {
 
           <img
             className="home-hero-mascot"
-            src="/maskot.png"
+            src="/maskot.webp"
             alt="Maskot PORPROV XIII Kalimantan Tengah membawa obor"
           />
 
@@ -303,7 +242,7 @@ export default function HomeView() {
 
 
 
-          <div className="absolute right-[7.2%] bottom-0 left-[7.2%] flex h-14 items-center gap-4 border-t border-white/20 text-[clamp(8px,0.75vw,12px)] font-extrabold tracking-[0.15em] text-white/75 max-[620px]:right-[5%] max-[620px]:left-[5%] max-[620px]:h-auto max-[620px]:min-h-12 max-[620px]:flex-wrap max-[620px]:justify-center max-[620px]:gap-x-2 max-[620px]:gap-y-1 max-[620px]:py-2.5">
+          <div className="absolute right-[7.2%] bottom-0 left-[7.2%] flex h-14 items-center gap-4 border-t border-white/20 text-[clamp(8px,0.75vw,12px)] font-extrabold tracking-[0.15em] text-white/75 max-[620px]:static max-[620px]:mx-[5%] max-[620px]:mt-3 max-[620px]:h-auto max-[620px]:min-h-12 max-[620px]:flex-wrap max-[620px]:justify-center max-[620px]:gap-x-2 max-[620px]:gap-y-1 max-[620px]:py-3">
             <span>SPORTIVITAS</span>
             <span className="text-xs text-[var(--lime)]">✳</span>
             <span>PERSAUDARAAN</span>
@@ -351,7 +290,16 @@ export default function HomeView() {
             </div>
           </div>
           <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-[repeat(3,minmax(0,1fr))_auto] items-stretch">
-            {featuredStadiums.slice(0, 3).map((item) => {
+            {displayedStadiums.length === 0 && (
+              <div className="col-span-full rounded-2xl border-2 border-dashed border-[var(--ui-border)] bg-[var(--ui-surface)] p-6 text-center text-xs text-[var(--muted)]">
+                {venuesLoading
+                  ? "Memuat data venue dari backend..."
+                  : venuesError
+                    ? `Gagal memuat data venue: ${venuesError}`
+                    : "Data venue belum tersedia."}
+              </div>
+            )}
+            {displayedStadiums.map((item) => {
               const venueTarget = `/venue?venue=${encodeURIComponent(item.venue)}`;
               return (
                 <Link
@@ -370,8 +318,8 @@ export default function HomeView() {
                         decoding="async"
                         onError={(e) => {
                           const target = e.currentTarget;
-                          if (!target.src.includes("sportCenter.jpg")) {
-                            target.src = "/venues2/sportCenter.jpg";
+                          if (!target.src.includes("sportCenter.webp")) {
+                            target.src = "/venues2/sportCenter.webp";
                           }
                         }}
                       />
@@ -394,14 +342,14 @@ export default function HomeView() {
                     <div className="mt-auto pt-4">
                       <div className="grid grid-cols-2 gap-4 border-t-2 border-[var(--ui-border)] pt-4">
 
-                        {/* <div>
-                          <div className="text-[10px] font-bold tracking-wider text-[var(--muted)] uppercase">
+                        <div>
+                          {/* <div className="text-[10px] font-bold tracking-wider text-[var(--muted)] uppercase">
                             CABOR
-                          </div>
+                          </div> */}
                           <div className="mt-0.5 text-sm font-extrabold text-[var(--ink)]">
                             {item.caborCount}
                           </div>
-                        </div> */}
+                        </div>
                       </div>
 
                       <div className="mt-3 border-t-2 border-[var(--ui-border)] pt-3 text-xs text-[var(--muted)]">
@@ -451,6 +399,15 @@ export default function HomeView() {
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-[repeat(3,minmax(0,1fr))_auto] items-stretch">
+            {featuredSports.length === 0 && (
+              <div className="col-span-full rounded-2xl border-2 border-dashed border-[var(--ui-border)] bg-[var(--ui-surface)] p-6 text-center text-xs text-[var(--muted)]">
+                {sportsLoading
+                  ? "Memuat data cabang olahraga dari backend..."
+                  : sportsError
+                    ? `Gagal memuat cabang olahraga: ${sportsError}`
+                    : "Data cabang olahraga belum tersedia."}
+              </div>
+            )}
             {featuredSports.map((sport) => {
               const emblem = getSportEmblemInfo(sport.id, sport.name);
               return (
@@ -563,7 +520,7 @@ export default function HomeView() {
             </div>
             <div className="flex items-center justify-center p-2">
               <img
-                src="/kera-bola.png"
+                src="/kera-bola.webp"
                 alt="Maskot PORPROV XIII Kalimantan Tengah memakai jersey bola sedang menendang bola"
                 className="w-full max-w-[340px] h-auto object-contain drop-shadow-lg transition-transform duration-300 hover:scale-[1.02]"
                 loading="lazy"
@@ -666,17 +623,26 @@ export default function HomeView() {
             </Link>
           </div>
 
+          {latestNews.length === 0 && (
+            <div className="rounded-2xl border-2 border-dashed border-[var(--ui-border)] bg-[var(--ui-surface)] p-6 text-center text-xs text-[var(--muted)]">
+              {newsLoading
+                ? "Memuat berita terbaru dari tab Informasi..."
+                : newsError || "Belum ada berita terbaru yang tersedia."}
+            </div>
+          )}
+
           {latestNews.length > 0 && (
-            <div className="grid grid-cols-[856fr_416fr] gap-8 mb-8 max-lg:grid-cols-1">
+            <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-[856fr_416fr] lg:gap-8">
               {/* Featured Card 1 */}
               {(() => {
                 const featured = latestNews[0];
                 return (
-                  <Link
-                    to="/informasi?tab=berita"
+                  <button
+                    type="button"
+                    onClick={() => setSelectedNews(featured)}
                     key={featured.id}
                     aria-label={`Baca berita ${featured.title}`}
-                    className="block relative rounded-[15px] overflow-hidden h-[460px] max-md:h-[300px] no-underline group bg-gradient-to-br from-[#3a5a6e] to-[#2a4050]"
+                    className="block relative w-full rounded-[15px] overflow-hidden h-[300px] lg:h-[460px] text-left cursor-pointer border-0 p-0 group bg-gradient-to-br from-[#3a5a6e] to-[#2a4050]"
                   >
                     <img
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -685,13 +651,7 @@ export default function HomeView() {
                       loading="lazy"
                       decoding="async"
                       onError={(e) => {
-                        const target = e.currentTarget;
-                        const fallback = fallbackNewsCards[0]?.image;
-                        if (fallback && target.src !== fallback) {
-                          target.src = fallback;
-                        } else {
-                          target.style.display = "none";
-                        }
+                        e.currentTarget.style.display = "none";
                       }}
                     />
                     <div className="absolute inset-0 berita-gradient rounded-[15px] flex flex-col justify-end p-8 max-md:p-5">
@@ -713,7 +673,7 @@ export default function HomeView() {
                         </p>
                       )}
                     </div>
-                  </Link>
+                  </button>
                 );
               })()}
 
@@ -721,13 +681,14 @@ export default function HomeView() {
               {latestNews[1] && (() => {
                 const second = latestNews[1];
                 return (
-                  <Link
-                    to="/informasi?tab=berita"
+                  <button
+                    type="button"
+                    onClick={() => setSelectedNews(second)}
                     key={second.id}
                     aria-label={`Baca berita ${second.title}`}
-                    className="flex flex-col gap-5 no-underline group hover:-translate-y-1 transition-transform text-inherit"
+                    className="flex w-full flex-col gap-4 text-left cursor-pointer border-0 bg-transparent p-0 group hover:-translate-y-1 transition-transform text-inherit lg:gap-5"
                   >
-                    <div className="relative rounded-[15px] overflow-hidden h-[265px] max-md:h-[200px] bg-gradient-to-br from-[#3a5a6e] to-[#2a4050]">
+                    <div className="relative rounded-[15px] overflow-hidden h-[200px] lg:h-[265px] bg-gradient-to-br from-[#3a5a6e] to-[#2a4050]">
                       <img
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         src={second.image}
@@ -735,13 +696,7 @@ export default function HomeView() {
                         loading="lazy"
                         decoding="async"
                         onError={(e) => {
-                          const target = e.currentTarget;
-                          const fallback = fallbackNewsCards[1]?.image;
-                          if (fallback && target.src !== fallback) {
-                            target.src = fallback;
-                          } else {
-                            target.style.display = "none";
-                          }
+                          e.currentTarget.style.display = "none";
                         }}
                       />
                       <div className="absolute inset-0 berita-gradient rounded-[15px] flex flex-col justify-end p-4">
@@ -766,7 +721,7 @@ export default function HomeView() {
                         </p>
                       )}
                     </div>
-                  </Link>
+                  </button>
                 );
               })()}
             </div>
@@ -774,15 +729,16 @@ export default function HomeView() {
 
           {/* Bottom 3-Column News Grid */}
           {latestNews.length > 2 && (
-            <div className="grid grid-cols-3 gap-8 max-lg:grid-cols-2 max-md:grid-cols-1">
-              {latestNews.slice(2, 5).map((news, idx) => (
-                <Link
-                  to="/informasi?tab=berita"
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
+              {latestNews.slice(2, 5).map((news) => (
+                <button
+                  type="button"
+                  onClick={() => setSelectedNews(news)}
                   key={news.id}
                   aria-label={`Baca berita ${news.title}`}
-                  className="flex flex-col gap-5 no-underline group hover:-translate-y-1 transition-transform text-inherit"
+                  className="flex w-full flex-col gap-4 text-left cursor-pointer border-0 bg-transparent p-0 group hover:-translate-y-1 transition-transform text-inherit md:gap-5"
                 >
-                  <div className="relative rounded-[15px] overflow-hidden h-[300px] max-md:h-[220px] bg-gradient-to-br from-[#3a5a6e] to-[#2a4050]">
+                  <div className="relative rounded-[15px] overflow-hidden h-[220px] md:h-[300px] bg-gradient-to-br from-[#3a5a6e] to-[#2a4050]">
                     <img
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       src={news.image}
@@ -790,13 +746,7 @@ export default function HomeView() {
                       loading="lazy"
                       decoding="async"
                       onError={(e) => {
-                        const target = e.currentTarget;
-                        const fallback = fallbackNewsCards[idx + 2]?.image;
-                        if (fallback && target.src !== fallback) {
-                          target.src = fallback;
-                        } else {
-                          target.style.display = "none";
-                        }
+                        e.currentTarget.style.display = "none";
                       }}
                     />
                     <div className="absolute inset-0 berita-gradient rounded-[15px] flex flex-col justify-end p-4">
@@ -821,7 +771,7 @@ export default function HomeView() {
                       </p>
                     )}
                   </div>
-                </Link>
+                </button>
               ))}
             </div>
           )}
@@ -837,7 +787,7 @@ export default function HomeView() {
             <div className="mt-4 grid grid-cols-[1fr_1fr] items-center gap-[8%] max-[900px]:gap-[5%] max-[620px]:grid-cols-1 max-[620px]:gap-[20px]">
               <div className="flex items-center justify-center p-2">
                 <img
-                  src="/maskot-kuliner.png"
+                  src="/maskot-kuliner.webp"
                   alt="Maskot PORPROV XIII Kalimantan Tengah menikmati kuliner khas Coto Manggala"
                   className="w-full max-w-[380px] h-auto object-contain drop-shadow-lg transition-transform duration-300 hover:scale-[1.02]"
                   loading="lazy"
@@ -895,7 +845,7 @@ export default function HomeView() {
               </div>
               <div className="flex items-center justify-center p-2">
                 <img
-                  src="/keraWis-bg.png"
+                  src="/keraWis-bg.webp"
                   alt="Maskot PORPROV XIII Kalimantan Tengah menikmati kuliner khas Coto Manggala"
                   className="w-full max-w-[380px] h-auto object-contain drop-shadow-lg transition-transform duration-300 hover:scale-[1.02]"
                   loading="lazy"
@@ -917,7 +867,7 @@ export default function HomeView() {
             <div className="mt-4 grid grid-cols-[1fr_1fr] items-center gap-[8%] max-[900px]:gap-[5%] max-[620px]:grid-cols-1 max-[620px]:gap-[20px]">
               <div className="flex items-center justify-center p-2">
                 <img
-                  src="/keraHotel.png"
+                  src="/keraHotel.webp"
                   alt="Maskot PORPROV XIII Kalimantan Tengah menikmati kuliner khas Coto Manggala"
                   className="w-full max-w-[380px] h-auto object-contain drop-shadow-lg transition-transform duration-300 hover:scale-[1.02]"
                   loading="lazy"
@@ -952,25 +902,130 @@ export default function HomeView() {
 
         <section className="relative min-h-[355px] overflow-hidden bg-[var(--orange)] text-white max-[620px]:min-h-[330px]">
           <div className="closing-pattern" aria-hidden="true" />
-          <div className="relative z-[1] mx-auto w-[var(--container-width)] pt-[62px] pb-[65px] max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:pt-[55px] max-[620px]:pb-[55px]">
-            <p className="mb-6 flex items-center gap-[10px] text-[clamp(10px,0.9vw,14px)] font-extrabold uppercase tracking-[0.15em] text-white [&>span]:bg-[var(--lime)]">
-              <span className="size-[7px] rounded-full shadow-[0_0_14px_rgba(211,237,113,0.75)]" />
-              Menuju PORPROV XIII KALIMANTAN TENGAH 2026
-            </p>
-            <h2 className="mt-0 mb-[26px] text-[clamp(28px,6vw,84px)] font-black leading-[0.98] tracking-[-0.06em] [&>span]:text-[var(--lime)]">
-              Bersama kita
-              <br />
-              <span>jadi juara.</span>
-            </h2>
-            <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[clamp(11px,0.95vw,15px)] font-extrabold text-[#102b49] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#c6e2f5] max-[620px]:min-h-[45px] max-[620px]:px-[15px]" href="#beranda">
-              Kembali ke atas
-            </a>
+          <div className="relative z-[1] mx-auto flex w-[var(--container-width)] flex-col justify-between gap-8 pt-[62px] pb-[65px] md:flex-row md:items-center max-[900px]:w-[90%] max-[620px]:w-[88%] max-[620px]:pt-[55px] max-[620px]:pb-[55px]">
+            <div>
+              <p className="mb-6 flex items-center gap-[10px] text-[clamp(10px,0.9vw,14px)] font-extrabold uppercase tracking-[0.15em] text-white [&>span]:bg-[var(--lime)]">
+                <span className="size-[7px] rounded-full shadow-[0_0_14px_rgba(211,237,113,0.75)]" />
+                Menuju PORPROV XIII KALIMANTAN TENGAH 2026
+              </p>
+              <h2 className="mt-0 mb-[26px] text-[clamp(28px,6vw,84px)] font-black leading-[0.98] tracking-[-0.06em] [&>span]:text-[var(--lime)]">
+                Bersama kita
+                <br />
+                <span>jadi juara.</span>
+              </h2>
+              <a className="inline-flex min-h-[49px] items-center justify-center gap-[18px] rounded-md bg-[var(--lime)] px-5 text-[clamp(11px,0.95vw,15px)] font-extrabold text-[#102b49] transition-[transform,background] duration-[160ms] hover:-translate-y-0.5 hover:bg-[#c6e2f5] max-[620px]:min-h-[45px] max-[620px]:px-[15px]" href="#beranda">
+                Kembali ke atas
+              </a>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 md:justify-end md:self-end">
+              {/* <img
+                src="/logos/kobar.svg"
+                alt="Logo Kabupaten Kotawaringin Barat"
+                className="h-16 sm:h-20 lg:h-24 w-auto object-contain drop-shadow-md"
+                loading="lazy"
+              /> */}
+              {/* <img
+                src="/logos/mmc-kobar.svg"
+                alt="Logo MMC Kotawaringin Barat"
+                className="h-14 sm:h-16 lg:h-20 w-auto object-contain drop-shadow-md"
+                loading="lazy"
+              /> */}
+            </div>
           </div>
-          <span className="absolute right-[8%] bottom-[-73px] text-[clamp(140px,35vw,440px)] font-black leading-none tracking-[-0.12em] text-white/10 max-[620px]:right-0 max-[620px]:bottom-[-32px]" aria-hidden="true">
+          <span className="pointer-events-none absolute right-[8%] bottom-[-73px] text-[clamp(140px,35vw,440px)] font-black leading-none tracking-[-0.12em] text-white/10 max-[620px]:right-0 max-[620px]:bottom-[-32px]" aria-hidden="true">
             XIII
           </span>
         </section>
       </main>
+
+      {selectedNews && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
+          onClick={() => setSelectedNews(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="home-news-modal-title"
+        >
+          <div
+            className="relative max-w-3xl w-full max-h-[85vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between p-5 sm:p-6 border-b border-slate-100 bg-slate-50/70">
+              <div className="space-y-1.5 pr-4 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="inline-flex items-center rounded-full bg-emerald-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+                    {selectedNews.category}
+                  </span>
+                  <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
+                    {selectedNews.date}
+                  </span>
+                </div>
+                <h2
+                  id="home-news-modal-title"
+                  className="text-lg sm:text-xl font-extrabold text-slate-900 leading-snug"
+                >
+                  {selectedNews.title}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedNews(null)}
+                aria-label="Tutup berita"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors shrink-0"
+              >
+                <X className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-4 text-slate-700 leading-relaxed text-sm sm:text-base">
+              {selectedNews.image && (
+                <div className="relative w-full h-56 sm:h-72 rounded-xl overflow-hidden shadow-md bg-slate-900">
+                  <img
+                    src={selectedNews.image}
+                    alt={selectedNews.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                </div>
+              )}
+
+              <div
+                className="space-y-3.5 [&_p]:mb-3.5 [&_p]:leading-relaxed [&_p]:text-slate-700 [&_strong]:font-bold [&_strong]:text-slate-900"
+                dangerouslySetInnerHTML={{
+                  __html: selectedNews.fullHtml || `<p>${selectedNews.excerpt}</p>`,
+                }}
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 p-4 px-5 sm:px-6 border-t border-slate-100 bg-slate-50">
+              {selectedNews.slug ? (
+                <a
+                  href={`https://kotawaringinbaratkab.go.id/id/blog/${selectedNews.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
+                >
+                  Buka Berita di Portal Pemkab Kobar
+                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                </a>
+              ) : (
+                <span />
+              )}
+              <button
+                type="button"
+                onClick={() => setSelectedNews(null)}
+                className="rounded-lg bg-slate-800 px-4 py-2 text-xs font-bold text-white hover:bg-slate-900"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SiteFooter />
     </>

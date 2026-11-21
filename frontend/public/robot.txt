@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /reset-password
+
+Sitemap: https://porprov.kotawaringinbaratkab.go.id/sitemap.xml

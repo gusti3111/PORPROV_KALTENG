@@ -39,6 +39,7 @@ import {
 } from "../../api/client";
 import type { ScheduleMatch } from "../../api/types";
 import { getSportScoringRule } from "../../utils/sportScoringConfig";
+import { resolveAutoMatchStatus, useCurrentTimeMs } from "../../utils/matchStatus";
 
 interface MatchFormState {
   match_id: string | null;
@@ -62,18 +63,40 @@ interface MatchFormState {
 }
 
 const ROUND_OPTIONS = [
+  "Ujicoba Lapangan",
+  "Ujicoba",
   "Fase Grup",
   "Fase Grup - Grup A",
   "Fase Grup - Grup B",
+  "Fase Grup - Grup C",
+  "Fase Grup - Grup D",
+  "Grup A",
+  "Grup B",
+  "Grup C",
+  "Grup D",
+  "WOMEN A",
+  "WOMEN B",
+  "MEN A",
+  "MEN B",
+  "MEN C",
+  "MEN D",
   "Penyisihan",
+  "QF 1",
+  "QF 2",
+  "QF 3",
+  "QF 4",
   "Perempat Final 1",
   "Perempat Final 2",
   "Perempat Final 3",
   "Perempat Final 4",
+  "SF 1",
+  "SF 2",
   "Semifinal 1",
   "Semifinal 2",
   "Perebutan Juara 3",
+  "Juara 3",
   "Final",
+  "Juara 2 & 1",
 ];
 
 function getTodayJakarta() {
@@ -207,6 +230,7 @@ export default function JadwalPage() {
   const [feedbackMsg, setFeedbackMsg] = useState("");
   const [deletingAll, setDeletingAll] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const nowMs = useCurrentTimeMs();
 
   const today = getTodayJakarta();
 
@@ -297,6 +321,10 @@ export default function JadwalPage() {
     );
     const winnerPart = match.participants.find((p) => p.is_winner);
 
+    const endDateTime = match.end_time
+      ? getJakartaDateTimeParts(match.end_time)
+      : startDateTime;
+
     const editForm: MatchFormState = {
       match_id: match.id,
       sport_id: matchSport?.id ?? match.sport_id ?? 0,
@@ -308,8 +336,8 @@ export default function JadwalPage() {
       round_name: match.round_name || "",
       start_date: startDateTime.date,
       start_time: startDateTime.time,
-      end_date: startDateTime.date,
-      end_time: startDateTime.time,
+      end_date: endDateTime.date,
+      end_time: endDateTime.time,
       status: match.status,
       contingent_ids:
         match.participants.length >= 2
@@ -873,9 +901,17 @@ export default function JadwalPage() {
                     <Select
                       value={form.event_id ? String(form.event_id) : "0"}
                       disabled={!form.sport_id}
-                      onValueChange={(value) =>
-                        setForm({ ...form, event_id: Number(value || 0) })
-                      }
+                      onValueChange={(value) => {
+                        const nextEventId = Number(value || 0);
+                        const matchedEvent = formEvents.find(
+                          (ev) => ev.id === nextEventId,
+                        );
+                        setForm({
+                          ...form,
+                          event_id: nextEventId,
+                          event_gender: matchedEvent?.gender ?? form.event_gender,
+                        });
+                      }}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Belum ditentukan (Opsional)" />
@@ -887,11 +923,36 @@ export default function JadwalPage() {
                         {formEvents.map((event) => (
                           <SelectItem key={event.id} value={String(event.id)}>
                             {event.name}
+                            {event.gender ? ` (${event.gender})` : ""}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   )}
+                  <div className="flex items-center gap-2 pt-1">
+                    <Label className="text-xs text-muted-foreground shrink-0">
+                      Divisi:
+                    </Label>
+                    <Select
+                      value={form.event_gender || "NONE"}
+                      onValueChange={(v) =>
+                        setForm({
+                          ...form,
+                          event_gender: !v || v === "NONE" ? "" : v,
+                        })
+                      }
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="Pilih divisi Putra/Putri" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="NONE">Umum / Otomatis</SelectItem>
+                        <SelectItem value="Men">Putra (Men)</SelectItem>
+                        <SelectItem value="Women">Putri (Women)</SelectItem>
+                        <SelectItem value="Mixed">Campuran (Mixed)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="grid gap-2">
@@ -1052,27 +1113,48 @@ export default function JadwalPage() {
                     </div>
                   ))}
                 </div>
-                <div className="flex items-center justify-between pt-1">
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                   <p className="text-xs text-muted-foreground">
-                    Kontingen boleh dikosongkan dulu saat membuat jadwal dan diisi nanti saat data kontingen tersedia. Untuk status Terjadwal, skor tidak perlu diisi.
+                    Kontingen boleh dikosongkan (`[]`) untuk jadwal non-pertandingan (mis. Ujicoba Lapangan) maupun jadwal gugur yang masih menunggu hasil grup. Untuk status Terjadwal, skor tidak perlu diisi.
                   </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5 shrink-0"
-                    onClick={() =>
-                      setForm({
-                        ...form,
-                        contingent_ids: [...form.contingent_ids, 0],
-                        athlete_names: [...form.athlete_names, ""],
-                        scores: [...form.scores, ""],
-                      })
-                    }
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    Tambah Kontingen
-                  </Button>
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    {form.contingent_ids.some((cid) => cid > 0) && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs text-muted-foreground"
+                        onClick={() =>
+                          setForm({
+                            ...form,
+                            contingent_ids: [0, 0],
+                            athlete_names: ["", ""],
+                            scores: ["", ""],
+                            winner_contingent_id: 0,
+                          })
+                        }
+                      >
+                        Kosongkan Peserta
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() =>
+                        setForm({
+                          ...form,
+                          contingent_ids: [...form.contingent_ids, 0],
+                          athlete_names: [...form.athlete_names, ""],
+                          scores: [...form.scores, ""],
+                        })
+                      }
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Tambah Kontingen
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -1364,6 +1446,8 @@ export default function JadwalPage() {
                 <tbody>
                   {filteredMatches.map((match) => {
                     const parts = match.participants || [];
+                    const effectiveStatus = resolveAutoMatchStatus(match, nowMs);
+                    const isAutoStatus = effectiveStatus !== match.status;
                     return (
                       <tr key={match.id} className="border-b hover:bg-muted/20">
                         <td className="p-2 font-medium whitespace-nowrap">
@@ -1414,7 +1498,7 @@ export default function JadwalPage() {
                                   {formatParticipantName(p)}{" "}
                                   {p.score
                                     ? `(${p.score})`
-                                    : match.status === "SCHEDULED"
+                                    : effectiveStatus === "SCHEDULED"
                                       ? "(0)"
                                       : ""}
                                   {p.is_winner ? " 🏆" : ""}
@@ -1427,8 +1511,19 @@ export default function JadwalPage() {
                         </td>
                         <td className="p-2 text-muted-foreground text-xs">{match.venue_name}</td>
                         <td className="p-2">
-                          <Badge variant={match.status === "FINISHED" ? "default" : "secondary"}>
-                            {statusLabels[match.status] || match.status}
+                          <Badge
+                            variant={
+                              effectiveStatus === "FINISHED"
+                                ? "default"
+                                : effectiveStatus === "ONGOING"
+                                  ? "destructive"
+                                  : "secondary"
+                            }
+                          >
+                            {effectiveStatus === "ONGOING"
+                              ? "LIVE"
+                              : statusLabels[effectiveStatus] || effectiveStatus}
+                            {isAutoStatus ? " (Auto)" : ""}
                           </Badge>
                         </td>
                         <td className="p-2">

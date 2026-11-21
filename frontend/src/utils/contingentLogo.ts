@@ -1,50 +1,50 @@
 const CONTINGENT_LOGOS_BY_ID: Record<number, string> = {
-  1: "/logos/kobar.png",
-  2: "/logos/kotim.png",
-  3: "/logos/plk.png",
-  4: "/logos/kps.png",
-  5: "/logos/barsel.png",
-  6: "/logos/barut.png",
-  7: "/logos/bartim.png",
-  8: "/logos/mura.png",
-  9: "/logos/ktn.png",
-  10: "/logos/sry.png",
-  11: "/logos/pulpis.png",
-  12: "/logos/gmas.png",
-  13: "/logos/skm.png",
-  14: "/logos/lmd.png",
+  1: "/logos/kobar.webp",
+  2: "/logos/kotim.webp",
+  3: "/logos/plk.webp",
+  4: "/logos/kps.webp",
+  5: "/logos/barsel.webp",
+  6: "/logos/barut.webp",
+  7: "/logos/bartim.webp",
+  8: "/logos/mura.webp",
+  9: "/logos/ktn.webp",
+  10: "/logos/sry.webp",
+  11: "/logos/pulpis.webp",
+  12: "/logos/gmas.webp",
+  13: "/logos/skm.webp",
+  14: "/logos/lmd.webp",
 };
 
 const CONTINGENT_LOGOS_BY_KEY: Record<string, string> = {
-  "kotawaringin barat": "/logos/kobar.png",
-  kobar: "/logos/kobar.png",
-  "kotawaringin timur": "/logos/kotim.png",
-  kotim: "/logos/kotim.png",
-  "kota palangka raya": "/logos/plk.png",
-  "palangka raya": "/logos/plk.png",
-  plk: "/logos/plk.png",
-  kapuas: "/logos/kps.png",
-  kps: "/logos/kps.png",
-  "barito selatan": "/logos/barsel.png",
-  barsel: "/logos/barsel.png",
-  "barito utara": "/logos/barut.png",
-  barut: "/logos/barut.png",
-  "barito timur": "/logos/bartim.png",
-  bartim: "/logos/bartim.png",
-  "murung raya": "/logos/mura.png",
-  mura: "/logos/mura.png",
-  katingan: "/logos/ktn.png",
-  ktn: "/logos/ktn.png",
-  seruyan: "/logos/sry.png",
-  sry: "/logos/sry.png",
-  "pulang pisau": "/logos/pulpis.png",
-  pulpis: "/logos/pulpis.png",
-  "gunung mas": "/logos/gmas.png",
-  gmas: "/logos/gmas.png",
-  sukamara: "/logos/skm.png",
-  skm: "/logos/skm.png",
-  lamandau: "/logos/lmd.png",
-  lmd: "/logos/lmd.png",
+  "kotawaringin barat": "/logos/kobar.webp",
+  kobar: "/logos/kobar.webp",
+  "kotawaringin timur": "/logos/kotim.webp",
+  kotim: "/logos/kotim.webp",
+  "kota palangka raya": "/logos/plk.webp",
+  "palangka raya": "/logos/plk.webp",
+  plk: "/logos/plk.webp",
+  kapuas: "/logos/kps.webp",
+  kps: "/logos/kps.webp",
+  "barito selatan": "/logos/barsel.webp",
+  barsel: "/logos/barsel.webp",
+  "barito utara": "/logos/barut.webp",
+  barut: "/logos/barut.webp",
+  "barito timur": "/logos/bartim.webp",
+  bartim: "/logos/bartim.webp",
+  "murung raya": "/logos/mura.webp",
+  mura: "/logos/mura.webp",
+  katingan: "/logos/ktn.webp",
+  ktn: "/logos/ktn.webp",
+  seruyan: "/logos/sry.webp",
+  sry: "/logos/sry.webp",
+  "pulang pisau": "/logos/pulpis.webp",
+  pulpis: "/logos/pulpis.webp",
+  "gunung mas": "/logos/gmas.webp",
+  gmas: "/logos/gmas.webp",
+  sukamara: "/logos/skm.webp",
+  skm: "/logos/skm.webp",
+  lamandau: "/logos/lmd.webp",
+  lmd: "/logos/lmd.webp",
 };
 
 export function getContingentLogoUrl(
@@ -53,7 +53,13 @@ export function getContingentLogoUrl(
   explicitLogoUrl?: string | null,
 ): string | null {
   if (explicitLogoUrl && explicitLogoUrl.trim() !== "") {
-    return explicitLogoUrl.trim();
+    const trimmed = explicitLogoUrl.trim();
+    // Normalize legacy .png/.jpg/.jpeg paths in /logos/ to .webp
+    const normalizedPath = trimmed.replace(
+      /(\/logos\/[^?#]+)\.(png|jpe?g)([?#].*)?$/i,
+      "$1.webp$3",
+    );
+    return normalizedPath;
   }
   if (contingentId && CONTINGENT_LOGOS_BY_ID[contingentId]) {
     return CONTINGENT_LOGOS_BY_ID[contingentId];
@@ -62,7 +68,7 @@ export function getContingentLogoUrl(
   const normalized = nameOrCode
     .trim()
     .toLowerCase()
-    .replace(/^kabupaten\s+/i, "");
+    .replace(/^(kabupaten|kab\.?)\s+/i, "");
   if (CONTINGENT_LOGOS_BY_KEY[normalized]) {
     return CONTINGENT_LOGOS_BY_KEY[normalized];
   }

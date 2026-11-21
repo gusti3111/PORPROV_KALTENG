@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
+    "dev:prod": "vite --host 0.0.0.0 --mode production",
     "build": "tsc --noEmit && vite build",
+    "build:local": "tsc --noEmit && vite build --mode development",
     "preview": "vite preview --host 0.0.0.0",
-    "start": "vite preview --host 0.0.0.0",
     "lint": "eslint ."
   },
   "dependencies": {

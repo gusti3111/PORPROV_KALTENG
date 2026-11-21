@@ -7,8 +7,10 @@ import SiteHeader from "../components/SiteHeader";
 import SportBracket from "../components/SportBracket";
 import { getAPIData, getAPIErrorMessage } from "../api/client";
 import type { Sport, SportTournament } from "../api/types";
+import { useCompetitionStore } from "../stores/competitionStore";
 import { getContingentLogoUrl } from "../utils/contingentLogo";
 import { formatParticipantName } from "../utils/participantDisplay";
+import { normalizeTournamentData } from "../utils/tournamentNormalizer";
 import {
   formatGroupDisplayName,
   formatStandingPrimaryMetric,
@@ -21,18 +23,23 @@ type BracketEntry = {
   hasActiveData: boolean;
 };
 
-function hasActiveTournamentData(tournament: SportTournament): boolean {
-  const hasGroupStandings = tournament.groups.some(
+function hasScopeData(scope: {
+  groups: SportTournament["groups"];
+  quarterfinals?: SportTournament["quarterfinals"];
+  semifinals: SportTournament["semifinals"];
+  final: SportTournament["final"];
+}): boolean {
+  const hasGroupStandings = scope.groups.some(
     (g) => g.standings && g.standings.length > 0,
   );
-  const hasQuarterfinals = (tournament.quarterfinals ?? []).some(
+  const hasQuarterfinals = (scope.quarterfinals ?? []).some(
     (m) =>
       (m.home && m.home !== "TBA") ||
       (m.away && m.away !== "TBA") ||
       m.home_score !== null ||
       m.away_score !== null,
   );
-  const hasSemifinals = tournament.semifinals.some(
+  const hasSemifinals = scope.semifinals.some(
     (m) =>
       (m.home && m.home !== "TBA") ||
       (m.away && m.away !== "TBA") ||
@@ -40,20 +47,36 @@ function hasActiveTournamentData(tournament: SportTournament): boolean {
       m.away_score !== null,
   );
   const hasFinal =
-    (Boolean(tournament.final.home) && tournament.final.home !== "TBA") ||
-    (Boolean(tournament.final.away) && tournament.final.away !== "TBA") ||
-    tournament.final.home_score !== null ||
-    tournament.final.away_score !== null;
+    (Boolean(scope.final.home) && scope.final.home !== "TBA") ||
+    (Boolean(scope.final.away) && scope.final.away !== "TBA") ||
+    scope.final.home_score !== null ||
+    scope.final.away_score !== null;
 
   return hasGroupStandings || hasQuarterfinals || hasSemifinals || hasFinal;
 }
 
+function hasActiveTournamentData(tournament: SportTournament): boolean {
+  if (tournament.divisions && tournament.divisions.length > 0) {
+    return tournament.divisions.some((div) => hasScopeData(div));
+  }
+  return hasScopeData(tournament);
+}
+
 export default function BaganView() {
+  const matches = useCompetitionStore((state) => state.matches);
+  const fetchMatches = useCompetitionStore((state) => state.fetchMatches);
   const [entries, setEntries] = useState<BracketEntry[]>([]);
   const [query, setQuery] = useState("");
   const [onlyUpdated, setOnlyUpdated] = useState(false);
+  const [selectedDivisionBySport, setSelectedDivisionBySport] = useState<
+    Record<number, string>
+  >({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    void fetchMatches();
+  }, [fetchMatches]);
 
   useEffect(() => {
     let active = true;
@@ -144,20 +167,53 @@ export default function BaganView() {
     };
   }, []);
 
+  const normalizedEntries = useMemo(
+    () =>
+      entries.map((entry) => {
+        const normalized = normalizeTournamentData(entry.tournament, matches);
+        return {
+          ...entry,
+          tournament: normalized,
+          hasActiveData: hasActiveTournamentData(normalized),
+        };
+      }),
+    [entries, matches],
+  );
+
   const updatedCount = useMemo(
-    () => entries.filter((e) => e.hasActiveData).length,
-    [entries],
+    () => normalizedEntries.filter((e) => e.hasActiveData).length,
+    [normalizedEntries],
   );
 
   const visibleEntries = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("id");
-    return entries.filter(({ tournament, hasActiveData }) => {
+    return normalizedEntries.filter(({ tournament, hasActiveData }) => {
       if (onlyUpdated && !hasActiveData) return false;
       if (!normalizedQuery) return true;
 
+      const allGroups =
+        tournament.divisions && tournament.divisions.length > 0
+          ? tournament.divisions.flatMap((d) => d.groups)
+          : tournament.groups;
+
+      const allBracketMatches =
+        tournament.divisions && tournament.divisions.length > 0
+          ? tournament.divisions.flatMap((d) => [
+              ...(d.quarterfinals ?? []),
+              ...d.semifinals,
+              d.final,
+              d.bronze,
+            ])
+          : [
+              ...(tournament.quarterfinals ?? []),
+              ...tournament.semifinals,
+              tournament.final,
+              tournament.bronze,
+            ];
+
       const searchableText = [
         tournament.sport_name,
-        ...tournament.groups.flatMap((group) => [
+        ...allGroups.flatMap((group) => [
           group.name,
           ...group.standings.map((standing) =>
             formatParticipantName({
@@ -166,16 +222,17 @@ export default function BaganView() {
             }),
           ),
         ]),
-        ...(tournament.quarterfinals ?? []).flatMap((m) => [m.label, m.home, m.away]),
-        ...tournament.semifinals.flatMap((match) => [match.label, match.home, match.away]),
-        tournament.final.home,
-        tournament.final.away,
+        ...allBracketMatches.flatMap((match) => [
+          match.label,
+          match.home,
+          match.away,
+        ]),
       ]
         .join(" ")
         .toLocaleLowerCase("id");
       return searchableText.includes(normalizedQuery);
     });
-  }, [entries, query, onlyUpdated]);
+  }, [normalizedEntries, query, onlyUpdated]);
 
   return (
     <>
@@ -191,7 +248,7 @@ export default function BaganView() {
           </div>
           <img
             className="bagan-page-hero-illustration"
-            src="/keraBagan.png"
+            src="/keraBagan.webp"
             alt="Maskot PORPROV menunjuk papan bagan pertandingan"
           />
         </section>
@@ -263,9 +320,30 @@ export default function BaganView() {
                   rule.tableType === "TIME_LEADERBOARD" ||
                   rule.tableType === "SCORE_LEADERBOARD";
                 const isRacketNoPoints = rule.mode === "GROUP_RACKET_2_0";
-                const activeGroups = tournament.groups.filter(
+                const divisions = tournament.divisions ?? [];
+                const activeDivision =
+                  divisions.length > 0
+                    ? divisions.find(
+                        (d) => d.division === selectedDivisionBySport[id],
+                      ) ?? divisions[0]
+                    : null;
+                const scopedGroups = activeDivision
+                  ? activeDivision.groups
+                  : tournament.groups;
+                const activeGroups = scopedGroups.filter(
                   (g) => g.standings && g.standings.length > 0,
                 );
+                const bracketTournament: SportTournament = activeDivision
+                  ? {
+                      ...tournament,
+                      groups: activeDivision.groups,
+                      quarterfinals: activeDivision.quarterfinals,
+                      semifinals: activeDivision.semifinals,
+                      final: activeDivision.final,
+                      bronze: activeDivision.bronze,
+                      third_place: activeDivision.third_place,
+                    }
+                  : tournament;
                 return (
                   <article className="bagan-event-card" key={id}>
                     <header className="bagan-event-heading">
@@ -298,6 +376,41 @@ export default function BaganView() {
                         Detail klasemen cabor <ArrowUpRight aria-hidden="true" />
                       </Link>
                     </header>
+
+                    {divisions.length > 0 && (
+                      <div
+                        className="mb-4 flex flex-wrap items-center gap-2"
+                        role="tablist"
+                        aria-label={`Pilih divisi ${tournament.sport_name}`}
+                      >
+                        {divisions.map((div) => {
+                          const isActive = activeDivision?.division === div.division;
+                          const label =
+                            div.label || (div.division === "Men" ? "Putra" : "Putri");
+                          return (
+                            <button
+                              key={div.division}
+                              type="button"
+                              role="tab"
+                              aria-selected={isActive}
+                              onClick={() =>
+                                setSelectedDivisionBySport((prev) => ({
+                                  ...prev,
+                                  [id]: div.division,
+                                }))
+                              }
+                              className={`rounded-full px-3.5 py-1.5 text-xs font-extrabold tracking-wide transition-colors ${
+                                isActive
+                                  ? "bg-[var(--green)] text-white shadow-xs"
+                                  : "border border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-foreground)] hover:border-[var(--green)]"
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
 
                     {activeGroups.length > 0 && (
                       <div className="sport-standings-grid mb-6">
@@ -396,7 +509,7 @@ export default function BaganView() {
                       </div>
                     )}
 
-                    <SportBracket tournament={tournament} />
+                    <SportBracket tournament={bracketTournament} />
                   </article>
                 );
               })}

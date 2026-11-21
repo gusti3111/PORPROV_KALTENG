@@ -34,6 +34,17 @@ export type SportTournamentMatch = {
   status: "SCHEDULED" | "ONGOING" | "FINISHED";
 };
 
+export type SportTournamentDivision = {
+  division: "Men" | "Women";
+  label: string;
+  groups: SportTournamentGroup[];
+  quarterfinals?: SportTournamentMatch[];
+  semifinals: SportTournamentMatch[];
+  final: SportTournamentMatch;
+  bronze: SportTournamentMatch;
+  third_place?: SportTournamentMatch;
+};
+
 export type SportTournament = {
   sport_id: number;
   sport_name: string;
@@ -43,6 +54,7 @@ export type SportTournament = {
   final: SportTournamentMatch;
   bronze: SportTournamentMatch;
   third_place?: SportTournamentMatch;
+  divisions?: SportTournamentDivision[];
 };
 
 export type Event = {
@@ -101,6 +113,7 @@ export type ScheduleMatch = {
   date: string;
   time: string;
   start_time: string;
+  end_time?: string;
   status: MatchStatus;
   live_stream_url?: string;
   next_match_id?: string | null;
@@ -132,6 +145,7 @@ export type SportMedalStanding = {
 export type BracketMatch = {
   id: number;
   sport_id: number;
+  division?: string;
   round_name: string;
   round_order: number;
   match_order: number;

@@ -34,7 +34,7 @@ export default function SiteHeader() {
       >
         <img
           className="brand-logo"
-          src="/iconporKalteng.jpeg"
+          src="/iconporKalteng.webp"
           alt="Logo PORPROV XIII Kalimantan Tengah"
         />
         <span className="brand-copy">

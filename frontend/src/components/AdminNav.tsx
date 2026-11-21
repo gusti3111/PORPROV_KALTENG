@@ -1,11 +1,17 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
+  Building2,
   CalendarRange,
+  Camera,
+  Compass,
   ExternalLink,
   GitBranch,
+  HeartPulse,
   LayoutDashboard,
   LogOut,
+  MapPin,
   Trophy,
+  Utensils,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -14,6 +20,12 @@ const navItems = [
   { to: "/admin/jadwal", label: "Input Jadwal & Kontingen", icon: CalendarRange },
   { to: "/admin/hasil", label: "Input Hasil & Pemenang", icon: Trophy },
   { to: "/admin/bagan", label: "Klasemen Grup & Bagan", icon: GitBranch },
+  { to: "/admin/hotels", label: "Hotel & Penginapan", icon: Building2 },
+  { to: "/admin/umkm", label: "Kuliner & UMKM", icon: Utensils },
+  { to: "/admin/wisata", label: "Destinasi Wisata", icon: Compass },
+  { to: "/admin/galeri", label: "Galeri Foto", icon: Camera },
+  { to: "/admin/venues", label: "Venue", icon: MapPin },
+  { to: "/admin/kesehatan", label: "Layanan Kesehatan", icon: HeartPulse },
 ];
 
 export default function AdminNav() {

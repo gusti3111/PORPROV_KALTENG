@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import SiteHeader from "../../components/SiteHeader";
 import SiteFooter from "../../components/SiteFooter";
 import AdminNav from "../../components/AdminNav";
 import SportBracket from "../../components/SportBracket";
+import { normalizeTournamentData } from "../../utils/tournamentNormalizer";
 import { formatParticipantName } from "../../utils/participantDisplay";
 import {
   ArrowRight,
@@ -116,6 +117,8 @@ export default function BaganPage() {
   const [volleyLost23, setVolleyLost23] = useState<number>(0);
   const [timeInputSeconds, setTimeInputSeconds] = useState<string>("");
   const [scoreInputValue, setScoreInputValue] = useState<string>("");
+  const [selectedDivision, setSelectedDivision] = useState<string>("");
+  const requestSeqRef = useRef<number>(0);
 
   useEffect(() => {
     void fetchSports();
@@ -133,30 +136,82 @@ export default function BaganPage() {
     }
   }, [matches, sports, selectedSportId]);
 
-  const loadSportTournamentData = useCallback(async (sportId: number) => {
-    setLoadingBracket(true);
-    try {
-      const [bracketData, tourData] = await Promise.all([
-        getAPIData<{ sport_id: number; matches: BracketMatch[] }>(
-          `/brackets/${sportId}`,
-        ),
-        getAPIData<SportTournament>(`/sports/${sportId}/tournament`),
-      ]);
-      setBracketMatches(bracketData.matches || []);
-      setTournament(tourData);
-    } catch {
-      setBracketMatches([]);
-      setTournament(null);
-    } finally {
-      setLoadingBracket(false);
-    }
-  }, []);
+  const loadSportTournamentData = useCallback(
+    async (sportId: number, requestedDivision?: string) => {
+      const seq = ++requestSeqRef.current;
+      setLoadingBracket(true);
+      try {
+        const trimmedRequested = (requestedDivision || "").trim();
+        let tourData: SportTournament;
+        let bracketData: { sport_id: number; matches: BracketMatch[] };
+        let resolvedDivision = trimmedRequested;
+
+        if (trimmedRequested) {
+          [bracketData, tourData] = await Promise.all([
+            getAPIData<{ sport_id: number; matches: BracketMatch[] }>(
+              `/brackets/${sportId}?division=${encodeURIComponent(trimmedRequested)}`,
+            ),
+            getAPIData<SportTournament>(`/sports/${sportId}/tournament`),
+          ]);
+        } else {
+          tourData = await getAPIData<SportTournament>(
+            `/sports/${sportId}/tournament`,
+          );
+          resolvedDivision =
+            Array.isArray(tourData.divisions) && tourData.divisions.length > 0
+              ? tourData.divisions[0].division
+              : "";
+          bracketData = await getAPIData<{
+            sport_id: number;
+            matches: BracketMatch[];
+          }>(
+            resolvedDivision
+              ? `/brackets/${sportId}?division=${encodeURIComponent(resolvedDivision)}`
+              : `/brackets/${sportId}`,
+          );
+        }
+
+        if (seq !== requestSeqRef.current) return;
+        setTournament(tourData);
+        setBracketMatches(bracketData.matches || []);
+        setSelectedDivision(resolvedDivision);
+      } catch {
+        if (seq !== requestSeqRef.current) return;
+        setBracketMatches([]);
+        setTournament(null);
+      } finally {
+        if (seq === requestSeqRef.current) {
+          setLoadingBracket(false);
+        }
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (selectedSportId > 0) {
       void loadSportTournamentData(selectedSportId);
     }
   }, [loadSportTournamentData, selectedSportId]);
+
+  const selectedSportName =
+    sports.find((s) => s.id === selectedSportId)?.name || "Cabang Olahraga";
+  const scoringRule = getSportScoringRule(selectedSportId, selectedSportName);
+
+  const normalizedTournament = tournament
+    ? normalizeTournamentData(tournament, matches)
+    : null;
+  const availableDivisions = normalizedTournament?.divisions ?? [];
+  const activeDivisionObj =
+    availableDivisions.length > 0
+      ? availableDivisions.find((d) => d.division === selectedDivision) ??
+        availableDivisions[0]
+      : null;
+  const activeDivision = activeDivisionObj?.division ?? "";
+  const activeDivisionLabel = activeDivisionObj
+    ? activeDivisionObj.label ||
+      (activeDivisionObj.division === "Men" ? "Putra" : "Putri")
+    : "";
 
   const openEditForm = (match: BracketMatch) => {
     setFeedbackMsg("");
@@ -181,11 +236,23 @@ export default function BaganPage() {
     });
   };
 
+  const handleSelectDivision = (nextDivision: string) => {
+    if (nextDivision === activeDivision) return;
+    closeEditForm();
+    setFeedbackMsg("");
+    setSelectedDivision(nextDivision);
+    if (selectedSportId > 0) {
+      void loadSportTournamentData(selectedSportId, nextDivision);
+    }
+  };
+
   const handleSaveBracketMatch = async () => {
     if (!editingMatch) return;
     try {
+      const matchDivision = (editingMatch.division || activeDivision).trim();
       const payload = {
         round_name: editingMatch.round_name,
+        ...(matchDivision ? { division: matchDivision } : {}),
         home_contingent_id:
           form.home_contingent_id > 0 ? form.home_contingent_id : null,
         away_contingent_id:
@@ -206,13 +273,13 @@ export default function BaganPage() {
       }
       closeEditForm();
       await Promise.all([
-        loadSportTournamentData(selectedSportId),
+        loadSportTournamentData(selectedSportId, activeDivision),
         fetchMatches(),
         fetchMedalStandings(),
         fetchSportMedalStandings(),
       ]);
       setFeedbackMsg(
-        `Bagan "${editingMatch.label}" berhasil diperbarui! Pemenang otomatis dimajukan ke babak selanjutnya dan disinkronkan ke web utama.`,
+        `Bagan "${editingMatch.label}"${activeDivisionLabel ? ` (${activeDivisionLabel})` : ""} berhasil diperbarui! Pemenang otomatis dimajukan ke babak selanjutnya dan disinkronkan ke web utama.`,
       );
     } catch (err) {
       alert(getAPIErrorMessage(err));
@@ -226,7 +293,7 @@ export default function BaganPage() {
       return;
     }
 
-    let payload = { ...standingForm };
+    let basePayload: StandingFormState = { ...standingForm };
     if (scoringRule.tableType === "TIME_LEADERBOARD") {
       const secs = Number(timeInputSeconds.replace(",", "."));
       if (!secs || secs <= 0) {
@@ -234,7 +301,7 @@ export default function BaganPage() {
         return;
       }
       const encoded = encodeTimeSecondsToStanding(secs);
-      payload = {
+      basePayload = {
         ...standingForm,
         ...encoded,
       };
@@ -245,11 +312,16 @@ export default function BaganPage() {
         return;
       }
       const encoded = encodeScoreToStanding(scoreVal);
-      payload = {
+      basePayload = {
         ...standingForm,
         ...encoded,
       };
     }
+
+    const payload = {
+      ...basePayload,
+      ...(activeDivision ? { division: activeDivision } : {}),
+    };
 
     try {
       const res = await fetch(
@@ -265,7 +337,7 @@ export default function BaganPage() {
           await readResponseError(res, "Gagal menyimpan data klasemen"),
         );
       }
-      await loadSportTournamentData(selectedSportId);
+      await loadSportTournamentData(selectedSportId, activeDivision);
       setStandingForm((prev) => ({
         ...prev,
         contingent_id: 0,
@@ -279,7 +351,7 @@ export default function BaganPage() {
       setTimeInputSeconds("");
       setScoreInputValue("");
       setFeedbackMsg(
-        `${scoringRule.sectionTitle} (${scoringRule.groupLabel} ${standingForm.group_code}) berhasil diperbarui dan diurutkan otomatis di web utama!`,
+        `${scoringRule.sectionTitle} (${activeDivisionLabel ? `Divisi ${activeDivisionLabel} · ` : ""}${scoringRule.groupLabel} ${standingForm.group_code}) berhasil diperbarui dan diurutkan otomatis di web utama!`,
       );
     } catch (err) {
       alert(getAPIErrorMessage(err));
@@ -316,12 +388,20 @@ export default function BaganPage() {
       (c) => c.id === row.contingent_id || c.name === row.contingent,
     );
     const cid = foundCont?.id ?? row.contingent_id ?? 0;
-    if (!cid || !confirm(`Hapus ${row.contingent} dari Grup ${groupCode}?`)) {
+    if (
+      !cid ||
+      !confirm(
+        `Hapus ${row.contingent} dari Grup ${groupCode}${activeDivisionLabel ? ` (${activeDivisionLabel})` : ""}?`,
+      )
+    ) {
       return;
     }
     try {
+      const divisionQuery = activeDivision
+        ? `&division=${encodeURIComponent(activeDivision)}`
+        : "";
       const res = await fetch(
-        `${API_BASE_URL}/sports/${selectedSportId}/standings?group_code=${groupCode}&contingent_id=${cid}`,
+        `${API_BASE_URL}/sports/${selectedSportId}/standings?group_code=${encodeURIComponent(groupCode)}&contingent_id=${cid}${divisionQuery}`,
         { method: "DELETE", headers: getAuthHeaders() },
       );
       if (!res.ok) {
@@ -329,7 +409,7 @@ export default function BaganPage() {
           await readResponseError(res, "Gagal menghapus kontingen dari grup"),
         );
       }
-      await loadSportTournamentData(selectedSportId);
+      await loadSportTournamentData(selectedSportId, activeDivision);
     } catch (err) {
       alert(getAPIErrorMessage(err));
     }
@@ -337,18 +417,25 @@ export default function BaganPage() {
 
   const handlePromoteGroupWinners = async () => {
     try {
+      const divisionQuery = activeDivision
+        ? `?division=${encodeURIComponent(activeDivision)}`
+        : "";
       const res = await fetch(
-        `${API_BASE_URL}/sports/${selectedSportId}/promote-groups`,
-        { method: "POST", headers: getAuthHeaders() },
+        `${API_BASE_URL}/sports/${selectedSportId}/promote-groups${divisionQuery}`,
+        {
+          method: "POST",
+          headers: getAuthHeaders({ "Content-Type": "application/json" }),
+          body: JSON.stringify(activeDivision ? { division: activeDivision } : {}),
+        },
       );
       if (!res.ok) {
         throw new Error(
           await readResponseError(res, "Gagal mempromosikan juara grup ke bagan"),
         );
       }
-      await loadSportTournamentData(selectedSportId);
+      await loadSportTournamentData(selectedSportId, activeDivision);
       setFeedbackMsg(
-        "Juara & Runner-up Grup A dan Grup B berhasil dimasukkan otomatis ke Bagan Penyisihan!",
+        `Juara & Runner-up Grup (A–D)${activeDivisionLabel ? ` Divisi ${activeDivisionLabel}` : ""} berhasil dimasukkan otomatis ke Bagan Penyisihan!`,
       );
     } catch (err) {
       alert(getAPIErrorMessage(err));
@@ -364,17 +451,49 @@ export default function BaganPage() {
     return labels[status] || status;
   };
 
-  const selectedSportName =
-    sports.find((s) => s.id === selectedSportId)?.name || "Cabang Olahraga";
-  const scoringRule = getSportScoringRule(selectedSportId, selectedSportName);
+  const dedupedBracketMatches = (() => {
+    const hasDivisionField = bracketMatches.some(
+      (m) => typeof m.division === "string" && m.division.trim() !== "",
+    );
+    const scopedMatches =
+      activeDivision && hasDivisionField
+        ? bracketMatches.filter(
+            (m) =>
+              (m.division || "").trim().toLowerCase() ===
+              activeDivision.toLowerCase(),
+          )
+        : bracketMatches;
 
-  const quarterfinalMatches = bracketMatches.filter(
+    const map = new Map<string, BracketMatch>();
+    for (const m of scopedMatches) {
+      const key = `${m.round_name}:${m.match_order}`;
+      const existing = map.get(key);
+      if (!existing) {
+        map.set(key, m);
+      } else {
+        const existingPop =
+          (existing.home_contingent_id ? 1 : 0) +
+          (existing.away_contingent_id ? 1 : 0) +
+          (existing.status === "FINISHED" ? 5 : existing.status === "ONGOING" ? 3 : 0);
+        const nextPop =
+          (m.home_contingent_id ? 1 : 0) +
+          (m.away_contingent_id ? 1 : 0) +
+          (m.status === "FINISHED" ? 5 : m.status === "ONGOING" ? 3 : 0);
+        if (nextPop > existingPop || (nextPop === existingPop && m.id > existing.id)) {
+          map.set(key, m);
+        }
+      }
+    }
+    return [...map.values()].sort((a, b) => a.match_order - b.match_order);
+  })();
+
+  const quarterfinalMatches = dedupedBracketMatches.filter(
     (m) => m.round_name === "QUARTERFINAL",
   );
-  const semifinalMatches = bracketMatches.filter(
+  const semifinalMatches = dedupedBracketMatches.filter(
     (m) => m.round_name === "SEMIFINAL",
   );
-  const finalAndThirdMatches = bracketMatches.filter(
+  const finalAndThirdMatches = dedupedBracketMatches.filter(
     (m) => m.round_name === "FINAL" || m.round_name === "THIRD_PLACE",
   );
 
@@ -615,7 +734,7 @@ export default function BaganPage() {
               Kelola Klasemen Fase Grup &amp; Bagan Penyisihan (Perempat Final – Final)
             </h1>
             <p className="text-muted-foreground">
-              Atur poin klasemen grup (Grup A &amp; Grup B) serta bagan gugur (Perempat Final, Semifinal, Perebutan Juara 3, dan Final) yang langsung terupdate di halaman Bagan &amp; Detail Cabor.
+              Atur poin klasemen grup (Grup A – D, terpisah Putra &amp; Putri) serta bagan gugur (Perempat Final, Semifinal, Perebutan Juara 3, dan Final) yang langsung terupdate di halaman Bagan &amp; Detail Cabor.
             </p>
           </div>
           <Link to={`/cabor/${selectedSportId}`}>
@@ -649,6 +768,9 @@ export default function BaganPage() {
                   const nextId = Number(v);
                   const nextSport = sports.find((s) => s.id === nextId);
                   const nextRule = getSportScoringRule(nextId, nextSport?.name);
+                  closeEditForm();
+                  setFeedbackMsg("");
+                  setSelectedDivision("");
                   setSelectedSportId(nextId);
                   setVolleyWon32(0);
                   setVolleyLost23(0);
@@ -682,9 +804,41 @@ export default function BaganPage() {
               onClick={() => void handlePromoteGroupWinners()}
               className="gap-2"
             >
-              <Trophy className="h-4 w-4" /> Loloskan Juara &amp; Runner-Up Grup ke Bagan
+              <Trophy className="h-4 w-4" /> Loloskan Juara &amp; Runner-Up Grup
+              {activeDivisionLabel ? ` (${activeDivisionLabel})` : ""} ke Bagan
             </Button>
           </div>
+
+          {availableDivisions.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-muted/30 px-3.5 py-2.5">
+              <div className="space-y-0.5">
+                <p className="text-xs font-bold uppercase tracking-wide text-foreground">
+                  Divisi Aktif (Klasemen Grup, Bagan Penyisihan &amp; Pratinjau)
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  Perubahan klasemen, promosi grup, dan skor bagan hanya berlaku pada divisi yang dipilih.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {availableDivisions.map((div) => {
+                  const isActive = activeDivision === div.division;
+                  const label =
+                    div.label || (div.division === "Men" ? "Putra" : "Putri");
+                  return (
+                    <Button
+                      key={div.division}
+                      type="button"
+                      size="sm"
+                      variant={isActive ? "default" : "outline"}
+                      onClick={() => handleSelectDivision(div.division)}
+                    >
+                      {label}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
@@ -721,6 +875,11 @@ export default function BaganPage() {
                       <Badge variant="secondary">
                         {scoringRule.sectionTitle.toUpperCase()} ({scoringRule.badgeLabel})
                       </Badge>
+                      {activeDivisionLabel && (
+                        <Badge className="bg-emerald-700 text-white">
+                          Divisi {activeDivisionLabel}
+                        </Badge>
+                      )}
                       {scoringRule.tableType === "TIME_LEADERBOARD" && (
                         <Badge className="bg-sky-600 text-white">
                           Mode Waktu Tercepat (Detik)
@@ -742,6 +901,7 @@ export default function BaganPage() {
                     </div>
                     <h2 className="text-xl font-bold">
                       {scoringRule.sectionTitle} – {selectedSportName}
+                      {activeDivisionLabel ? ` (${activeDivisionLabel})` : ""}
                     </h2>
                     <p className="text-xs text-muted-foreground">
                       {scoringRule.description}
@@ -772,6 +932,8 @@ export default function BaganPage() {
                         <SelectContent>
                           <SelectItem value="A">Grup A (atau Grup Tunggal)</SelectItem>
                           <SelectItem value="B">Grup B</SelectItem>
+                          <SelectItem value="C">Grup C</SelectItem>
+                          <SelectItem value="D">Grup D</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -843,6 +1005,8 @@ export default function BaganPage() {
                         <SelectContent>
                           <SelectItem value="A">Sesi A (Kualifikasi 1)</SelectItem>
                           <SelectItem value="B">Sesi B (Kualifikasi 2)</SelectItem>
+                          <SelectItem value="C">Sesi C (Kualifikasi 3)</SelectItem>
+                          <SelectItem value="D">Sesi D (Kualifikasi 4)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -925,6 +1089,12 @@ export default function BaganPage() {
                             </SelectItem>
                             <SelectItem value="B">
                               {scoringRule.groupLabel} B
+                            </SelectItem>
+                            <SelectItem value="C">
+                              {scoringRule.groupLabel} C
+                            </SelectItem>
+                            <SelectItem value="D">
+                              {scoringRule.groupLabel} D
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -1172,24 +1342,61 @@ export default function BaganPage() {
                   </form>
                 )}
 
-                {/* Tabel Klasemen / Tabel Waktu / Tabel Skor */}
-                {tournament &&
-                  Array.isArray(tournament.groups) &&
-                  tournament.groups.length > 0 && (
-                    <div className="grid gap-6 lg:grid-cols-2">
-                      {tournament.groups.map((group) => (
-                        <div
-                          key={group.code}
-                          className="rounded-xl border p-4 space-y-3"
+                {/* Switcher Divisi Putra / Putri jika tersedia */}
+                {availableDivisions.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-semibold text-muted-foreground mr-1">
+                      Divisi:
+                    </span>
+                    {availableDivisions.map((div) => {
+                      const isActive = activeDivision === div.division;
+                      const label =
+                        div.label || (div.division === "Men" ? "Putra" : "Putri");
+                      return (
+                        <Button
+                          key={div.division}
+                          type="button"
+                          size="sm"
+                          variant={isActive ? "default" : "outline"}
+                          onClick={() => handleSelectDivision(div.division)}
                         >
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-bold text-base">
-                              {formatGroupDisplayName(
-                                scoringRule,
-                                group.name,
-                                tournament.groups.filter((g) => g.standings.length > 0).length,
-                              )}
-                            </h3>
+                          {label}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Tabel Klasemen / Tabel Waktu / Tabel Skor */}
+                {(() => {
+                  const displayGroups = activeDivisionObj
+                    ? activeDivisionObj.groups
+                    : normalizedTournament?.groups ?? [];
+                  if (!normalizedTournament) return null;
+                  if (!Array.isArray(displayGroups) || displayGroups.length === 0) {
+                    return (
+                      <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+                        Belum ada data klasemen
+                        {activeDivisionLabel ? ` untuk divisi ${activeDivisionLabel}` : ""}. Gunakan formulir di atas untuk menambahkan kontingen ke {scoringRule.groupLabel} A–D.
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="grid gap-6 lg:grid-cols-2">
+                      {displayGroups.map((group) => (
+                          <div
+                            key={group.code}
+                            className="rounded-xl border p-4 space-y-3"
+                          >
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-bold text-base">
+                                {formatGroupDisplayName(
+                                  scoringRule,
+                                  group.name,
+                                  displayGroups.filter((g) => g.standings.length > 0)
+                                    .length,
+                                )}
+                              </h3>
                             <Badge variant="outline">
                               {group.standings.length} Kontingen
                             </Badge>
@@ -1384,22 +1591,57 @@ export default function BaganPage() {
                         </div>
                       ))}
                     </div>
-                  )}
+                  );
+                })()}
               </Card>
             )}
 
             {/* SECTION 2: BAGAN PENYISIHAN (PEREMPAT FINAL, SEMIFINAL, FINAL & PEREBUTAN JUARA 3) */}
             <Card className="p-6 space-y-6">
-              <div className="border-b pb-4">
-                <Badge variant="secondary" className="mb-1">
-                  FASE GUGUR / PENYISIHAN
-                </Badge>
-                <h2 className="text-xl font-bold">
-                  Kelola Bagan Penyisihan – {selectedSportName}
-                </h2>
-                <p className="text-xs text-muted-foreground">
-                  Pemenang Perempat Final 1 &amp; 2 otomatis masuk ke Semifinal 1; Perempat Final 3 &amp; 4 ke Semifinal 2. Pemenang Semifinal otomatis maju ke Final, dan yang kalah ke Perebutan Juara 3. Saat Final selesai, medali Emas &amp; Perak otomatis tercatat!
-                </p>
+              <div className="flex flex-wrap items-start justify-between gap-4 border-b pb-4">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <Badge variant="secondary">
+                      FASE GUGUR / PENYISIHAN
+                    </Badge>
+                    {activeDivisionLabel && (
+                      <Badge className="bg-emerald-700 text-white">
+                        Divisi {activeDivisionLabel}
+                      </Badge>
+                    )}
+                  </div>
+                  <h2 className="text-xl font-bold">
+                    Kelola Bagan Penyisihan – {selectedSportName}
+                    {activeDivisionLabel ? ` (${activeDivisionLabel})` : ""}
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Pemenang Perempat Final 1 &amp; 2 otomatis masuk ke Semifinal 1; Perempat Final 3 &amp; 4 ke Semifinal 2. Pemenang Semifinal otomatis maju ke Final, dan yang kalah ke Perebutan Juara 3. Saat Final selesai, medali Emas &amp; Perak otomatis tercatat!
+                  </p>
+                </div>
+
+                {availableDivisions.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-semibold text-muted-foreground">
+                      Divisi:
+                    </span>
+                    {availableDivisions.map((div) => {
+                      const isActive = activeDivision === div.division;
+                      const label =
+                        div.label || (div.division === "Men" ? "Putra" : "Putri");
+                      return (
+                        <Button
+                          key={div.division}
+                          type="button"
+                          size="sm"
+                          variant={isActive ? "default" : "outline"}
+                          onClick={() => handleSelectDivision(div.division)}
+                        >
+                          {label}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               <div className="grid gap-6 lg:grid-cols-3">
@@ -1445,13 +1687,21 @@ export default function BaganPage() {
             {/* SECTION 3: LIVE PREVIEW BAGAN WEB UTAMA */}
             {tournament && (
               <Card className="p-6 space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <Badge variant="secondary" className="mb-1">
-                      PRATINJAU LANGSUNG WEB UTAMA
-                    </Badge>
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <Badge variant="secondary">
+                        PRATINJAU LANGSUNG WEB UTAMA
+                      </Badge>
+                      {activeDivisionLabel && (
+                        <Badge className="bg-emerald-700 text-white">
+                          Divisi {activeDivisionLabel}
+                        </Badge>
+                      )}
+                    </div>
                     <h2 className="text-lg font-bold">
-                      Tampilan Bagan {tournament.sport_name} di Halaman Publik
+                      Tampilan Bagan {tournament.sport_name}
+                      {activeDivisionLabel ? ` (${activeDivisionLabel})` : ""} di Halaman Publik
                     </h2>
                   </div>
                   <Link
@@ -1461,7 +1711,21 @@ export default function BaganPage() {
                     Buka Halaman Bagan Utama →
                   </Link>
                 </div>
-                <SportBracket tournament={tournament} />
+                <SportBracket
+                  tournament={
+                    normalizedTournament && activeDivisionObj
+                      ? {
+                          ...normalizedTournament,
+                          groups: activeDivisionObj.groups,
+                          quarterfinals: activeDivisionObj.quarterfinals,
+                          semifinals: activeDivisionObj.semifinals,
+                          final: activeDivisionObj.final,
+                          bronze: activeDivisionObj.bronze,
+                          third_place: activeDivisionObj.third_place,
+                        }
+                      : normalizedTournament ?? tournament
+                  }
+                />
               </Card>
             )}
           </>

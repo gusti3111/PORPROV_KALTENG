@@ -70,9 +70,6 @@ const initialLoading: Record<Resource, boolean> = {
   contingents: false,
 };
 
-const RATU_ALAMSYAH_NOTE =
-  "Venue di dalam GOR Sport Center Ratu Alamsyah untuk pertandingan Basket, Bola Voli Indoor, Futsal, dan Sepak Takraw.";
-
 function formatJakartaDateTime(startTime?: string, fallbackDate?: string, fallbackTime?: string) {
   if (!startTime) {
     return { date: fallbackDate || "", time: fallbackTime || "" };
@@ -102,59 +99,6 @@ function normalizeSportDisplayName(name: string) {
     .replace(/\b(ergometer|egrometer)\b/gi, "Agrometer")
     .replace(/\bmotoprix\b/gi, "Motoprixx")
     .replace(/\bmotor\s*prix\b/gi, "Motor Prixx");
-}
-
-function normalizeVenueText(value?: string) {
-  return (value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
-function isGorSportCenterVenue(name?: string) {
-  const n = normalizeVenueText(name);
-  return n.includes("gor") && n.includes("sport center");
-}
-
-function consolidateGorSportCenterVenues(rawVenues: Venue[]) {
-  const group = rawVenues.filter((v) => isGorSportCenterVenue(v.name));
-  if (group.length <= 1) {
-    return { venues: rawVenues };
-  }
-
-  const primary =
-    group.find((v) => normalizeVenueText(v.name).includes("ratu alamsyah")) ??
-    group[0];
-  const mergedVenue: Venue = {
-    ...primary,
-    note: RATU_ALAMSYAH_NOTE,
-  };
-  const skipIds = new Set(
-    group.filter((v) => v.id !== primary.id).map((v) => v.id),
-  );
-
-  const venues = rawVenues
-    .filter((v) => !skipIds.has(v.id))
-    .map((v) => (v.id === primary.id ? mergedVenue : v));
-
-  return { venues };
-}
-
-function normalizeMatchVenue(
-  match: ScheduleMatch,
-  venues: Venue[],
-): ScheduleMatch {
-  if (!isGorSportCenterVenue(match.venue_name)) return match;
-  const ratu = venues.find((v) =>
-    normalizeVenueText(v.name).includes("ratu alamsyah"),
-  );
-  if (!ratu) return match;
-  return {
-    ...match,
-    venue_id: ratu.id,
-    venue_name: ratu.name,
-  };
 }
 
 export const useCompetitionStore = create<CompetitionState>((set, get) => ({
@@ -200,12 +144,8 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
       errors: { ...state.errors, venues: undefined },
     }));
     try {
-      const rawVenues = await getAPIData<Venue[]>("/venues");
-      const { venues } = consolidateGorSportCenterVenues(rawVenues);
-      set((state) => ({
-        venues,
-        matches: state.matches.map((m) => normalizeMatchVenue(m, venues)),
-      }));
+      const venues = await getAPIData<Venue[]>("/venues");
+      set({ venues });
     } catch (error) {
       set((state) => ({
         errors: { ...state.errors, venues: getAPIErrorMessage(error) },
@@ -225,7 +165,6 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
     }));
     try {
       const rawMatches = await getAPIData<ScheduleMatch[]>("/matches");
-      const currentVenues = get().venues;
       const mappedMatches = rawMatches.map((m) => {
         const jakarta = formatJakartaDateTime(m.start_time, m.date, m.time);
         return {
@@ -236,11 +175,7 @@ export const useCompetitionStore = create<CompetitionState>((set, get) => ({
           event_name: normalizeSportDisplayName(m.event_name),
         };
       });
-      const matches =
-        currentVenues.length > 0
-          ? mappedMatches.map((m) => normalizeMatchVenue(m, currentVenues))
-          : mappedMatches;
-      set({ matches });
+      set({ matches: mappedMatches });
     } catch (error) {
       set((state) => ({
         errors: { ...state.errors, matches: getAPIErrorMessage(error) },

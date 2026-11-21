@@ -16,14 +16,15 @@ import {
   Flame,
   Globe,
   HeartHandshake,
+  HeartPulse,
   History,
-  Info,
   MapPin,
   Medal,
   Newspaper,
   Phone,
   RotateCcw,
   ShieldCheck,
+  SlidersHorizontal,
   Sparkles,
   Star,
   Store,
@@ -35,24 +36,34 @@ import {
   X,
 } from "lucide-react";
 import {
-  kobarUMKMData,
   kobarDistricts,
   kobarCategories,
   kobarCulinaryThemes,
   type KobarUMKMItem,
   type KobarUMKMType,
 } from "../data/umkmKobarData";
-import { hotelData } from "../data/hotelKobarData";
-import { wisataKobarData } from "../data/wisataKobarData";
+import { fetchUMKM } from "../api/umkm";
+import {
+  HOTEL_TYPES,
+  fetchHotels,
+  type HotelItem,
+} from "../data/hotelKobarData";
+import { fetchWisata, type WisataItem } from "../api/wisata";
+import {
+  KESEHATAN_CATEGORIES,
+  fetchKesehatan,
+  type KesehatanItem,
+} from "../api/kesehatan";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
+import { fetchGaleri, type GaleriItem } from "../api/galeri";
 import { getContingentLogoUrl } from "../utils/contingentLogo";
 
-type NewsCategory = "Berita" | "Galeri" | "Tempat Makan dan Nongkrong" | "Hotel dan Penginapan" | "Pariwisata" | "About Us";
+type NewsCategory = "Berita" | "Galeri" | "Tempat Makan dan Nongkrong" | "Hotel dan Penginapan" | "Pariwisata" | "Layanan Kesehatan" | "About Us";
 type CategoryFilter = NewsCategory;
 
 type NewsArticle = {
@@ -102,14 +113,14 @@ const officialArticleImages: Record<string, string> = {
 };
 
 const venueImageFallbacks: string[] = [
-  "/venues2/sportCenter.jpg",
-  "/venues2/GORKoni.jpg",
-  "/venues2/pangakalnbunpark.jpg",
-  "/venues2/kampungSega.jpg",
-  "/venues2/LapanganTenisPasirPanjang.jpeg",
+  "/venues2/sportCenter.webp",
+  "/venues2/GORKoni.webp",
+  "/venues2/pangakalnbunpark.webp",
+  "/venues2/kampungSega.webp",
+  "/venues2/LapanganTenisPasirPanjang.webp",
   "/venues2/jalanRaya.jpg",
-  "/venues2/stadion.jpeg",
-  "/venues2/gorSportCenter.jpeg",
+  "/venues2/stadion.webp",
+  "/venues2/gorSportCenter.webp",
   "/sportcenter.webp",
 ];
 
@@ -149,15 +160,7 @@ function getCleanExcerpt(rawStr: string): string {
   }
 }
 
-type GalleryPhoto = {
-  id: number;
-  category: string;
-  title: string;
-  src: string;
-};
-
-// Data Hotel & Penginapan diimpor dari ../data/hotelKobarData
-// Data UMKM & Venue resmi Kotawaringin Barat diimpor dari ../data/umkmKobarData
+// Data Hotel, UMKM & Galeri diambil dari backend API
 
 const articles: NewsArticle[] = [
   {
@@ -168,7 +171,7 @@ const articles: NewsArticle[] = [
     excerpt:
       "Ikuti perkembangan berita dan pengumuman resmi menjelang penyelenggaraan PORPROV XIII.",
     theme: "green",
-    image: "/venues2/sportCenter.jpg",
+    image: "/venues2/sportCenter.webp",
   },
   {
     id: 2,
@@ -178,7 +181,7 @@ const articles: NewsArticle[] = [
     excerpt:
       "Jelajahi sejarah panjang dan prestasi yang telah dicapai dalam penyelenggaraan PORPROV XIII.",
     theme: "orange",
-    image: "/venues2/GORKoni.jpg",
+    image: "/venues2/GORKoni.webp",
   },
   {
     id: 3,
@@ -188,7 +191,7 @@ const articles: NewsArticle[] = [
     excerpt:
       "Atlet dari berbagai kabupaten dan kota bersiap untuk bertanding dengan menjunjung sportivitas.",
     theme: "lime",
-    image: "/venues2/pangakalnbunpark.jpg",
+    image: "/venues2/pangakalnbunpark.webp",
   },
   {
     id: 4,
@@ -198,61 +201,15 @@ const articles: NewsArticle[] = [
     excerpt:
       "Cari tahu cabang olahraga dan informasi pertandingan dalam agenda PORPROV XIII.",
     theme: "green",
-    image: "/venues2/kampungSega.jpg",
+    image: "/venues2/kampungSega.webp",
   },
 ];
-
-const galleryPhotos: GalleryPhoto[] = [
-  {
-    id: 10,
-    category: "Venue",
-    title: "GOR Basket Indoor Pangkalan Bun",
-    src: "/galeri/gor-basket-indoor.jpg",
-  },
-  {
-    id: 12,
-    category: "Venue",
-    title: "Stadion & Lintasan Atletik Sport Center",
-    src: "/galeri/stadion-lintasan-atletik.jpg",
-  },
-  {
-    id: 13,
-    category: "Venue",
-    title: "Arena Panjat Tebing PORPROV XIII",
-    src: "/galeri/arena-panjat-tebing.jpg",
-  },
-  {
-    id: 14,
-    category: "Venue",
-    title: "Lapangan Tenis Pasir Panjang",
-    src: "/galeri/lapangan-tenis-pasir-panjang.jpg",
-  },
-  {
-    id: 15,
-    category: "Venue",
-    title: "Roller Track di Sport Center",
-    src: "/galeri/VenueSepatuRoda.JPG",
-  },
-  {
-    id: 16,
-    category: "Venue",
-    title: "Malam Hari di Sport Center",
-    src: "/galeri/drumband.JPG",
-  },
-  {
-    id: 14,
-    category: "Venue",
-    title: "Aula Antakusuma",
-    src: "/galeri/aulaAntakusuma.jpeg",
-  },
-
-];
-
 
 const categories: CategoryFilter[] = [
   "Tempat Makan dan Nongkrong",
   "Pariwisata",
   "Hotel dan Penginapan",
+  "Layanan Kesehatan",
   "Galeri",
   "Berita",
   "About Us",
@@ -437,6 +394,7 @@ export default function Newsview() {
     if (tabParam === "umkm" || tabParam === "makan" || tabParam === "nongkrong" || tabParam === "kuliner") return "Tempat Makan dan Nongkrong";
     if (tabParam === "hotel" || tabParam === "penginapan") return "Hotel dan Penginapan";
     if (tabParam === "wisata" || tabParam === "pariwisata" || tabParam === "tourism") return "Pariwisata";
+    if (tabParam === "kesehatan" || tabParam === "health" || tabParam === "medis") return "Layanan Kesehatan";
     if (tabParam === "galeri" || tabParam === "gallery") return "Galeri";
     if (tabParam === "about" || tabParam === "about-us" || tabParam === "about_us" || tabParam === "sejarah" || tabParam === "history") return "About Us";
     if (tabParam === "berita") return "Berita";
@@ -448,6 +406,7 @@ export default function Newsview() {
     if (tabParam === "umkm" || tabParam === "makan" || tabParam === "nongkrong" || tabParam === "kuliner") setSelectedCategory("Tempat Makan dan Nongkrong");
     else if (tabParam === "hotel" || tabParam === "penginapan") setSelectedCategory("Hotel dan Penginapan");
     else if (tabParam === "wisata" || tabParam === "pariwisata" || tabParam === "tourism") setSelectedCategory("Pariwisata");
+    else if (tabParam === "kesehatan" || tabParam === "health" || tabParam === "medis") setSelectedCategory("Layanan Kesehatan");
     else if (tabParam === "galeri" || tabParam === "gallery") setSelectedCategory("Galeri");
     else if (tabParam === "about" || tabParam === "about-us" || tabParam === "about_us" || tabParam === "sejarah" || tabParam === "history") setSelectedCategory("About Us");
     else if (tabParam === "berita") setSelectedCategory("Berita");
@@ -466,18 +425,55 @@ export default function Newsview() {
     useState<KobarUMKMItem | null>(null);
   const [query, setQuery] = useState("");
   const [showAllGallery, setShowAllGallery] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState<GalleryPhoto | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<GaleriItem | null>(null);
+  const [galeriItems, setGaleriItems] = useState<GaleriItem[]>([]);
+  const [galeriLoading, setGaleriLoading] = useState<boolean>(false);
+  const [galeriError, setGaleriError] = useState<string | null>(null);
+  const [galeriCategoryFilter, setGaleriCategoryFilter] = useState<string>("Semua");
+  const [galeriFeaturedOnly, setGaleriFeaturedOnly] = useState<boolean>(false);
+  const [failedGaleriImages, setFailedGaleriImages] = useState<Record<number, boolean>>({});
+  const [galeriRefreshTick, setGaleriRefreshTick] = useState<number>(0);
 
   // Live MMC Kobar API State
   const [mmcArticles, setMmcArticles] = useState<MmcNewsItem[]>([]);
   const [isLoadingMmc, setIsLoadingMmc] = useState<boolean>(true);
   const [mmcError, setMmcError] = useState<string | null>(null);
   const [selectedDetailArticle, setSelectedDetailArticle] = useState<DisplayArticle | null>(null);
+  const [hotels, setHotels] = useState<HotelItem[]>([]);
+  const [hotelsLoading, setHotelsLoading] = useState<boolean>(false);
+  const [hotelsError, setHotelsError] = useState<string | null>(null);
+  const [hotelTypeFilter, setHotelTypeFilter] = useState<string>("Semua");
+  const [hotelDistrictFilter, setHotelDistrictFilter] = useState<string>("Semua Kecamatan");
+  const [failedHotelImages, setFailedHotelImages] = useState<Record<number, boolean>>({});
+  const [hotelRefreshTick, setHotelRefreshTick] = useState<number>(0);
+
+  const [umkmItems, setUmkmItems] = useState<KobarUMKMItem[]>([]);
+  const [umkmLoading, setUmkmLoading] = useState<boolean>(false);
+  const [umkmError, setUmkmError] = useState<string | null>(null);
+  const [failedUmkmImages, setFailedUmkmImages] = useState<Record<number, boolean>>({});
+  const [umkmRefreshTick, setUmkmRefreshTick] = useState<number>(0);
+
+  const [wisataItems, setWisataItems] = useState<WisataItem[]>([]);
+  const [wisataLoading, setWisataLoading] = useState<boolean>(false);
+  const [wisataError, setWisataError] = useState<string | null>(null);
+  const [wisataCategoryFilter, setWisataCategoryFilter] = useState<string>("Semua");
+  const [wisataDistrictFilter, setWisataDistrictFilter] = useState<string>("Semua");
+  const [failedWisataImages, setFailedWisataImages] = useState<Record<number, boolean>>({});
+  const [wisataRefreshTick, setWisataRefreshTick] = useState<number>(0);
+
+  const [kesehatanItems, setKesehatanItems] = useState<KesehatanItem[]>([]);
+  const [kesehatanLoading, setKesehatanLoading] = useState<boolean>(false);
+  const [kesehatanError, setKesehatanError] = useState<string | null>(null);
+  const [kesehatanCategoryFilter, setKesehatanCategoryFilter] = useState<string>("Semua");
+  const [kesehatanDistrictFilter, setKesehatanDistrictFilter] = useState<string>("Semua");
+  const [failedKesehatanImages, setFailedKesehatanImages] = useState<Record<number, boolean>>({});
+  const [kesehatanRefreshTick, setKesehatanRefreshTick] = useState<number>(0);
 
   const fetchMmcNews = async () => {
     setIsLoadingMmc(true);
     setMmcError(null);
     try {
+      // const res = await fetch("https://mmc.apikobar.id/api/berita?search=porprov%20xiii");
       const res = await fetch("https://mmc.apikobar.id/api/berita?search=porprov%20xiii");
       if (!res.ok) {
         throw new Error(`HTTP error ${res.status}`);
@@ -500,12 +496,225 @@ export default function Newsview() {
     fetchMmcNews();
   }, []);
 
+  const [umkmFiltersOpen, setUmkmFiltersOpen] = useState(false);
+
   const normalizedQuery = query.trim().toLocaleLowerCase("id");
   const isAboutUsTab = selectedCategory === "About Us";
   const isGalleryTab = selectedCategory === "Galeri";
   const isUMKMTab = selectedCategory === "Tempat Makan dan Nongkrong";
   const isHotelTab = selectedCategory === "Hotel dan Penginapan";
   const isWisataTab = selectedCategory === "Pariwisata";
+  const isKesehatanTab = selectedCategory === "Layanan Kesehatan";
+
+  useEffect(() => {
+    if (!isKesehatanTab) return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      setKesehatanLoading(true);
+      setKesehatanError(null);
+      void fetchKesehatan({
+        category: kesehatanCategoryFilter,
+        district: kesehatanDistrictFilter,
+        search: normalizedQuery,
+      })
+        .then((rows) => {
+          if (!cancelled) {
+            setKesehatanItems(rows);
+          }
+        })
+        .catch((err: unknown) => {
+          if (!cancelled) {
+            setKesehatanError(
+              err instanceof Error
+                ? err.message
+                : "Gagal memuat data layanan kesehatan.",
+            );
+          }
+        })
+        .finally(() => {
+          if (!cancelled) {
+            setKesehatanLoading(false);
+          }
+        });
+    }, normalizedQuery ? 250 : 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [
+    isKesehatanTab,
+    kesehatanCategoryFilter,
+    kesehatanDistrictFilter,
+    normalizedQuery,
+    kesehatanRefreshTick,
+  ]);
+
+  useEffect(() => {
+    if (!isGalleryTab) return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      setGaleriLoading(true);
+      setGaleriError(null);
+      void fetchGaleri({
+        category: galeriCategoryFilter,
+        is_featured: galeriFeaturedOnly ? true : undefined,
+        search: normalizedQuery,
+      })
+        .then((rows) => {
+          if (!cancelled) {
+            setGaleriItems(rows);
+          }
+        })
+        .catch((err: unknown) => {
+          if (!cancelled) {
+            setGaleriError(
+              err instanceof Error ? err.message : "Gagal memuat foto galeri.",
+            );
+          }
+        })
+        .finally(() => {
+          if (!cancelled) {
+            setGaleriLoading(false);
+          }
+        });
+    }, normalizedQuery ? 250 : 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [
+    isGalleryTab,
+    galeriCategoryFilter,
+    galeriFeaturedOnly,
+    normalizedQuery,
+    galeriRefreshTick,
+  ]);
+
+  useEffect(() => {
+    if (!isUMKMTab) return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      setUmkmLoading(true);
+      setUmkmError(null);
+      void fetchUMKM({
+        tipe: selectedUMKMType,
+        culinary_theme_key: selectedCulinaryTheme,
+        kecamatan: selectedDistrict,
+        recommended: onlyRecommended,
+        search: normalizedQuery,
+      })
+        .then((rows) => {
+          if (!cancelled) {
+            setUmkmItems(rows);
+          }
+        })
+        .catch((err: unknown) => {
+          if (!cancelled) {
+            setUmkmError(
+              err instanceof Error ? err.message : "Gagal memuat data kuliner & UMKM.",
+            );
+          }
+        })
+        .finally(() => {
+          if (!cancelled) {
+            setUmkmLoading(false);
+          }
+        });
+    }, normalizedQuery ? 250 : 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [
+    isUMKMTab,
+    selectedUMKMType,
+    selectedCulinaryTheme,
+    selectedDistrict,
+    onlyRecommended,
+    normalizedQuery,
+    umkmRefreshTick,
+  ]);
+
+  useEffect(() => {
+    if (!isWisataTab) return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      setWisataLoading(true);
+      setWisataError(null);
+      void fetchWisata({
+        category: wisataCategoryFilter,
+        district: wisataDistrictFilter,
+        search: normalizedQuery,
+      })
+        .then((rows) => {
+          if (!cancelled) {
+            setWisataItems(rows);
+          }
+        })
+        .catch((err: unknown) => {
+          if (!cancelled) {
+            setWisataError(
+              err instanceof Error ? err.message : "Gagal memuat data destinasi wisata.",
+            );
+          }
+        })
+        .finally(() => {
+          if (!cancelled) {
+            setWisataLoading(false);
+          }
+        });
+    }, normalizedQuery ? 250 : 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [
+    isWisataTab,
+    wisataCategoryFilter,
+    wisataDistrictFilter,
+    normalizedQuery,
+    wisataRefreshTick,
+  ]);
+
+  useEffect(() => {
+    if (!isHotelTab) return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      setHotelsLoading(true);
+      setHotelsError(null);
+      void fetchHotels({
+        type: hotelTypeFilter,
+        district: hotelDistrictFilter,
+        search: normalizedQuery,
+      })
+        .then((rows) => {
+          if (!cancelled) {
+            setHotels(rows);
+          }
+        })
+        .catch((err: unknown) => {
+          if (!cancelled) {
+            setHotelsError(
+              err instanceof Error ? err.message : "Gagal memuat data hotel.",
+            );
+          }
+        })
+        .finally(() => {
+          if (!cancelled) {
+            setHotelsLoading(false);
+          }
+        });
+    }, normalizedQuery ? 250 : 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [isHotelTab, hotelTypeFilter, hotelDistrictFilter, normalizedQuery, hotelRefreshTick]);
 
   const liveMappedArticles: DisplayArticle[] = useMemo(() => {
     if (mmcArticles.length > 0) {
@@ -579,21 +788,35 @@ export default function Newsview() {
     [liveMappedArticles, normalizedQuery, selectedCategory],
   );
 
+  const galeriCategoryOptions = useMemo(() => {
+    const unique = Array.from(
+      new Set(galeriItems.map((g) => g.category).filter(Boolean)),
+    );
+    return ["Semua", ...unique];
+  }, [galeriItems]);
+
   const visibleGalleryPhotos = useMemo(
     () =>
-      galleryPhotos.filter((photo) =>
-        `${photo.title} ${photo.category}`
-          .toLocaleLowerCase("id")
-          .includes(normalizedQuery),
-      ),
-    [normalizedQuery],
+      galeriItems.filter((photo) => {
+        const matchesCategory =
+          galeriCategoryFilter === "Semua" ||
+          photo.category === galeriCategoryFilter;
+        const matchesFeatured = !galeriFeaturedOnly || photo.is_featured;
+        const matchesQuery =
+          !normalizedQuery ||
+          `${photo.title} ${photo.category} ${photo.caption} ${photo.photographer}`
+            .toLocaleLowerCase("id")
+            .includes(normalizedQuery);
+        return matchesCategory && matchesFeatured && matchesQuery;
+      }),
+    [galeriItems, galeriCategoryFilter, galeriFeaturedOnly, normalizedQuery],
   );
   const displayedGalleryPhotos = showAllGallery
     ? visibleGalleryPhotos
     : visibleGalleryPhotos.slice(0, 6);
 
   const visibleUMKM = useMemo(() => {
-    const filtered = kobarUMKMData.filter((item) => {
+    const filtered = umkmItems.filter((item) => {
       const matchesType =
         selectedUMKMType === "Semua" || item.tipe === selectedUMKMType;
       const matchesDistrict =
@@ -608,7 +831,7 @@ export default function Newsview() {
         !onlyRealPhoto || item.image.startsWith("/kuliner-real/");
       const matchesQuery =
         !normalizedQuery ||
-        `${item.nama} ${item.kategori_google} ${item.culinaryTheme} ${item.signatureDish} ${item.alamat} ${item.kecamatanFull}`
+        `${item.nama} ${item.kategori_google} ${item.culinaryTheme} ${item.signatureDish} ${item.deskripsi ?? ""} ${item.alamat} ${item.kecamatanFull}`
           .toLocaleLowerCase("id")
           .includes(normalizedQuery);
 
@@ -633,6 +856,7 @@ export default function Newsview() {
       return (b.jumlah_ulasan || 0) - (a.jumlah_ulasan || 0);
     });
   }, [
+    umkmItems,
     normalizedQuery,
     selectedUMKMType,
     selectedDistrict,
@@ -650,26 +874,85 @@ export default function Newsview() {
 
   const visibleHotels = useMemo(
     () =>
-      hotelData.filter(
-        (hotel) =>
+      hotels.filter((hotel) => {
+        const matchesType =
+          hotelTypeFilter === "Semua" || hotel.type === hotelTypeFilter;
+        const matchesDistrict =
+          hotelDistrictFilter === "Semua Kecamatan" ||
+          hotel.district
+            .toLocaleLowerCase("id")
+            .includes(hotelDistrictFilter.toLocaleLowerCase("id"));
+        const matchesQuery =
           !normalizedQuery ||
           `${hotel.hotelName} ${hotel.type} ${hotel.address} ${hotel.district} ${hotel.nearVenue} ${hotel.facilities.join(" ")}`
             .toLocaleLowerCase("id")
-            .includes(normalizedQuery),
-      ),
-    [normalizedQuery],
+            .includes(normalizedQuery);
+        return matchesType && matchesDistrict && matchesQuery;
+      }),
+    [hotels, hotelTypeFilter, hotelDistrictFilter, normalizedQuery],
   );
+
+  const wisataCategoryOptions = useMemo(() => {
+    const unique = Array.from(
+      new Set(wisataItems.map((w) => w.category).filter(Boolean)),
+    );
+    return ["Semua", ...unique];
+  }, [wisataItems]);
+
+  const wisataDistrictOptions = useMemo(() => {
+    const unique = Array.from(
+      new Set(wisataItems.map((w) => w.district).filter(Boolean)),
+    );
+    return ["Semua", ...unique];
+  }, [wisataItems]);
 
   const visibleWisata = useMemo(
     () =>
-      wisataKobarData.filter(
-        (wisata) =>
+      wisataItems.filter((wisata) => {
+        const matchesCategory =
+          wisataCategoryFilter === "Semua" ||
+          wisata.category === wisataCategoryFilter;
+        const matchesDistrict =
+          wisataDistrictFilter === "Semua" ||
+          wisata.district === wisataDistrictFilter;
+        const matchesQuery =
           !normalizedQuery ||
           `${wisata.name} ${wisata.category} ${wisata.district} ${wisata.description} ${wisata.highlights} ${wisata.openInfo}`
             .toLocaleLowerCase("id")
-            .includes(normalizedQuery),
-      ),
-    [normalizedQuery],
+            .includes(normalizedQuery);
+        return matchesCategory && matchesDistrict && matchesQuery;
+      }),
+    [wisataItems, wisataCategoryFilter, wisataDistrictFilter, normalizedQuery],
+  );
+
+  const kesehatanDistrictOptions = useMemo(() => {
+    const unique = Array.from(
+      new Set(kesehatanItems.map((k) => k.district).filter(Boolean)),
+    );
+    return ["Semua", ...unique];
+  }, [kesehatanItems]);
+
+  const visibleKesehatan = useMemo(
+    () =>
+      kesehatanItems.filter((item) => {
+        const matchesCategory =
+          kesehatanCategoryFilter === "Semua" ||
+          item.category
+            .toLocaleLowerCase("id")
+            .includes(kesehatanCategoryFilter.toLocaleLowerCase("id"));
+        const matchesDistrict =
+          kesehatanDistrictFilter === "Semua" ||
+          item.district
+            .toLocaleLowerCase("id")
+            .includes(kesehatanDistrictFilter.toLocaleLowerCase("id"));
+        const matchesQuery =
+          !normalizedQuery ||
+          `${item.name} ${item.category} ${item.district} ${item.description} ${item.highlights} ${item.openInfo}`
+            .toLocaleLowerCase("id")
+            .includes(normalizedQuery);
+        return matchesCategory && matchesDistrict && matchesQuery;
+      }),
+    [kesehatanItems, kesehatanCategoryFilter, kesehatanDistrictFilter, normalizedQuery],
   );
 
   const searchPlaceholder = isGalleryTab
@@ -682,7 +965,9 @@ export default function Newsview() {
           ? "Cari nama hotel, wisma, atau lokasi..."
           : isWisataTab
             ? "Cari destinasi wisata, pantai, cagar budaya, atau lokasi..."
-            : "Cari berita...";
+            : isKesehatanTab
+              ? "Cari rumah sakit, puskesmas, klinik, apotek, atau lokasi..."
+              : "Cari berita...";
 
   return (
     <>
@@ -704,7 +989,9 @@ export default function Newsview() {
                       ? "Hotel & Penginapan"
                       : isWisataTab
                         ? "Pariwisata"
-                        : "Informasi"}
+                        : isKesehatanTab
+                          ? "Layanan Kesehatan"
+                          : "Informasi"}
             </span>
           </div>
           <p className="schedule-eyebrow">
@@ -719,7 +1006,9 @@ export default function Newsview() {
                     ? "AKOMODASI PORPROV XIII KALIMANTAN TENGAH"
                     : isWisataTab
                       ? "DESTINASI WISATA RESMI KOTAWARINGIN BARAT • PORPROV XIII"
-                      : "INFORMASI PORPROV XIII KALIMANTAN TENGAH 2026"}
+                      : isKesehatanTab
+                        ? "LAYANAN KESEHATAN & MEDIS KOTAWARINGIN BARAT • PORPROV XIII"
+                        : "INFORMASI PORPROV XIII KALIMANTAN TENGAH 2026"}
           </p>
           <h1>
             {isGalleryTab ? (
@@ -742,6 +1031,10 @@ export default function Newsview() {
               <>
                 Pesona <span>Pariwisata Kobar</span>
               </>
+            ) : isKesehatanTab ? (
+              <>
+                Layanan <span>Kesehatan</span>
+              </>
             ) : (
               <>
                 Pusat <span>Informasi</span>
@@ -754,16 +1047,18 @@ export default function Newsview() {
               : isAboutUsTab
                 ? "Mengenal lebih dekat visi penyelenggaraan, profil organisasi, perjalanan sejarah, filosofi Isen Mulang & Huma Betang, serta profil 14 Kontingen Kabupaten/Kota dalam perhelatan PORPROV XIII Kalimantan Tengah 2026."
                 : isUMKMTab
-                  ? `Panduan ${kobarUMKMData.length} tempat makan, kedai kopi, restoran, warung makan, dan street food di Kabupaten Kotawaringin Barat untuk kontingen & penonton PORPROV XIII.`
+                  ? `Panduan ${umkmItems.length || 63} tempat makan, kedai kopi, restoran, warung makan, dan street food di Kabupaten Kotawaringin Barat untuk kontingen & penonton PORPROV XIII.`
                   : isHotelTab
                     ? "Temukan rekomendasi hotel dan penginapan nyaman di sekitar lokasi pertandingan PORPROV XIII."
                     : isWisataTab
                       ? "Panduan destinasi wisata unggulan di Kabupaten Kotawaringin Barat — mulai dari habitat orangutan Taman Nasional Tanjung Puting, Pantai Kubu, cagar budaya Istana Kuning, hingga susur Sungai Arut."
-                      : "Informasi terkini seputar PORPROV XIII Kalimantan Tengah"}
+                      : isKesehatanTab
+                        ? "Direktori rumah sakit, puskesmas, klinik, dan apotek di Kabupaten Kotawaringin Barat untuk mendukung kesehatan atlet, ofisial, dan penonton PORPROV XIII."
+                        : "Informasi terkini seputar PORPROV XIII Kalimantan Tengah"}
           </p>
           <img
             className="news-hero-illustration"
-            src="/keraBerita.png"
+            src="/keraBerita.webp"
             alt="Maskot PORPROV memegang kamera"
           />
           {!isAboutUsTab && (
@@ -864,7 +1159,7 @@ export default function Newsview() {
 
                   <div className="flex flex-col items-center justify-center rounded-2xl border border-white/15 bg-white/10 p-6 text-center backdrop-blur-xs lg:col-span-4">
                     <img
-                      src="/iconporKalteng-removebg-preview.png"
+                      src="/iconporKalteng-removebg-preview.webp"
                       alt="Logo PORPROV XIII Kalimantan Tengah"
                       className="h-28 w-auto object-contain drop-shadow-md"
                     />
@@ -1195,7 +1490,7 @@ export default function Newsview() {
                 </div>
 
                 {visibleContingents.length > 0 ? (
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {visibleContingents.map((contingent) => {
                       const logoUrl = getContingentLogoUrl(
                         contingent.name,
@@ -1246,57 +1541,188 @@ export default function Newsview() {
               </div>
             </div>
           ) : isGalleryTab ? (
-            visibleGalleryPhotos.length > 0 ? (
-              <>
-                <div className="news-gallery-grid" aria-live="polite">
-                  {displayedGalleryPhotos.map((photo) => (
-                    <Card
-                      className="news-gallery-card p-0"
-                      key={photo.id}
-                      role="article"
-                      aria-label={`${photo.category}: ${photo.title}`}
-                      onClick={() => setSelectedPhoto(photo)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <img
-                        className="news-gallery-image"
-                        src={photo.src}
-                        alt={`${photo.title} (foto ilustrasi)`}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      <div className="news-gallery-copy">
-                        <span>{photo.category}</span>
-                        <h2>{photo.title}</h2>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-                {visibleGalleryPhotos.length > 6 && (
-                  <Button
-                    className="news-gallery-more"
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowAllGallery((showAll) => !showAll)}
+            <div className="space-y-6" aria-live="polite">
+              {/* Filter Kategori & Unggulan Galeri */}
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/90 p-4 text-xs text-slate-600 shadow-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                  <label htmlFor="galeri-category-filter" className="font-semibold text-slate-600 shrink-0">
+                    Kategori:
+                  </label>
+                  <select
+                    id="galeri-category-filter"
+                    value={galeriCategoryFilter}
+                    onChange={(e) => setGaleriCategoryFilter(e.target.value)}
+                    className="max-w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-800 focus:border-[#174a72] focus:outline-hidden"
                   >
-                    {showAllGallery ? "Tampilkan lebih sedikit" : "Lebih banyak"}
+                    {galeriCategoryOptions.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={() => setGaleriFeaturedOnly((prev) => !prev)}
+                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${galeriFeaturedOnly
+                      ? "bg-amber-400 text-slate-950 shadow-xs"
+                      : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                      }`}
+                  >
+                    <Star className={`h-3.5 w-3.5 shrink-0 ${galeriFeaturedOnly ? "fill-slate-950" : "text-amber-500"}`} />
+                    Foto Unggulan
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span>
+                    Menampilkan <strong>{visibleGalleryPhotos.length}</strong> foto
+                  </span>
+                  {(galeriCategoryFilter !== "Semua" ||
+                    galeriFeaturedOnly ||
+                    normalizedQuery !== "") && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setGaleriCategoryFilter("Semua");
+                          setGaleriFeaturedOnly(false);
+                          setQuery("");
+                        }}
+                        className="inline-flex shrink-0 items-center gap-1 font-bold text-rose-600 hover:underline"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        Reset
+                      </button>
+                    )}
+                </div>
+              </div>
+
+              {galeriLoading ? (
+                <div
+                  className="rounded-xl border border-slate-200 bg-white p-10 text-center text-xs font-semibold text-slate-600"
+                  role="status"
+                >
+                  Memuat foto galeri dari server...
+                </div>
+              ) : galeriError ? (
+                <div
+                  className="rounded-xl border border-rose-200 bg-rose-50 p-8 text-center"
+                  role="alert"
+                >
+                  <p className="text-sm font-bold text-rose-800">
+                    Gagal memuat foto galeri
+                  </p>
+                  <p className="mt-1 text-xs text-rose-700">{galeriError}</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setGaleriRefreshTick((t) => t + 1)}
+                    className="mt-4 gap-1.5 border-rose-300 bg-white text-rose-700 hover:bg-rose-100"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                    Coba Lagi
                   </Button>
-                )}
-              </>
-            ) : (
-              <p className="news-empty" role="status">
-                Foto galeri tidak ditemukan. Coba kata kunci lain.
-              </p>
-            )
+                </div>
+              ) : visibleGalleryPhotos.length > 0 ? (
+                <>
+                  <div className="news-gallery-grid">
+                    {displayedGalleryPhotos.map((photo) => {
+                      const imgFailed = Boolean(failedGaleriImages[photo.id]);
+                      const hasValidImage = Boolean(photo.image_url) && !imgFailed;
+                      return (
+                        <Card
+                          className="news-gallery-card min-w-0 cursor-pointer p-0"
+                          key={photo.id}
+                          role="article"
+                          aria-label={`${photo.category}: ${photo.title}`}
+                          onClick={() => setSelectedPhoto(photo)}
+                        >
+                          {hasValidImage ? (
+                            <img
+                              className="news-gallery-image"
+                              src={photo.image_url}
+                              alt={photo.title}
+                              decoding="async"
+                              loading="lazy"
+                              onError={() =>
+                                setFailedGaleriImages((prev) => ({
+                                  ...prev,
+                                  [photo.id]: true,
+                                }))
+                              }
+                            />
+                          ) : (
+                            <div className="flex h-full w-full flex-col items-center justify-center bg-[image:var(--hero-gradient)] p-4 text-center text-white/85">
+                              <Camera className="mb-1.5 h-8 w-8 shrink-0 text-amber-300" />
+                              <span className="max-w-full break-words line-clamp-2 text-xs font-bold">
+                                {photo.title}
+                              </span>
+                              <span className="mt-0.5 text-[10px] text-sky-200/80">
+                                Foto belum tersedia
+                              </span>
+                            </div>
+                          )}
+                          {photo.is_featured && (
+                            <span className="absolute top-3 right-3 z-10 inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-400 px-2.5 py-0.5 text-[10px] font-extrabold text-slate-950 shadow-xs">
+                              <Star className="h-3 w-3 shrink-0 fill-slate-950" />
+                              Unggulan
+                            </span>
+                          )}
+                          <div className="news-gallery-copy min-w-0">
+                            <span className="block max-w-full truncate">
+                              {photo.category}
+                            </span>
+                            <h2 className="min-w-0 break-words line-clamp-2">
+                              {photo.title}
+                            </h2>
+                            {photo.caption && (
+                              <p className="mt-1 min-w-0 break-words line-clamp-2 text-xs text-white/80">
+                                {photo.caption}
+                              </p>
+                            )}
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                  {visibleGalleryPhotos.length > 6 && (
+                    <div className="flex justify-center">
+                      <Button
+                        className="news-gallery-more shrink-0"
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowAllGallery((showAll) => !showAll)}
+                      >
+                        {showAllGallery ? "Tampilkan lebih sedikit" : "Lebih banyak"}
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div
+                  className="rounded-xl border border-dashed border-slate-300 p-10 text-center"
+                  role="status"
+                >
+                  <Camera className="mx-auto h-9 w-9 text-slate-400" />
+                  <p className="mt-2 text-sm font-bold text-slate-800">
+                    Foto galeri tidak ditemukan
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Coba ubah filter kategori atau kata kunci pencarian.
+                  </p>
+                </div>
+              )}
+            </div>
           ) : isHotelTab ? (
             <div className="space-y-6" aria-live="polite">
               {/* Hero Banner: Akomodasi & Penginapan Kotawaringin Barat */}
               <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-[image:var(--hero-gradient)] text-white shadow-lg">
-                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 p-6 sm:p-8">
-                  <div className="max-w-2xl space-y-3">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-amber-400/20 border border-amber-400/30 px-3.5 py-1 text-xs font-bold text-amber-300">
-                      <MapPin className="h-3.5 w-3.5" />
-                      <span>AKOMODASI &amp; PENGINAPAN RESMI • PORPROV XIII</span>
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 p-4 sm:p-8">
+                  <div className="w-full min-w-0 max-w-2xl space-y-3">
+                    <div className="inline-flex max-w-full items-center gap-2 rounded-xl sm:rounded-full bg-amber-400/20 border border-amber-400/30 px-3 py-1 text-[10px] sm:text-xs font-bold leading-snug text-amber-300">
+                      <MapPin className="h-3.5 w-3.5 shrink-0" />
+                      <span className="[overflow-wrap:anywhere]">AKOMODASI &amp; PENGINAPAN RESMI • PORPROV XIII</span>
                     </div>
 
                     <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
@@ -1311,7 +1737,7 @@ export default function Newsview() {
                   <div className="w-full md:w-auto shrink-0 flex items-center justify-center">
                     <div className="relative flex flex-col items-center justify-center border-none shadow-none">
                       <img
-                        src="/monyet_tidur.png"
+                        src="/monyet_tidur.webp"
                         alt="Maskot Monyet Tidur Hotel dan Penginapan"
                         className="w-auto h-auto max-h-36 sm:max-h-48 md:max-h-56 max-w-[240px] sm:max-w-[300px] md:max-w-xs object-contain drop-shadow-lg transition-transform duration-500 hover:scale-105"
                         loading="lazy"
@@ -1321,143 +1747,268 @@ export default function Newsview() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-xs text-slate-600 shadow-xs">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-[#174a72]" />
-                  <span>
-                    Menampilkan <strong>{visibleHotels.length}</strong> rekomendasi akomodasi & penginapan di sekitar venue PORPROV XIII.
+              {/* Filter Tipe & Kecamatan Hotel */}
+              <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white/90 p-4 text-xs text-slate-600 shadow-xs">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {(["Semua", ...HOTEL_TYPES] as const).map((typeOption) => {
+                      const active = hotelTypeFilter === typeOption;
+                      return (
+                        <button
+                          key={typeOption}
+                          type="button"
+                          onClick={() => setHotelTypeFilter(typeOption)}
+                          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${active
+                            ? "bg-[#174a72] text-white shadow-xs"
+                            : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                            }`}
+                        >
+                          {typeOption}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label htmlFor="hotel-district-filter" className="font-semibold text-slate-600 shrink-0">
+                      Kecamatan:
+                    </label>
+                    <select
+                      id="hotel-district-filter"
+                      value={hotelDistrictFilter}
+                      onChange={(e) => setHotelDistrictFilter(e.target.value)}
+                      className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-800 focus:border-[#174a72] focus:outline-hidden"
+                    >
+                      {kobarDistricts.map((dist) => (
+                        <option key={dist} value={dist}>
+                          {dist}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <MapPin className="h-4 w-4 shrink-0 text-[#174a72]" />
+                    <span className="min-w-0 break-words">
+                      Menampilkan <strong>{visibleHotels.length}</strong> rekomendasi akomodasi &amp; penginapan di sekitar venue PORPROV XIII.
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-500">
+                    *Tarif dan ketersediaan kamar dapat berubah selama penyelenggaraan PORPROV.
                   </span>
                 </div>
-                <span className="text-[11px] text-slate-500">
-                  *Tarif dan ketersediaan kamar dapat berubah selama penyelenggaraan PORPROV.
-                </span>
               </div>
 
-              {visibleHotels.length > 0 ? (
+              {hotelsLoading ? (
+                <div
+                  className="rounded-xl border border-slate-200 bg-white p-10 text-center text-xs font-semibold text-slate-600"
+                  role="status"
+                >
+                  Memuat data hotel &amp; penginapan dari server...
+                </div>
+              ) : hotelsError ? (
+                <div
+                  className="rounded-xl border border-rose-200 bg-rose-50 p-8 text-center"
+                  role="alert"
+                >
+                  <p className="text-sm font-bold text-rose-800">
+                    Gagal memuat data hotel &amp; penginapan
+                  </p>
+                  <p className="mt-1 text-xs text-rose-700">{hotelsError}</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setHotelRefreshTick((t) => t + 1)}
+                    className="mt-4 gap-1.5 border-rose-300 bg-white text-rose-700 hover:bg-rose-100"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    Coba Lagi
+                  </Button>
+                </div>
+              ) : visibleHotels.length > 0 ? (
                 <div className="news-grid">
-                  {visibleHotels.map((hotel) => (
-                    <Card
-                      className="news-card flex flex-col justify-between overflow-hidden rounded-xl border border-slate-200 bg-white p-0 shadow-xs transition-all hover:-translate-y-1 hover:shadow-md"
-                      key={hotel.id}
-                      role="article"
-                    >
-                      <div>
-                        <div className="relative h-48 w-full overflow-hidden bg-slate-100">
-                          {hotel.image ? (
-                            <img
-                              className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-                              src={hotel.image}
-                              alt={hotel.hotelName}
-                              loading="lazy"
-                              onError={(e) => {
-                                e.currentTarget.style.display = "none";
-                              }}
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-slate-100 text-xs font-medium text-slate-400">
-                              Foto belum tersedia
-                            </div>
-                          )}
-                          <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
-                            <span className="rounded-full bg-[#102b49]/90 px-2.5 py-1 text-[10px] font-bold tracking-wide text-white uppercase backdrop-blur-xs">
-                              {hotel.type}
-                            </span>
-                          </div>
-                          <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-amber-400/95 px-2.5 py-1 text-xs font-extrabold text-slate-950 shadow-xs">
-                            <Star className="h-3.5 w-3.5 fill-slate-950" />
-                            <span>{hotel.rating}</span>
-                          </div>
-                          <div className="absolute right-3 bottom-3 left-3 flex items-center justify-between">
-                            <span className="rounded-md bg-black/70 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-xs">
-                              Kec. {hotel.district}
-                            </span>
-                          </div>
-                        </div>
+                  {visibleHotels.map((hotel) => {
+                    const imgFailed = Boolean(failedHotelImages[hotel.id]);
+                    const hasValidImage = Boolean(hotel.image) && !imgFailed;
+                    const waDigits = hotel.contact.replace(/\D/g, "");
+                    const mapsHref =
+                      hotel.mapsUrl ||
+                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${hotel.hotelName} ${hotel.address}`)}`;
 
-                        <div className="p-5">
-                          <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
-                            {hotel.hotelName}
-                          </h2>
-                          <p className="mt-1 text-xs font-semibold text-[#174a72]">
-                            {hotel.priceRange}
-                          </p>
-
-                          <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
-                            <div className="flex items-start gap-2">
-                              <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#397eae]" />
-                              <span>{hotel.address}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-[11px] font-medium text-emerald-700">
-                              <Clock className="h-3.5 w-3.5 shrink-0" />
-                              <span>{hotel.nearVenue}</span>
-                            </div>
-                          </div>
-
-                          <div className="mt-3 flex flex-wrap gap-1.5">
-                            {hotel.facilities.map((facility) => (
-                              <span
-                                key={facility}
-                                className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700"
-                              >
-                                {facility}
+                    return (
+                      <Card
+                        className="news-card flex min-w-0 flex-col justify-between overflow-hidden rounded-xl border border-slate-200 bg-white p-0 shadow-xs transition-all hover:-translate-y-1 hover:shadow-md"
+                        key={hotel.id}
+                        role="article"
+                      >
+                        <div className="min-w-0">
+                          <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                            {hasValidImage ? (
+                              <img
+                                className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                                src={hotel.image}
+                                alt={hotel.hotelName}
+                                loading="lazy"
+                                onError={() => {
+                                  setFailedHotelImages((prev) => ({
+                                    ...prev,
+                                    [hotel.id]: true,
+                                  }));
+                                }}
+                              />
+                            ) : (
+                              <div className="flex h-full w-full flex-col items-center justify-center bg-[image:var(--hero-gradient)] p-4 text-center text-white/85">
+                                <Building2 className="mb-2 h-8 w-8 text-amber-300 shrink-0" />
+                                <span className="max-w-full break-words line-clamp-2 text-xs font-bold">
+                                  {hotel.hotelName}
+                                </span>
+                                <span className="mt-0.5 text-[10px] text-sky-200/80">
+                                  Foto belum tersedia
+                                </span>
+                              </div>
+                            )}
+                            <div className="absolute top-3 left-3 flex max-w-[65%] flex-wrap items-center gap-1.5">
+                              <span className="shrink-0 max-w-full truncate rounded-full bg-[#102b49]/90 px-2.5 py-1 text-[10px] font-bold tracking-wide text-white uppercase backdrop-blur-xs">
+                                {hotel.type}
                               </span>
-                            ))}
+                            </div>
+                            <div className="absolute top-3 right-3 flex shrink-0 items-center gap-1 rounded-full bg-amber-400/95 px-2.5 py-1 text-xs font-extrabold text-slate-950 shadow-xs">
+                              <Star className="h-3.5 w-3.5 shrink-0 fill-slate-950" />
+                              <span>{hotel.rating.toFixed(1)}</span>
+                            </div>
+                            <div className="absolute right-3 bottom-3 left-3 flex items-center justify-between gap-2">
+                              <span className="shrink-0 max-w-full truncate rounded-md bg-black/70 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-xs">
+                                Kec. {hotel.district}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="min-w-0 p-5">
+                            <h2 className="min-w-0 break-words line-clamp-2 text-lg font-extrabold tracking-tight text-slate-900">
+                              {hotel.hotelName}
+                            </h2>
+                            {hotel.priceRange && (
+                              <p className="mt-1 min-w-0 break-words line-clamp-1 text-xs font-semibold text-[#174a72]">
+                                {hotel.priceRange}
+                              </p>
+                            )}
+
+                            <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
+                              <div className="flex min-w-0 items-start gap-2">
+                                <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#397eae]" />
+                                <span className="min-w-0 flex-1 break-words line-clamp-2">
+                                  {hotel.address}
+                                </span>
+                              </div>
+                              {hotel.nearVenue && (
+                                <div className="flex min-w-0 items-start gap-2 text-[11px] font-medium text-emerald-700">
+                                  <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                  <span className="min-w-0 flex-1 break-words line-clamp-2">
+                                    {hotel.nearVenue}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {hotel.facilities.length > 0 && (
+                              <div className="mt-3 flex min-w-0 flex-wrap gap-1.5">
+                                {hotel.facilities.map((facility, idx) => (
+                                  <span
+                                    key={`${hotel.id}-fac-${idx}`}
+                                    className="max-w-full truncate rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700"
+                                    title={facility}
+                                  >
+                                    {facility}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-2 border-t border-slate-100 bg-slate-50/70 p-4">
-                        <a
-                          href={hotel.mapsUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#174a72] bg-[#174a72]/5 px-3 py-2 text-xs font-bold text-[#174a72] transition-colors hover:bg-[#174a72] hover:text-white"
-                          title="Buka lokasi hotel, fasilitas, dan rute di Google Maps"
-                        >
-                          <Camera className="h-3.5 w-3.5" />
-                          Foto &amp; Peta
-                          <ExternalLink className="h-3 w-3 opacity-70" />
-                        </a>
-                        {hotel.contact ? (
+                        <div className="grid grid-cols-2 gap-2 border-t border-slate-100 bg-slate-50/70 p-4">
                           <a
-                            href={`https://wa.me/${hotel.contact.replace(/\D/g, "")}`}
+                            href={mapsHref}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-emerald-700"
+                            className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-lg border border-[#174a72] bg-[#174a72]/5 px-2.5 py-2 text-xs font-bold text-[#174a72] transition-colors hover:bg-[#174a72] hover:text-white"
+                            title="Buka lokasi hotel, fasilitas, dan rute di Google Maps"
                           >
-                            <Phone className="h-3.5 w-3.5" />
-                            Reservasi
+                            <Camera className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate">Foto &amp; Peta</span>
+                            <ExternalLink className="h-3 w-3 shrink-0 opacity-70" />
                           </a>
-                        ) : (
-                          <a
-                            href={hotel.mapsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-700 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-slate-800"
-                          >
-                            <MapPin className="h-3.5 w-3.5" />
-                            Cek Lokasi
-                          </a>
-                        )}
-                      </div>
-                    </Card>
-                  ))}
+                          {waDigits ? (
+                            <a
+                              href={`https://wa.me/${waDigits}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-2.5 py-2 text-xs font-bold text-white transition-colors hover:bg-emerald-700"
+                            >
+                              <Phone className="h-3.5 w-3.5 shrink-0" />
+                              <span className="truncate">Reservasi</span>
+                            </a>
+                          ) : (
+                            <a
+                              href={mapsHref}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-lg bg-slate-700 px-2.5 py-2 text-xs font-bold text-white transition-colors hover:bg-slate-800"
+                            >
+                              <MapPin className="h-3.5 w-3.5 shrink-0" />
+                              <span className="truncate">Cek Lokasi</span>
+                            </a>
+                          )}
+                        </div>
+                      </Card>
+                    );
+                  })}
                 </div>
               ) : (
-                <p className="news-empty" role="status">
-                  Data hotel dan penginapan tidak ditemukan. Coba kata kunci lain.
-                </p>
+                <div
+                  className="rounded-xl border border-dashed border-slate-300 p-10 text-center"
+                  role="status"
+                >
+                  <Building2 className="mx-auto h-9 w-9 text-slate-400" />
+                  <p className="mt-2 text-sm font-bold text-slate-800">
+                    Data hotel dan penginapan tidak ditemukan
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Coba ubah filter tipe akomodasi, kecamatan, atau kata kunci pencarian.
+                  </p>
+                  {(hotelTypeFilter !== "Semua" ||
+                    hotelDistrictFilter !== "Semua Kecamatan" ||
+                    normalizedQuery !== "") && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setHotelTypeFilter("Semua");
+                          setHotelDistrictFilter("Semua Kecamatan");
+                          setQuery("");
+                        }}
+                        className="mt-3 gap-1.5 text-xs font-bold"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        Reset Filter
+                      </Button>
+                    )}
+                </div>
               )}
             </div>
           ) : isWisataTab ? (
             <div className="space-y-8" aria-live="polite">
               {/* Hero Banner: Pariwisata Kotawaringin Barat */}
               <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-r from-emerald-950 via-[#0e3a2f] to-[#124d3e] text-white shadow-lg">
-                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 p-6 sm:p-8">
-                  <div className="max-w-2xl space-y-3">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-emerald-400/20 border border-emerald-400/30 px-3.5 py-1 text-xs font-bold text-emerald-300">
-                      <Compass className="h-3.5 w-3.5" />
-                      <span>DESTINASI WISATA RESMI KOTAWARINGIN BARAT • PORPROV XIII</span>
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 p-4 sm:p-8">
+                  <div className="w-full min-w-0 max-w-2xl space-y-3">
+                    <div className="inline-flex max-w-full items-center gap-2 rounded-xl sm:rounded-full bg-emerald-400/20 border border-emerald-400/30 px-3 py-1 text-[10px] sm:text-xs font-bold leading-snug text-emerald-300">
+                      <Compass className="h-3.5 w-3.5 shrink-0" />
+                      <span className="[overflow-wrap:anywhere]">DESTINASI WISATA RESMI KOTAWARINGIN BARAT • PORPROV XIII</span>
                     </div>
 
                     <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
@@ -1470,7 +2021,7 @@ export default function Newsview() {
                     <div className="flex flex-wrap items-center gap-4 pt-2 text-xs font-semibold text-emerald-200">
                       <div className="flex items-center gap-1.5">
                         <MapPin className="h-4 w-4 text-emerald-300" />
-                        <span>{wisataKobarData.length} Destinasi Populer Terkurasi</span>
+                        <span>{wisataItems.length} Destinasi Populer Terkurasi</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Sparkles className="h-4 w-4 text-amber-300" />
@@ -1483,7 +2034,7 @@ export default function Newsview() {
                   <div className="w-full md:w-auto shrink-0 flex items-center justify-center">
                     <div className="relative flex flex-col items-center justify-center border-none shadow-none">
                       <img
-                        src="/KeraWis2.png"
+                        src="/KeraWis2.webp"
                         alt="Maskot Wisata Kotawaringin Barat"
                         className="w-auto h-auto max-h-36 sm:max-h-48 md:max-h-56 max-w-[240px] sm:max-w-[300px] md:max-w-xs object-contain drop-shadow-lg transition-transform duration-500 hover:scale-105"
                         loading="lazy"
@@ -1493,79 +2044,561 @@ export default function Newsview() {
                 </div>
               </div>
 
-              {/* Grid Destinasi Wisata */}
-              {visibleWisata.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {visibleWisata.map((item) => (
-                    <Card
-                      key={item.id}
-                      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-emerald-400"
+              {/* Filter Kategori & Kecamatan Wisata */}
+              <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white/90 p-4 text-xs text-slate-600 shadow-xs">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label htmlFor="wisata-category-filter" className="font-semibold text-slate-600 shrink-0">
+                      Kategori:
+                    </label>
+                    <select
+                      id="wisata-category-filter"
+                      value={wisataCategoryFilter}
+                      onChange={(e) => setWisataCategoryFilter(e.target.value)}
+                      className="max-w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-800 focus:border-emerald-700 focus:outline-hidden"
                     >
-                      <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          loading="lazy"
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-emerald-300 backdrop-blur-xs">
-                          <Compass className="h-3 w-3" />
-                          <span>{item.category}</span>
-                        </div>
-                      </div>
+                      {wisataCategoryOptions.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                      <div className="flex flex-1 flex-col justify-between p-5 space-y-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
-                            <MapPin className="h-3.5 w-3.5 shrink-0" />
-                            <span>{item.district}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label htmlFor="wisata-district-filter" className="font-semibold text-slate-600 shrink-0">
+                      Kecamatan / Lokasi:
+                    </label>
+                    <select
+                      id="wisata-district-filter"
+                      value={wisataDistrictFilter}
+                      onChange={(e) => setWisataDistrictFilter(e.target.value)}
+                      className="max-w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-800 focus:border-emerald-700 focus:outline-hidden"
+                    >
+                      {wisataDistrictOptions.map((dist) => (
+                        <option key={dist} value={dist}>
+                          {dist}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2.5">
+                  <span className="min-w-0 break-words">
+                    Menampilkan <strong>{visibleWisata.length}</strong> destinasi wisata Kotawaringin Barat.
+                  </span>
+                  {(wisataCategoryFilter !== "Semua" ||
+                    wisataDistrictFilter !== "Semua" ||
+                    normalizedQuery !== "") && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWisataCategoryFilter("Semua");
+                          setWisataDistrictFilter("Semua");
+                          setQuery("");
+                        }}
+                        className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-rose-600 hover:underline"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        Reset Filter
+                      </button>
+                    )}
+                </div>
+              </div>
+
+              {/* Grid Destinasi Wisata */}
+              {wisataLoading ? (
+                <div
+                  className="rounded-xl border border-slate-200 bg-white p-10 text-center text-xs font-semibold text-slate-600"
+                  role="status"
+                >
+                  Memuat data destinasi wisata dari server...
+                </div>
+              ) : wisataError ? (
+                <div
+                  className="rounded-xl border border-rose-200 bg-rose-50 p-8 text-center"
+                  role="alert"
+                >
+                  <p className="text-sm font-bold text-rose-800">
+                    Gagal memuat data destinasi wisata
+                  </p>
+                  <p className="mt-1 text-xs text-rose-700">{wisataError}</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setWisataRefreshTick((t) => t + 1)}
+                    className="mt-4 gap-1.5 border-rose-300 bg-white text-rose-700 hover:bg-rose-100"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                    Coba Lagi
+                  </Button>
+                </div>
+              ) : visibleWisata.length > 0 ? (
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {visibleWisata.map((item) => {
+                    const imgFailed = Boolean(failedWisataImages[item.id]);
+                    const hasValidImage = Boolean(item.image) && !imgFailed;
+                    const mapsHref =
+                      item.mapsUrl ||
+                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.name} ${item.district}`)}`;
+
+                    return (
+                      <Card
+                        key={item.id}
+                        className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-emerald-400"
+                      >
+                        <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
+                          {hasValidImage ? (
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              loading="lazy"
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              onError={() =>
+                                setFailedWisataImages((prev) => ({
+                                  ...prev,
+                                  [item.id]: true,
+                                }))
+                              }
+                            />
+                          ) : (
+                            <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-emerald-950 via-[#0e3a2f] to-[#124d3e] p-4 text-center text-white/85">
+                              <Compass className="mb-1.5 h-8 w-8 shrink-0 text-emerald-300" />
+                              <span className="max-w-full break-words line-clamp-2 text-xs font-bold">
+                                {item.name}
+                              </span>
+                              <span className="mt-0.5 text-[10px] text-emerald-200/80">
+                                Foto belum tersedia
+                              </span>
+                            </div>
+                          )}
+                          <div className="absolute top-3 left-3 inline-flex max-w-[calc(100%-1.5rem)] shrink-0 items-center gap-1 rounded-full bg-black/65 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-emerald-300 backdrop-blur-xs">
+                            <Compass className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{item.category}</span>
                           </div>
-                          <h3 className="text-lg font-extrabold text-slate-900 group-hover:text-emerald-900 transition-colors">
-                            {item.name}
-                          </h3>
-                          <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
-                            {item.description}
-                          </p>
                         </div>
 
-                        <div className="space-y-3 pt-2 border-t border-slate-100">
-                          <div className="rounded-lg bg-emerald-50/70 p-2.5 text-[11px] text-emerald-950 font-medium leading-snug">
-                            ✨ <strong>Highlight:</strong> {item.highlights}
+                        <div className="flex min-w-0 flex-1 flex-col justify-between p-5 space-y-4">
+                          <div className="min-w-0 space-y-2">
+                            {item.district && (
+                              <div className="flex min-w-0 items-center gap-1.5 text-xs font-semibold text-emerald-800">
+                                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                                <span className="min-w-0 truncate">{item.district}</span>
+                              </div>
+                            )}
+                            <h3 className="min-w-0 break-words line-clamp-2 text-lg font-extrabold text-slate-900 group-hover:text-emerald-900 transition-colors">
+                              {item.name}
+                            </h3>
+                            {item.description && (
+                              <p className="min-w-0 break-words line-clamp-3 text-xs text-slate-600 leading-relaxed">
+                                {item.description}
+                              </p>
+                            )}
                           </div>
-                          <div className="flex items-center justify-between text-xs pt-1">
-                            <span className="text-[11px] text-slate-500 font-medium">
-                              {item.openInfo}
-                            </span>
-                            <a
-                              href={item.mapsUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3 py-1.5 transition-colors shadow-xs"
-                            >
-                              <span>Rute Maps</span>
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
+
+                          <div className="min-w-0 space-y-3 pt-2 border-t border-slate-100">
+                            {item.highlights && (
+                              <div className="min-w-0 break-words line-clamp-2 rounded-lg bg-emerald-50/70 p-2.5 text-[11px] text-emerald-950 font-medium leading-snug">
+                                ✨ <strong>Highlight:</strong> {item.highlights}
+                              </div>
+                            )}
+                            <div className="flex min-w-0 items-center justify-between gap-2 text-xs pt-1">
+                              <span className="min-w-0 flex-1 break-words line-clamp-2 text-[11px] text-slate-500 font-medium">
+                                {item.openInfo || "Terbuka untuk umum"}
+                              </span>
+                              <a
+                                href={mapsHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3 py-1.5 transition-colors shadow-xs"
+                              >
+                                <span>Rute Maps</span>
+                                <ExternalLink className="h-3 w-3 shrink-0" />
+                              </a>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    );
+                  })}
                 </div>
               ) : (
-                <p className="news-empty" role="status">
-                  Destinasi wisata tidak ditemukan. Coba kata kunci lain.
-                </p>
+                <div
+                  className="rounded-xl border border-dashed border-slate-300 p-10 text-center"
+                  role="status"
+                >
+                  <Compass className="mx-auto h-9 w-9 text-slate-400" />
+                  <p className="mt-2 text-sm font-bold text-slate-800">
+                    Destinasi wisata tidak ditemukan
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Coba ubah filter kategori, lokasi, atau kata kunci pencarian.
+                  </p>
+                  {(wisataCategoryFilter !== "Semua" ||
+                    wisataDistrictFilter !== "Semua" ||
+                    normalizedQuery !== "") && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setWisataCategoryFilter("Semua");
+                          setWisataDistrictFilter("Semua");
+                          setQuery("");
+                        }}
+                        className="mt-3 gap-1.5 text-xs font-bold"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        Reset Filter
+                      </Button>
+                    )}
+                </div>
+              )}
+            </div>
+          ) : isKesehatanTab ? (
+            <div className="space-y-8" aria-live="polite">
+              {/* Hero Banner: Layanan Kesehatan Kotawaringin Barat */}
+              <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-r from-rose-950 via-[#7f1d1d] to-[#9f1239] text-white shadow-lg">
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 p-4 sm:p-8">
+                  <div className="w-full min-w-0 max-w-2xl space-y-3">
+                    <div className="inline-flex max-w-full items-center gap-2 rounded-xl sm:rounded-full bg-rose-400/20 border border-rose-300/30 px-3 py-1 text-[10px] sm:text-xs font-bold leading-snug text-rose-200">
+                      <HeartPulse className="h-3.5 w-3.5 shrink-0" />
+                      <span className="[overflow-wrap:anywhere]">LAYANAN KESEHATAN &amp; MEDIS RESMI KOTAWARINGIN BARAT • PORPROV XIII</span>
+                    </div>
+
+                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+                      Direktori Rumah Sakit, Puskesmas, Klinik &amp; Apotek
+                    </h2>
+                    <p className="text-xs sm:text-sm text-rose-100/90 leading-relaxed">
+                      Akses cepat informasi fasilitas kesehatan terdekat untuk atlet, ofisial, dan masyarakat selama penyelenggaraan PORPROV XIII Kalimantan Tengah 2026 di Kabupaten Kotawaringin Barat.
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-4 pt-2 text-xs font-semibold text-rose-100">
+                      <div className="flex items-center gap-1.5">
+                        <HeartPulse className="h-4 w-4 text-rose-300 shrink-0" />
+                        <span>{kesehatanItems.length} Fasilitas Kesehatan Terdaftar</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <ShieldCheck className="h-4 w-4 text-amber-300 shrink-0" />
+                        <span>RS, Puskesmas, Klinik &amp; Apotek</span>
+                      </div>
+                    </div>
+                  </div>
+
+
+
+                  <img
+                    src="./kerasakit.png"
+                    alt="Maskot Wisata Kotawaringin Barat"
+                    className="w-auto h-auto max-h-36 sm:max-h-48 md:max-h-56 max-w-[240px] sm:max-w-[300px] md:max-w-xs object-contain drop-shadow-lg transition-transform duration-500 hover:scale-105"
+                    loading="lazy"
+                  />
+
+                </div>
+              </div>
+
+              {/* Hotline Darurat 24 Jam */}
+              <div className="rounded-2xl border border-rose-200 bg-rose-50/70 p-4 sm:p-5 shadow-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2 text-xs font-extrabold tracking-wider text-rose-800 uppercase">
+                    <Phone className="h-4 w-4 text-rose-600" aria-hidden="true" />
+                    <span>Nomor Hotline &amp; Layanan Darurat (24 Jam)</span>
+                  </div>
+                  <span className="text-[11px] font-medium text-rose-700">
+                    Ketuk nomor untuk langsung menghubungi
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                  {[
+                    {
+                      label: "Pemadam Kebakaran Kobar (Hotline)",
+                      number: "0532-22008",
+                      href: "tel:053222008",
+                      desc: "Quick Respon Damkar & Penyelamatan Kobar",
+                      external: false,
+                    },
+                    {
+                      label: "WhatsApp Damkar Kobar",
+                      number: "0812-9046-1661",
+                      href: "https://wa.me/6281290461661",
+                      desc: "Laporan cepat via WhatsApp Damkar Kobar",
+                      external: true,
+                    },
+                    {
+                      label: "Darurat Terpadu",
+                      number: "112",
+                      href: "tel:112",
+                      desc: "Layanan panggilan darurat nasional",
+                      external: false,
+                    },
+                    {
+                      label: "Polisi / Polres",
+                      number: "110",
+                      href: "tel:110",
+                      desc: "Keamanan & ketertiban masyarakat",
+                      external: false,
+                    },
+                    {
+                      label: "Ambulans / IGD",
+                      number: "119",
+                      href: "tel:119",
+                      desc: "Evakuasi & gawat darurat medis",
+                      external: false,
+                    },
+                    {
+                      label: "Basarnas / SAR",
+                      number: "115",
+                      href: "tel:115",
+                      desc: "Pencarian & pertolongan",
+                      external: false,
+                    },
+                  ].map((hotline) => (
+                    <a
+                      key={hotline.number}
+                      href={hotline.href}
+                      target={hotline.external ? "_blank" : undefined}
+                      rel={hotline.external ? "noopener noreferrer" : undefined}
+                      className="group flex flex-col justify-between rounded-xl border border-rose-200/80 bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-rose-400 hover:shadow-sm no-underline"
+                    >
+                      <span className="text-[11px] font-bold text-slate-700 group-hover:text-rose-700">
+                        {hotline.label}
+                      </span>
+                      <strong className="mt-1 text-lg sm:text-xl font-black tracking-tight text-rose-700 tabular-nums">
+                        {hotline.number}
+                      </strong>
+                      <span className="mt-0.5 text-[10px] text-slate-500">
+                        {hotline.desc}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* Filter Kategori & Kecamatan Layanan Kesehatan */}
+              <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white/90 p-4 text-xs text-slate-600 shadow-xs">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {(["Semua", ...KESEHATAN_CATEGORIES] as const).map((cat) => {
+                      const active = kesehatanCategoryFilter === cat;
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setKesehatanCategoryFilter(cat)}
+                          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${active
+                            ? "bg-rose-700 text-white shadow-xs"
+                            : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                            }`}
+                        >
+                          {cat}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label htmlFor="kesehatan-district-filter" className="font-semibold text-slate-600 shrink-0">
+                      Kecamatan / Lokasi:
+                    </label>
+                    <select
+                      id="kesehatan-district-filter"
+                      value={kesehatanDistrictFilter}
+                      onChange={(e) => setKesehatanDistrictFilter(e.target.value)}
+                      className="max-w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-800 focus:border-rose-700 focus:outline-hidden"
+                    >
+                      {kesehatanDistrictOptions.map((dist) => (
+                        <option key={dist} value={dist}>
+                          {dist}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2.5">
+                  <span className="min-w-0 break-words">
+                    Menampilkan <strong>{visibleKesehatan.length}</strong> fasilitas layanan kesehatan.
+                  </span>
+                  {(kesehatanCategoryFilter !== "Semua" ||
+                    kesehatanDistrictFilter !== "Semua" ||
+                    normalizedQuery !== "") && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setKesehatanCategoryFilter("Semua");
+                          setKesehatanDistrictFilter("Semua");
+                          setQuery("");
+                        }}
+                        className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-rose-600 hover:underline"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        Reset Filter
+                      </button>
+                    )}
+                </div>
+              </div>
+
+              {/* Grid Layanan Kesehatan */}
+              {kesehatanLoading ? (
+                <div
+                  className="rounded-xl border border-slate-200 bg-white p-10 text-center text-xs font-semibold text-slate-600"
+                  role="status"
+                >
+                  Memuat data layanan kesehatan dari server...
+                </div>
+              ) : kesehatanError ? (
+                <div
+                  className="rounded-xl border border-rose-200 bg-rose-50 p-8 text-center"
+                  role="alert"
+                >
+                  <p className="text-sm font-bold text-rose-800">
+                    Gagal memuat data layanan kesehatan
+                  </p>
+                  <p className="mt-1 text-xs text-rose-700">{kesehatanError}</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setKesehatanRefreshTick((t) => t + 1)}
+                    className="mt-4 gap-1.5 border-rose-300 bg-white text-rose-700 hover:bg-rose-100"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                    Coba Lagi
+                  </Button>
+                </div>
+              ) : visibleKesehatan.length > 0 ? (
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {visibleKesehatan.map((item) => {
+                    const imgFailed = Boolean(failedKesehatanImages[item.id]);
+                    const hasValidImage = Boolean(item.image) && !imgFailed;
+                    const mapsHref =
+                      item.mapsUrl ||
+                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.name} ${item.district}`)}`;
+
+                    return (
+                      <Card
+                        key={item.id}
+                        className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-rose-400"
+                      >
+                        <div className="relative aspect-video w-full overflow-hidden bg-rose-50">
+                          {hasValidImage ? (
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              loading="lazy"
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              onError={() =>
+                                setFailedKesehatanImages((prev) => ({
+                                  ...prev,
+                                  [item.id]: true,
+                                }))
+                              }
+                            />
+                          ) : (
+                            <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-rose-950 via-[#7f1d1d] to-[#9f1239] p-4 text-center text-white/90">
+                              <HeartPulse className="mb-1.5 h-9 w-9 shrink-0 text-rose-300" />
+                              <span className="max-w-full break-words line-clamp-2 text-xs font-bold">
+                                {item.name}
+                              </span>
+                              <span className="mt-0.5 text-[10px] text-rose-200/80">
+                                {item.category || "Layanan Kesehatan"}
+                              </span>
+                            </div>
+                          )}
+                          <div className="absolute top-3 left-3 inline-flex max-w-[calc(100%-1.5rem)] shrink-0 items-center gap-1 rounded-full bg-black/65 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-rose-200 backdrop-blur-xs">
+                            <HeartPulse className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{item.category}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex min-w-0 flex-1 flex-col justify-between p-5 space-y-4">
+                          <div className="min-w-0 space-y-2">
+                            {item.district && (
+                              <div className="flex min-w-0 items-center gap-1.5 text-xs font-semibold text-rose-800">
+                                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                                <span className="min-w-0 truncate">{item.district}</span>
+                              </div>
+                            )}
+                            <h3 className="min-w-0 break-words line-clamp-2 text-lg font-extrabold text-slate-900 group-hover:text-rose-900 transition-colors">
+                              {item.name}
+                            </h3>
+                            {item.description && (
+                              <p className="min-w-0 break-words line-clamp-3 text-xs text-slate-600 leading-relaxed">
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 space-y-3 pt-2 border-t border-slate-100">
+                            {item.highlights && (
+                              <div className="min-w-0 break-words line-clamp-2 rounded-lg bg-rose-50/80 p-2.5 text-[11px] text-rose-950 font-medium leading-snug">
+                                🏥 <strong>Layanan:</strong> {item.highlights}
+                              </div>
+                            )}
+                            <div className="flex min-w-0 items-center justify-between gap-2 text-xs pt-1">
+                              <span className="min-w-0 flex-1 break-words line-clamp-2 text-[11px] text-slate-500 font-medium">
+                                {item.openInfo || "Hubungi fasilitas terkait"}
+                              </span>
+                              <a
+                                href={mapsHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs px-3 py-1.5 transition-colors shadow-xs"
+                              >
+                                <span>Rute Maps</span>
+                                <ExternalLink className="h-3 w-3 shrink-0" />
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div
+                  className="rounded-xl border border-dashed border-slate-300 p-10 text-center"
+                  role="status"
+                >
+                  <HeartPulse className="mx-auto h-9 w-9 text-slate-400" />
+                  <p className="mt-2 text-sm font-bold text-slate-800">
+                    Layanan kesehatan tidak ditemukan
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Coba ubah filter kategori, lokasi, atau kata kunci pencarian.
+                  </p>
+                  {(kesehatanCategoryFilter !== "Semua" ||
+                    kesehatanDistrictFilter !== "Semua" ||
+                    normalizedQuery !== "") && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setKesehatanCategoryFilter("Semua");
+                          setKesehatanDistrictFilter("Semua");
+                          setQuery("");
+                        }}
+                        className="mt-3 gap-1.5 text-xs font-bold"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        Reset Filter
+                      </Button>
+                    )}
+                </div>
               )}
             </div>
           ) : isUMKMTab ? (
             <div className="space-y-8" aria-live="polite">
               {/* Hero Banner: Eksplorasi Kuliner Kotawaringin Barat */}
               <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-[image:var(--hero-gradient)] text-white shadow-lg">
-                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 p-6 sm:p-8">
-                  <div className="max-w-2xl space-y-3">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-amber-400/20 border border-amber-400/30 px-3.5 py-1 text-xs font-bold text-amber-300">
-                      <Utensils className="h-3.5 w-3.5" />
-                      <span>DIREKTORI RESMI TEMPAT MAKAN &amp; NONGKRONG KOTAWARINGIN BARAT</span>
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 p-4 sm:p-8">
+                  <div className="w-full min-w-0 max-w-2xl space-y-3">
+                    <div className="inline-flex max-w-full items-center gap-2 rounded-xl sm:rounded-full bg-amber-400/20 border border-amber-400/30 px-3 py-1 text-[10px] sm:text-xs font-bold leading-snug text-amber-300">
+                      <Utensils className="h-3.5 w-3.5 shrink-0" />
+                      <span className="[overflow-wrap:anywhere]">DIREKTORI RESMI TEMPAT MAKAN &amp; NONGKRONG KOTAWARINGIN BARAT</span>
                     </div>
 
                     <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
@@ -1573,17 +2606,17 @@ export default function Newsview() {
                     </h2>
 
                     <p className="text-xs sm:text-sm text-sky-100/90 leading-relaxed">
-                      Menampilkan <strong>{kobarUMKMData.length} tempat makan, restoran khas sungai, warung tradisional, food court, dan kafe pilihan</strong> di Pangkalan Bun (Kotawaringin Barat) lengkap dengan foto tempat, keunggulan menu, jam operasional, dan info reservasi.
+                      Menampilkan <strong>{umkmItems.length} tempat makan, restoran khas sungai, warung tradisional, food court, dan kafe pilihan</strong> di Pangkalan Bun (Kotawaringin Barat) lengkap dengan foto tempat, keunggulan menu, jam operasional, dan info reservasi.
                     </p>
 
                     <div className="flex flex-wrap items-center gap-4 pt-2 text-xs font-semibold text-slate-200">
                       <div className="flex items-center gap-1.5">
                         <Utensils className="h-4 w-4 text-amber-300" />
-                        <span>{kobarUMKMData.length} Destinasi Kuliner</span>
+                        <span>{umkmItems.length} Destinasi Kuliner</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Camera className="h-4 w-4 text-emerald-300" />
-                        <span>{kobarUMKMData.filter((x) => x.image.startsWith("/kuliner-real/")).length} Foto Lokasi</span>
+                        <span>{umkmItems.filter((x) => x.image.startsWith("/kuliner-real/")).length} Foto Lokasi</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Tag className="h-4 w-4 text-sky-300" />
@@ -1595,7 +2628,7 @@ export default function Newsview() {
                   <div className="w-full md:w-auto shrink-0 flex items-center justify-center">
                     <div className="relative flex flex-col items-center justify-center border-none shadow-none">
                       <img
-                        src="/keraMakan.png"
+                        src="/keraMakan.webp"
                         alt="Maskot Kuliner Kotawaringin Barat"
                         className="w-auto h-auto max-h-36 sm:max-h-48 md:max-h-56 max-w-[240px] sm:max-w-[300px] md:max-w-xs object-contain drop-shadow-lg transition-transform duration-500 hover:scale-105"
                         loading="lazy"
@@ -1605,358 +2638,514 @@ export default function Newsview() {
                 </div>
               </div>
 
-              {/* Tema Kuliner Quick Filter */}
-              <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-[#174a72] uppercase">
-                    <Utensils className="h-4 w-4" />
-                    <span>Pilihan Sajian & Jenis Tempat Makan</span>
-                  </div>
-                  {selectedCulinaryTheme !== "Semua" && (
+              {/* Quick Category Icon Row (ala GoFood) */}
+              <div className="flex items-stretch gap-2.5 overflow-x-auto pb-1 pt-1 sm:grid sm:grid-cols-3 md:grid-cols-6 sm:overflow-visible">
+                {[
+                  {
+                    key: "all",
+                    topLabel: "Semua",
+                    bottomLabel: "Kuliner",
+                    icon: Utensils,
+                    iconBg: "bg-emerald-50 text-emerald-600",
+                    active:
+                      selectedUMKMType === "Semua" &&
+                      !onlyRecommended &&
+                      selectedCulinaryTheme === "Semua",
+                    onClick: () => {
+                      setSelectedUMKMType("Semua");
+                      setOnlyRecommended(false);
+                      setSelectedCulinaryTheme("Semua");
+                      setUmkmPage(1);
+                    },
+                  },
+                  {
+                    key: "recommended",
+                    topLabel: "Rating",
+                    bottomLabel: "Terbaik",
+                    badge: "4.8+",
+                    icon: Star,
+                    iconBg: "bg-amber-50 text-amber-500",
+                    active: onlyRecommended,
+                    onClick: () => {
+                      setOnlyRecommended((prev) => !prev);
+                      setUmkmPage(1);
+                    },
+                  },
+                  {
+                    key: "restoran",
+                    topLabel: "Restoran",
+                    bottomLabel: "Keluarga",
+                    icon: Store,
+                    iconBg: "bg-rose-50 text-rose-600",
+                    active: selectedUMKMType === "restoran",
+                    onClick: () => {
+                      setSelectedUMKMType(
+                        selectedUMKMType === "restoran" ? "Semua" : "restoran",
+                      );
+                      setUmkmPage(1);
+                    },
+                  },
+                  {
+                    key: "cafe",
+                    topLabel: "Kafe &",
+                    bottomLabel: "Kopi",
+                    icon: Coffee,
+                    iconBg: "bg-sky-50 text-sky-600",
+                    active: selectedUMKMType === "cafe",
+                    onClick: () => {
+                      setSelectedUMKMType(
+                        selectedUMKMType === "cafe" ? "Semua" : "cafe",
+                      );
+                      setUmkmPage(1);
+                    },
+                  },
+                  {
+                    key: "rumah_makan",
+                    topLabel: "Rumah",
+                    bottomLabel: "Makan",
+                    icon: Flame,
+                    iconBg: "bg-orange-50 text-orange-600",
+                    active: selectedUMKMType === "rumah_makan",
+                    onClick: () => {
+                      setSelectedUMKMType(
+                        selectedUMKMType === "rumah_makan"
+                          ? "Semua"
+                          : "rumah_makan",
+                      );
+                      setUmkmPage(1);
+                    },
+                  },
+                  {
+                    key: "warung",
+                    topLabel: "Warung",
+                    bottomLabel: "Lokal",
+                    icon: Tag,
+                    iconBg: "bg-violet-50 text-violet-600",
+                    active: selectedUMKMType === "warung",
+                    onClick: () => {
+                      setSelectedUMKMType(
+                        selectedUMKMType === "warung" ? "Semua" : "warung",
+                      );
+                      setUmkmPage(1);
+                    },
+                  },
+                ].map((cat) => {
+                  const IconComp = cat.icon;
+                  return (
                     <button
+                      key={cat.key}
                       type="button"
-                      onClick={() => {
-                        setSelectedCulinaryTheme("Semua");
-                        setUmkmPage(1);
-                      }}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 hover:underline"
+                      onClick={cat.onClick}
+                      className={`relative flex min-w-[96px] shrink-0 flex-col items-center justify-center rounded-2xl border px-3 py-3 text-center transition-all sm:min-w-0 ${cat.active
+                        ? "border-[#174a72] bg-sky-50/70 shadow-sm ring-1 ring-[#174a72]/20"
+                        : "border-slate-200/90 bg-white shadow-xs hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm"
+                        }`}
                     >
-                      <RotateCcw className="h-3 w-3" />
-                      Tampilkan Semua Sajian
-                    </button>
-                  )}
-                </div>
-
-                {/* Horizontal Scroll Theme Chips */}
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {kobarCulinaryThemes.map((theme) => {
-                    const isActive = selectedCulinaryTheme === theme.key;
-                    const count =
-                      theme.key === "Semua"
-                        ? kobarUMKMData.length
-                        : kobarUMKMData.filter(
-                          (item) => item.culinaryThemeKey === theme.key,
-                        ).length;
-
-                    return (
-                      <button
-                        key={theme.key}
-                        type="button"
-                        onClick={() => {
-                          setSelectedCulinaryTheme(
-                            isActive ? "Semua" : theme.key,
-                          );
-                          setUmkmPage(1);
-                        }}
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all ${isActive
-                          ? "bg-[#174a72] text-white shadow-xs"
-                          : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-[#397eae] hover:bg-slate-100"
-                          }`}
-                      >
-                        <span>{theme.label}</span>
-                        <span
-                          className={`rounded-full px-1.5 py-0.2 text-[10px] ${isActive
-                            ? "bg-white/20 text-white"
-                            : "bg-slate-200 text-slate-600"
-                            }`}
-                        >
-                          {count}
+                      {cat.badge && (
+                        <span className="absolute -top-1.5 left-2 rounded-md bg-slate-900 px-1.5 py-0.5 text-[10px] font-extrabold text-white shadow-xs">
+                          {cat.badge}
                         </span>
-                      </button>
-                    );
-                  })}
-                </div>
+                      )}
+                      <div
+                        className={`mb-2 flex h-10 w-10 items-center justify-center rounded-xl ${cat.iconBg}`}
+                      >
+                        <IconComp className="h-5 w-5" />
+                      </div>
+                      <span className="text-[11px] font-medium leading-tight text-slate-500">
+                        {cat.topLabel}
+                      </span>
+                      <span className="text-xs font-extrabold leading-tight text-slate-900">
+                        {cat.bottomLabel}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* Sub-kategori, Kecamatan & Search Bar Controls */}
-              <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-[#174a72] uppercase">
-                    <Store className="h-4 w-4" />
-                    <span>Filter Direktori Kuliner</span>
-                  </div>
-                  <span className="text-xs text-slate-600 font-medium">
-                    Menampilkan <strong>{visibleUMKM.length}</strong> dari{" "}
-                    {kobarUMKMData.length} tempat terdaftar
-                  </span>
-                </div>
+              {/* Filter Toggle Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-xs">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  aria-expanded={umkmFiltersOpen}
+                  onClick={() => setUmkmFiltersOpen((open) => !open)}
+                  className="gap-2 text-xs font-bold"
+                >
+                  <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+                  {umkmFiltersOpen ? "Sembunyikan filter" : "Tampilkan filter"}
+                </Button>
+                <span className="text-xs text-slate-600 font-medium">
+                  Menampilkan <strong>{visibleUMKM.length}</strong> dari{" "}
+                  {umkmItems.length} tempat terdaftar
+                </span>
+              </div>
 
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  {/* Category Pills */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold text-slate-500 mr-1">
-                      Kategori:
-                    </span>
-                    {kobarCategories.map((cat) => {
-                      const isActive = selectedUMKMType === cat.value;
-                      return (
+              {umkmFiltersOpen && (
+                <>
+                  {/* Tema Kuliner Quick Filter */}
+                  <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3">
+                      <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-[#174a72] uppercase">
+                        <Utensils className="h-4 w-4" />
+                        <span>Pilihan Sajian & Jenis Tempat Makan</span>
+                      </div>
+                      {selectedCulinaryTheme !== "Semua" && (
                         <button
-                          key={cat.label}
                           type="button"
                           onClick={() => {
-                            setSelectedUMKMType(cat.value);
+                            setSelectedCulinaryTheme("Semua");
                             setUmkmPage(1);
                           }}
-                          className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${isActive
-                            ? "bg-slate-900 text-white shadow-xs"
+                          className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 hover:underline"
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          Tampilkan Semua Sajian
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Horizontal Scroll Theme Chips */}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {kobarCulinaryThemes.map((theme) => {
+                        const isActive = selectedCulinaryTheme === theme.key;
+                        const count =
+                          theme.key === "Semua"
+                            ? umkmItems.length
+                            : umkmItems.filter(
+                              (item) => item.culinaryThemeKey === theme.key,
+                            ).length;
+
+                        return (
+                          <button
+                            key={theme.key}
+                            type="button"
+                            onClick={() => {
+                              setSelectedCulinaryTheme(
+                                isActive ? "Semua" : theme.key,
+                              );
+                              setUmkmPage(1);
+                            }}
+                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all ${isActive
+                              ? "bg-[#174a72] text-white shadow-xs"
+                              : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-[#397eae] hover:bg-slate-100"
+                              }`}
+                          >
+                            <span>{theme.label}</span>
+                            <span
+                              className={`rounded-full px-1.5 py-0.2 text-[10px] ${isActive
+                                ? "bg-white/20 text-white"
+                                : "bg-slate-200 text-slate-600"
+                                }`}
+                            >
+                              {count}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Sub-kategori, Kecamatan & Search Bar Controls */}
+                  <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3">
+                      <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-[#174a72] uppercase">
+                        <Store className="h-4 w-4" />
+                        <span>Filter Direktori Kuliner</span>
+                      </div>
+                      <span className="text-xs text-slate-600 font-medium">
+                        Menampilkan <strong>{visibleUMKM.length}</strong> dari{" "}
+                        {umkmItems.length} tempat terdaftar
+                      </span>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                      {/* Category Pills */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-semibold text-slate-500 mr-1">
+                          Kategori:
+                        </span>
+                        {kobarCategories.map((cat) => {
+                          const isActive = selectedUMKMType === cat.value;
+                          return (
+                            <button
+                              key={cat.label}
+                              type="button"
+                              onClick={() => {
+                                setSelectedUMKMType(cat.value);
+                                setUmkmPage(1);
+                              }}
+                              className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${isActive
+                                ? "bg-slate-900 text-white shadow-xs"
+                                : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                                }`}
+                            >
+                              {cat.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Kecamatan & Quick Toggles */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-semibold text-slate-500 mr-1 flex items-center gap-1">
+                          <MapPin className="h-3.5 w-3.5" /> Kecamatan:
+                        </span>
+                        <select
+                          aria-label="Pilih Kecamatan"
+                          value={selectedDistrict}
+                          onChange={(e) => {
+                            setSelectedDistrict(e.target.value);
+                            setUmkmPage(1);
+                          }}
+                          className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-800 focus:border-[#174a72] focus:outline-hidden"
+                        >
+                          {kobarDistricts.map((dist) => (
+                            <option key={dist} value={dist}>
+                              {dist}
+                            </option>
+                          ))}
+                        </select>
+
+                        {/* Rekomendasi Teratas Toggle */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOnlyRecommended(!onlyRecommended);
+                            setUmkmPage(1);
+                          }}
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${onlyRecommended
+                            ? "bg-amber-400 text-slate-950 font-black shadow-xs ring-1 ring-amber-500"
                             : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
                             }`}
                         >
-                          {cat.label}
+                          <Star
+                            className={`h-3.5 w-3.5 ${onlyRecommended
+                              ? "fill-slate-950"
+                              : "text-amber-500"
+                              }`}
+                          />
+                          Rating Tinggi (4.8+)
                         </button>
-                      );
-                    })}
-                  </div>
 
-                  {/* Kecamatan & Quick Toggles */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold text-slate-500 mr-1 flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5" /> Kecamatan:
-                    </span>
-                    <select
-                      aria-label="Pilih Kecamatan"
-                      value={selectedDistrict}
-                      onChange={(e) => {
-                        setSelectedDistrict(e.target.value);
-                        setUmkmPage(1);
-                      }}
-                      className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-800 focus:border-[#174a72] focus:outline-hidden"
-                    >
-                      {kobarDistricts.map((dist) => (
-                        <option key={dist} value={dist}>
-                          {dist}
-                        </option>
-                      ))}
-                    </select>
-
-                    {/* Rekomendasi Teratas Toggle */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOnlyRecommended(!onlyRecommended);
-                        setUmkmPage(1);
-                      }}
-                      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${onlyRecommended
-                        ? "bg-amber-400 text-slate-950 font-black shadow-xs ring-1 ring-amber-500"
-                        : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                        }`}
-                    >
-                      <Star
-                        className={`h-3.5 w-3.5 ${onlyRecommended
-                          ? "fill-slate-950"
-                          : "text-amber-500"
-                          }`}
-                      />
-                      Rating Tinggi (4.8+)
-                    </button>
-
-                    {/* Foto Nyata Toggle */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOnlyRealPhoto(!onlyRealPhoto);
-                        setUmkmPage(1);
-                      }}
-                      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${onlyRealPhoto
-                        ? "bg-emerald-600 text-white font-black shadow-xs ring-1 ring-emerald-700"
-                        : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                        }`}
-                    >
-                      <Camera
-                        className={`h-3.5 w-3.5 ${onlyRealPhoto
-                          ? "text-white"
-                          : "text-emerald-600"
-                          }`}
-                      />
-                      Foto Nyata Tempat ({kobarUMKMData.filter((x) => x.image.startsWith("/kuliner-real/")).length})
-                    </button>
-
-                    {/* Reset All Filters */}
-                    {(selectedUMKMType !== "Semua" ||
-                      selectedDistrict !== "Semua Kecamatan" ||
-                      selectedCulinaryTheme !== "Semua" ||
-                      onlyRecommended ||
-                      onlyRealPhoto) && (
+                        {/* Foto Nyata Toggle */}
                         <button
                           type="button"
                           onClick={() => {
-                            setSelectedUMKMType("Semua");
-                            setSelectedDistrict("Semua Kecamatan");
-                            setSelectedCulinaryTheme("Semua");
-                            setOnlyRecommended(false);
-                            setOnlyRealPhoto(false);
+                            setOnlyRealPhoto(!onlyRealPhoto);
                             setUmkmPage(1);
                           }}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-700 underline underline-offset-2 ml-1"
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${onlyRealPhoto
+                            ? "bg-emerald-600 text-white font-black shadow-xs ring-1 ring-emerald-700"
+                            : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                            }`}
                         >
-                          <RotateCcw className="h-3 w-3" />
-                          Reset Filter
+                          <Camera
+                            className={`h-3.5 w-3.5 ${onlyRealPhoto
+                              ? "text-white"
+                              : "text-emerald-600"
+                              }`}
+                          />
+                          Foto Nyata Tempat ({umkmItems.filter((x) => x.image.startsWith("/kuliner-real/")).length})
                         </button>
-                      )}
-                  </div>
-                </div>
 
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2.5 text-[11px] text-slate-500">
-                  <p>
-                    *Catatan: Jam buka, ketersediaan menu, dan nomor telepon bersumber dari data publik Google Maps Kotawaringin Barat.
-                  </p>
-                  {/* <p className="flex items-center gap-1 font-semibold text-[#174a72]">
-                    <Camera className="h-3.5 w-3.5 text-amber-500" />
-                    Klik <strong>&quot;Maps ↗&quot;</strong> pada kartu untuk melihat foto tempat &amp; menu dari pengunjung Google Maps.
-                  </p> */}
-                </div>
-              </div>
-
-              {/* Culinary Cards Grid */}
-              {visibleUMKM.length > 0 ? (
-                <div className="space-y-6">
-                  <div className="news-grid">
-                    {paginatedUMKM.map((item) => (
-                      <Card
-                        className="news-card flex flex-col justify-between overflow-hidden rounded-xl border border-slate-200 bg-white p-0 shadow-xs transition-all hover:-translate-y-1 hover:shadow-md"
-                        key={item.id}
-                        role="article"
-                      >
-                        <div>
-                          {/* Card Food Image Header */}
-                          <div className="relative h-48 w-full overflow-hidden bg-slate-100 group">
-                            {item.image ? (
-                              <img
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                src={item.image}
-                                alt={item.nama}
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full flex-col items-center justify-center bg-[image:var(--hero-gradient)] text-white/80 p-4 text-center">
-                                <Coffee className="h-9 w-9 text-amber-300 mb-2" />
-                                <span className="text-xs font-bold">{item.nama}</span>
-                                <span className="text-[10px] text-sky-200/80 mt-0.5">Lihat galeri di Google Maps</span>
-                              </div>
-                            )}
-
-                            {/* Theme Pill Overlay */}
-                            {/* <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
-                              <span className="rounded-full bg-[#102b49]/90 px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-white uppercase backdrop-blur-xs">
-                                {item.culinaryTheme}
-                              </span>
-                              <a
-                                href={item.google_maps_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title="Lihat foto tempat & menu di Google Maps"
-                                className="inline-flex items-center gap-1 rounded-full bg-slate-950/80 hover:bg-slate-950 px-2 py-1 text-[10px] font-bold text-amber-300 backdrop-blur-xs transition-colors shadow-xs"
-                              >
-                                <Camera className="h-3 w-3 text-amber-300" />
-                                <span>Maps ↗</span>
-                              </a>
-                            </div> */}
-
-                            {/* Rating Badge */}
-                            {item.ada_rating && (
-                              <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-[10px] font-extrabold text-slate-950 shadow-xs">
-                                <Star className="h-3 w-3 fill-slate-950" />
-                                <span>
-                                  {item.rating_google.toFixed(1)} ({item.jumlah_ulasan})
-                                </span>
-                              </div>
-                            )}
-
-                            {/* District & Price Range */}
-                            <div className="absolute right-3 bottom-3 left-3 flex items-center justify-between gap-2">
-                              <span className="rounded-md bg-black/75 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-xs line-clamp-1">
-                                Kec. {item.kecamatan}
-                              </span>
-                              <span className="rounded-md bg-emerald-700/90 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-xs">
-                                {item.priceRange}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Card Content Body */}
-                          <div className="p-5">
-                            <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-900 leading-snug">
-                              {item.nama}
-                            </h3>
-
-                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-bold text-[#174a72]">
-                              <span>{item.kategori_google}</span>
-                              {item.instagram && (
-                                <span className="text-[11px] font-semibold text-pink-600">
-                                  • {item.instagram}
-                                </span>
-                              )}
-                            </div>
-
-                            {item.deskripsi && (
-                              <p className="mt-2 text-xs text-slate-600 leading-relaxed line-clamp-3">
-                                {item.deskripsi}
-                              </p>
-                            )}
-
-                            {/* Signature Dish Pill */}
-                            <div className="mt-2.5 rounded-lg border border-amber-200/80 bg-amber-50/70 p-2 text-xs">
-                              <span className="font-extrabold text-amber-900 text-[11px] block">
-                                🍽️ Keunggulan &amp; Menu:
-                              </span>
-                              <p className="text-[11px] font-medium text-amber-950/80 mt-0.5 leading-snug">
-                                {item.signatureDish}
-                              </p>
-                            </div>
-
-                            <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
-                              <div className="flex items-start gap-2">
-                                <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#397eae]" />
-                                <span className="line-clamp-2">{item.alamat}</span>
-                              </div>
-
-                              {item.jam_buka && (
-                                <div className="flex items-center gap-2 text-[11px] font-medium text-slate-700">
-                                  <Clock className="h-3.5 w-3.5 shrink-0 text-[#397eae]" />
-                                  <span>Jam Buka: {item.jam_buka}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Card Footer Actions */}
-                        <div className="grid grid-cols-2 gap-2 border-t border-slate-100 bg-slate-50/70 p-4">
-                          <a
-                            href={item.google_maps_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#174a72] bg-[#174a72]/5 px-2.5 py-2 text-xs font-bold text-[#174a72] transition-colors hover:bg-[#174a72] hover:text-white"
-                            title="Buka foto tempat, menu, dan rute di Google Maps"
-                          >
-                            {/* <Camera className="h-3.5 w-3.5 shrink-0" /> */}
-                            <span>Lihat Lokasi</span>
-                            <ExternalLink className="h-3 w-3 opacity-70 shrink-0" />
-                          </a>
-
-                          {item.telepon ? (
-                            <a
-                              href={`https://wa.me/${item.telepon.replace(/[^0-9]/g, "")}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-2.5 py-2 text-xs font-bold text-white transition-colors hover:bg-emerald-700"
-                            >
-                              <Phone className="h-3.5 w-3.5 shrink-0" />
-                              Hubungi
-                            </a>
-                          ) : (
+                        {/* Reset All Filters */}
+                        {(selectedUMKMType !== "Semua" ||
+                          selectedDistrict !== "Semua Kecamatan" ||
+                          selectedCulinaryTheme !== "Semua" ||
+                          onlyRecommended ||
+                          onlyRealPhoto) && (
                             <button
                               type="button"
-                              onClick={() => setSelectedUMKMDetail(item)}
-                              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-800 px-2.5 py-2 text-xs font-bold text-white transition-colors hover:bg-slate-900"
+                              onClick={() => {
+                                setSelectedUMKMType("Semua");
+                                setSelectedDistrict("Semua Kecamatan");
+                                setSelectedCulinaryTheme("Semua");
+                                setOnlyRecommended(false);
+                                setOnlyRealPhoto(false);
+                                setUmkmPage(1);
+                              }}
+                              className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-700 underline underline-offset-2 ml-1"
                             >
-                              <Info className="h-3.5 w-3.5 shrink-0" />
-                              Detail Menu
+                              <RotateCcw className="h-3 w-3" />
+                              Reset Filter
                             </button>
                           )}
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2.5 text-[11px] text-slate-500">
+                      <p>
+                        *Catatan: Jam buka, ketersediaan menu, dan nomor telepon bersumber dari data publik Google Maps Kotawaringin Barat.
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Culinary Cards Section */}
+              {umkmLoading ? (
+                <div
+                  className="rounded-xl border border-slate-200 bg-white p-10 text-center text-xs font-semibold text-slate-600"
+                  role="status"
+                >
+                  Memuat data tempat makan &amp; kuliner dari server...
+                </div>
+              ) : umkmError ? (
+                <div
+                  className="rounded-xl border border-rose-200 bg-rose-50 p-8 text-center"
+                  role="alert"
+                >
+                  <p className="text-sm font-bold text-rose-800">
+                    Gagal memuat data tempat makan &amp; kuliner
+                  </p>
+                  <p className="mt-1 text-xs text-rose-700">{umkmError}</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setUmkmRefreshTick((t) => t + 1)}
+                    className="mt-4 gap-1.5 border-rose-300 bg-white text-rose-700 hover:bg-rose-100"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                    Coba Lagi
+                  </Button>
+                </div>
+              ) : visibleUMKM.length > 0 ? (
+                <div className="space-y-6">
+                  <div className="rounded-3xl border border-rose-100/90 bg-gradient-to-br from-rose-50/90 via-amber-50/50 to-orange-50/80 p-4 sm:p-6 shadow-xs">
+                    {/* Section Header */}
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                      <div className="flex items-start gap-2.5 min-w-0">
+                        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-600 text-white shadow-xs">
+                          <Utensils className="h-4 w-4" />
                         </div>
-                      </Card>
-                    ))}
+                        <div className="min-w-0">
+                          <h3 className="min-w-0 break-words text-base sm:text-lg font-black tracking-tight text-slate-900">
+                            Pilihan Tempat Makan &amp; Restoran
+                          </h3>
+                          <p className="min-w-0 break-words text-xs text-slate-600">
+                            Klik kartu untuk melihat deskripsi, menu unggulan, alamat lengkap, dan rute.
+                          </p>
+                        </div>
+                      </div>
+                      {totalUMKMPages > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUmkmPage((prev) =>
+                              prev >= totalUMKMPages ? 1 : prev + 1,
+                            );
+                          }}
+                          title="Halaman berikutnya"
+                          aria-label="Halaman berikutnya"
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-emerald-700 shadow-xs transition-transform hover:scale-105 hover:bg-emerald-50"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Cards Grid */}
+                    <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 md:grid-cols-3 lg:grid-cols-4 max-[380px]:grid-cols-1">
+                      {paginatedUMKM.map((item) => {
+                        const imgFailed = Boolean(failedUmkmImages[item.id]);
+                        const hasValidImage = Boolean(item.image) && !imgFailed;
+                        return (
+                          <Card
+                            key={item.id}
+                            role="article"
+                            tabIndex={0}
+                            onClick={() => setSelectedUMKMDetail(item)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                setSelectedUMKMDetail(item);
+                              }
+                            }}
+                            className="group flex h-full min-w-0 cursor-pointer flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-2.5 shadow-xs transition-all hover:-translate-y-1 hover:border-rose-200 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#174a72]"
+                          >
+                            <div className="min-w-0">
+                              {/* Card Food Image Header */}
+                              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-slate-100">
+                                {hasValidImage ? (
+                                  <img
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    src={item.image}
+                                    alt={item.nama}
+                                    loading="lazy"
+                                    onError={() =>
+                                      setFailedUmkmImages((prev) => ({
+                                        ...prev,
+                                        [item.id]: true,
+                                      }))
+                                    }
+                                  />
+                                ) : (
+                                  <div className="flex h-full w-full flex-col items-center justify-center bg-[image:var(--hero-gradient)] p-3 text-center text-white/85">
+                                    <Coffee className="mb-1.5 h-7 w-7 shrink-0 text-amber-300" />
+                                    <span className="max-w-full break-words line-clamp-2 text-xs font-bold leading-snug">
+                                      {item.nama}
+                                    </span>
+                                    <span className="mt-0.5 text-[10px] text-sky-200/80">
+                                      Foto belum tersedia
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* Rating Pill Badge */}
+                                {item.ada_rating && (
+                                  <div className="absolute top-2 left-2 inline-flex shrink-0 items-center gap-1 rounded-lg bg-rose-600 px-2 py-0.5 text-[11px] font-extrabold text-white shadow-xs">
+                                    <Star className="h-3 w-3 shrink-0 fill-white" />
+                                    <span>{item.rating_google.toFixed(1)}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Compact Card Body */}
+                              <div className="mt-2.5 min-w-0 space-y-1 px-0.5">
+                                <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] font-medium text-slate-600">
+                                  <MapPin className="h-3 w-3 shrink-0 text-emerald-600" />
+                                  <span className="min-w-0 truncate">Kec. {item.kecamatan}</span>
+                                  {item.ada_rating && (
+                                    <span className="shrink-0 text-slate-400">
+                                      • {item.jumlah_ulasan} ulasan
+                                    </span>
+                                  )}
+                                </div>
+
+                                <p className="min-w-0 break-words line-clamp-1 text-[11px] font-semibold text-slate-500 leading-snug">
+                                  {item.kategori_google}
+                                </p>
+
+                                <h3 className="min-w-0 break-words line-clamp-2 text-sm sm:text-[15px] font-extrabold tracking-tight text-slate-900 leading-snug">
+                                  {item.nama}
+                                </h3>
+
+                                {item.jam_buka && (
+                                  <p className="flex min-w-0 items-start gap-1 pt-0.5 text-[11px] text-slate-500 leading-snug">
+                                    <Clock className="mt-0.5 h-3 w-3 shrink-0 text-[#397eae]" />
+                                    <span className="min-w-0 flex-1 break-words line-clamp-1">
+                                      {item.jam_buka}
+                                    </span>
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Card Bottom Price & Quick Action */}
+                            <div className="mt-3 flex min-w-0 flex-wrap items-center justify-between gap-1.5 border-t border-slate-100 px-0.5 pt-2">
+                              <span className="min-w-0 truncate text-xs sm:text-sm font-black text-rose-600">
+                                {item.priceRange || "Lihat Detail"}
+                              </span>
+                              <span className="inline-flex shrink-0 items-center gap-0.5 text-[11px] font-bold text-[#174a72] group-hover:text-rose-600 transition-colors">
+                                Detail <ChevronRight className="h-3 w-3 shrink-0" />
+                              </span>
+                            </div>
+                          </Card>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Pagination Navigation */}
@@ -1967,7 +3156,7 @@ export default function Newsview() {
                         <strong>{totalUMKMPages}</strong> ({visibleUMKM.length} tempat)
                       </p>
 
-                      <div className="flex items-center gap-1">
+                      <div className="flex flex-wrap items-center justify-center gap-2">
                         <Button
                           variant="outline"
                           size="sm"
@@ -2057,11 +3246,30 @@ export default function Newsview() {
                     </button>
 
                     <div className="relative h-48 w-full overflow-hidden rounded-xl bg-slate-100">
-                      <img
-                        src={selectedUMKMDetail.image}
-                        alt={selectedUMKMDetail.nama}
-                        className="h-full w-full object-cover"
-                      />
+                      {selectedUMKMDetail.image &&
+                        !failedUmkmImages[selectedUMKMDetail.id] ? (
+                        <img
+                          src={selectedUMKMDetail.image}
+                          alt={selectedUMKMDetail.nama}
+                          className="h-full w-full object-cover"
+                          onError={() =>
+                            setFailedUmkmImages((prev) => ({
+                              ...prev,
+                              [selectedUMKMDetail.id]: true,
+                            }))
+                          }
+                        />
+                      ) : (
+                        <div className="flex h-full w-full flex-col items-center justify-center bg-[image:var(--hero-gradient)] p-4 text-center text-white/85">
+                          <Coffee className="mb-1.5 h-8 w-8 shrink-0 text-amber-300" />
+                          <span className="max-w-full break-words text-xs font-bold">
+                            {selectedUMKMDetail.nama}
+                          </span>
+                          <span className="mt-0.5 text-[10px] text-sky-200/80">
+                            Foto belum tersedia
+                          </span>
+                        </div>
+                      )}
                       <div className="absolute top-3 left-3">
                         <span className="rounded-full bg-[#102b49]/90 px-3 py-1 text-xs font-extrabold text-white">
                           {selectedUMKMDetail.culinaryTheme}
@@ -2081,10 +3289,23 @@ export default function Newsview() {
                     <h3 className="mt-4 text-xl font-black text-slate-900">
                       {selectedUMKMDetail.nama}
                     </h3>
-                    <p className="text-xs font-bold text-[#174a72]">
-                      {selectedUMKMDetail.kategori_google} • Kec.{" "}
-                      {selectedUMKMDetail.kecamatanFull}
-                    </p>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs font-bold text-[#174a72]">
+                      <span>
+                        {selectedUMKMDetail.kategori_google} • Kec.{" "}
+                        {selectedUMKMDetail.kecamatanFull}
+                      </span>
+                      {selectedUMKMDetail.instagram && (
+                        <span className="text-[11px] font-semibold text-pink-600">
+                          • {selectedUMKMDetail.instagram}
+                        </span>
+                      )}
+                    </div>
+
+                    {selectedUMKMDetail.deskripsi && (
+                      <p className="mt-2.5 text-xs text-slate-600 leading-relaxed">
+                        {selectedUMKMDetail.deskripsi}
+                      </p>
+                    )}
 
                     <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs">
                       <span className="font-extrabold text-amber-900 block">
@@ -2236,13 +3457,13 @@ export default function Newsview() {
                         onClick={() => setSelectedDetailArticle(article)}
                       >
                         <img
-                          src={article.image || "/venues2/sportCenter.jpg"}
+                          src={article.image || "/venues2/sportCenter.webp"}
                           alt={article.title}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           onError={(e) => {
                             const target = e.currentTarget;
-                            if (!target.src.includes("sportCenter.jpg")) {
-                              target.src = "/venues2/sportCenter.jpg";
+                            if (!target.src.includes("sportCenter.webp")) {
+                              target.src = "/venues2/sportCenter.webp";
                             }
                           }}
                         />
@@ -2337,15 +3558,48 @@ export default function Newsview() {
             <span className="text-4xl">&times;</span>
           </button>
 
-          <div className="max-w-5xl w-full flex flex-col items-center">
-            <img
-              src={selectedPhoto.src}
-              alt={selectedPhoto.title}
-              className="max-h-[80vh] max-w-full rounded-lg shadow-2xl object-contain"
-            />
-            <div className="mt-4 text-center text-white">
-              <Badge variant="secondary" className="mb-2">{selectedPhoto.category}</Badge>
-              <h3 className="text-xl font-bold">{selectedPhoto.title}</h3>
+          <div
+            className="max-w-5xl w-full flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {selectedPhoto.image_url && !failedGaleriImages[selectedPhoto.id] ? (
+              <img
+                src={selectedPhoto.image_url}
+                alt={selectedPhoto.title}
+                className="max-h-[75vh] max-w-full rounded-lg shadow-2xl object-contain"
+                onError={() =>
+                  setFailedGaleriImages((prev) => ({
+                    ...prev,
+                    [selectedPhoto.id]: true,
+                  }))
+                }
+              />
+            ) : (
+              <div className="flex h-64 w-full max-w-lg flex-col items-center justify-center rounded-xl bg-slate-800 text-white/80">
+                <Camera className="mb-2 h-10 w-10 text-amber-300" />
+                <span className="text-sm font-semibold">Foto belum tersedia</span>
+              </div>
+            )}
+            <div className="mt-4 max-w-2xl text-center text-white">
+              <div className="mb-2 flex flex-wrap items-center justify-center gap-2">
+                <Badge variant="secondary">{selectedPhoto.category}</Badge>
+                {selectedPhoto.is_featured && (
+                  <Badge className="bg-amber-400 text-slate-950">Unggulan</Badge>
+                )}
+              </div>
+              <h3 className="text-xl font-bold break-words">{selectedPhoto.title}</h3>
+              {selectedPhoto.caption && (
+                <p className="mt-1.5 text-sm text-slate-200 break-words">
+                  {selectedPhoto.caption}
+                </p>
+              )}
+              {(selectedPhoto.photographer || selectedPhoto.event_date) && (
+                <p className="mt-2 text-xs text-slate-400">
+                  {selectedPhoto.photographer && `Fotografer: ${selectedPhoto.photographer}`}
+                  {selectedPhoto.photographer && selectedPhoto.event_date && " • "}
+                  {selectedPhoto.event_date}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -2399,8 +3653,8 @@ export default function Newsview() {
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const target = e.currentTarget;
-                      if (!target.src.includes("sportCenter.jpg")) {
-                        target.src = "/venues2/sportCenter.jpg";
+                      if (!target.src.includes("sportCenter.webp")) {
+                        target.src = "/venues2/sportCenter.webp";
                       }
                     }}
                   />

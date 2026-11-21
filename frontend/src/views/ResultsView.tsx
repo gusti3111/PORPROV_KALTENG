@@ -22,6 +22,10 @@ import SiteHeader from "../components/SiteHeader";
 import { useCompetitionStore } from "../stores/competitionStore";
 import { getContingentLogoUrl } from "../utils/contingentLogo";
 import { formatParticipantName } from "../utils/participantDisplay";
+import { resolveAutoMatchStatus, useCurrentTimeMs } from "../utils/matchStatus";
+
+const NON_MATCH_AGENDA_PATTERN =
+  /upacara|pembukaan|penutupan|kepulangan|technical\s*meeting|manager\s*meeting|penyegaran\s*wasit|uji\s*coba|ujicoba|\bopening\b|\bclosing\b/i;
 
 type ResultsTab = "matches" | "medals" | "sports";
 
@@ -113,7 +117,9 @@ export default function ResultsView() {
   const [selectedSport, setSelectedSport] = useState(
     () => searchParams.get("cabor") || "",
   );
+  const [visibleCount, setVisibleCount] = useState(20);
   const [query, setQuery] = useState("");
+  const nowMs = useCurrentTimeMs();
 
   useEffect(() => {
     const caborParam = searchParams.get("cabor") || "";
@@ -138,20 +144,28 @@ export default function ResultsView() {
   const results = useMemo<MatchResult[]>(
     () =>
       matches
+        .map((match) => ({
+          ...match,
+          status: resolveAutoMatchStatus(match, nowMs),
+        }))
         .filter((match) => {
-          if (match.participants.length > 0) {
-            return (
-              match.status === "FINISHED" ||
-              match.status === "ONGOING" ||
-              match.status === "SCHEDULED"
-            );
-          }
-          const isGroupStage =
-            /(grup|group|penyisihan|pool)/i.test(match.round_name || "") ||
-            /(grup|group|penyisihan|pool)/i.test(match.title || "");
-          return (
-            isGroupStage &&
-            (match.status === "SCHEDULED" || match.status === "ONGOING")
+          const validStatus =
+            match.status === "FINISHED" ||
+            match.status === "ONGOING" ||
+            match.status === "SCHEDULED";
+          if (!validStatus || match.participants.length === 0) return false;
+          const combinedText = `${match.event_name || ""} ${match.round_name || ""} ${match.title || ""}`;
+          return !NON_MATCH_AGENDA_PATTERN.test(combinedText);
+        })
+        .sort((a, b) => {
+          const statusPriority = (status: string) =>
+            status === "ONGOING" ? 0 : status === "FINISHED" ? 1 : 2;
+          const prioDiff = statusPriority(a.status) - statusPriority(b.status);
+          if (prioDiff !== 0) return prioDiff;
+          const dateDiff = (b.date || "").localeCompare(a.date || "");
+          if (dateDiff !== 0) return dateDiff;
+          return (b.start_time || b.time || "").localeCompare(
+            a.start_time || a.time || "",
           );
         })
         .map((match) => ({
@@ -185,7 +199,7 @@ export default function ResultsView() {
                   },
                 ],
         })),
-    [matches],
+    [matches, nowMs],
   );
 
   const visibleResults = useMemo(() => {
@@ -234,6 +248,10 @@ export default function ResultsView() {
   //       }),
   //   [matches],
   // );
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [selectedDate, selectedSport, query]);
+
   const resultDates = useMemo(
     () => [...new Set(results.map((result) => result.date))].sort(),
     [results],
@@ -291,7 +309,7 @@ export default function ResultsView() {
           </p>
           <img
             className="results-hero-illustration"
-            src="/keraHasil.png"
+            src="/keraHasil.webp"
             alt="Maskot PORPROV menunjukkan medali"
           />
           <Card className="results-total flex-row" aria-label={`${totalMedals} medali`}>
@@ -320,13 +338,14 @@ export default function ResultsView() {
           >
             <TabsList
               variant="line"
-              className="results-tabs"
+              className="results-tabs !h-auto !w-full max-w-full flex-wrap !justify-start gap-x-3 gap-y-2 pb-1.5 sm:flex-nowrap"
               aria-label="Kategori hasil"
             >
               <TabsTrigger
                 id="results-tab-matches"
                 aria-controls="results-panel-matches"
                 value="matches"
+                className="flex-none px-2 py-1.5 text-xs sm:text-sm"
               >
                 Hasil pertandingan
                 <Badge variant="secondary">{results.length}</Badge>
@@ -335,6 +354,7 @@ export default function ResultsView() {
                 id="results-tab-medals"
                 aria-controls="results-panel-medals"
                 value="medals"
+                className="flex-none px-2 py-1.5 text-xs sm:text-sm"
               >
                 Perolehan medali per kontingen
               </TabsTrigger>
@@ -342,6 +362,7 @@ export default function ResultsView() {
                 id="results-tab-sports"
                 aria-controls="results-panel-sports"
                 value="sports"
+                className="flex-none px-2 py-1.5 text-xs sm:text-sm"
               >
                 Perolehan medali per cabor
               </TabsTrigger>
@@ -547,7 +568,9 @@ export default function ResultsView() {
                   {loadingMatches ? (
                     <p role="status">Memuat hasil pertandingan...</p>
                   ) : visibleResults.length > 0 ? (
-                    visibleResults.map((result) => (
+                    <>
+                      <div className="results-cards-track">
+                        {visibleResults.slice(0, visibleCount).map((result) => (
                       <Card
                         className="gap-3 rounded-none border-x-0 border-t-0 border-b border-[var(--ui-border)] bg-transparent p-4 shadow-none ring-0 last:border-b-0 sm:gap-4 sm:px-5 sm:py-4"
                         key={result.id}
@@ -615,11 +638,11 @@ export default function ResultsView() {
                           })}
                         </div>
 
-                        <div className="flex items-center justify-between gap-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
                           <span className="min-w-0 text-[10px] leading-snug text-[var(--muted)]">
                             {result.venue}
                           </span>
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex flex-wrap items-center gap-2 shrink-0">
                             {result.status === "ONGOING" && result.liveStreamUrl?.trim() && (
                               <a
                                 href={result.liveStreamUrl.trim()}
@@ -640,7 +663,20 @@ export default function ResultsView() {
                           </div>
                         </div>
                       </Card>
-                    ))
+                        ))}
+                      </div>
+                      {visibleResults.length > visibleCount && (
+                      <div className="flex justify-center border-t border-[var(--ui-border)] p-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setVisibleCount((prev) => prev + 20)}
+                        >
+                          Tampilkan lebih banyak ({visibleResults.length - visibleCount} lagi)
+                        </Button>
+                      </div>
+                    )}
+                    </>
                   ) : (
                     <div className="results-no-data">
                       Belum ada hasil yang sesuai dengan filter.
@@ -653,7 +689,7 @@ export default function ResultsView() {
               <TabsContent
                 value="medals"
                 id="results-panel-medals"
-                className="medals-panel"
+                className="medals-panel w-full min-w-0 overflow-hidden"
               >
                 {loadingMedals ? (
                   <p role="status">Memuat klasemen medali...</p>
@@ -677,18 +713,27 @@ export default function ResultsView() {
                       <table className="medal-table">
                         <thead>
                           <tr>
-                            <th scope="col">Peringkat</th>
+                            <th scope="col" className="w-8 text-center">
+                              <span className="sm:hidden">#</span>
+                              <span className="hidden sm:inline">Peringkat</span>
+                            </th>
                             <th scope="col">Kontingen</th>
-                            <th scope="col">
-                              <MedalIcon type="gold" />
+                            <th scope="col" className="text-center">
+                              <span className="inline-flex justify-center">
+                                <MedalIcon type="gold" />
+                              </span>
                             </th>
-                            <th scope="col">
-                              <MedalIcon type="silver" />
+                            <th scope="col" className="text-center">
+                              <span className="inline-flex justify-center">
+                                <MedalIcon type="silver" />
+                              </span>
                             </th>
-                            <th scope="col">
-                              <MedalIcon type="bronze" />
+                            <th scope="col" className="text-center">
+                              <span className="inline-flex justify-center">
+                                <MedalIcon type="bronze" />
+                              </span>
                             </th>
-                            <th scope="col">Total</th>
+                            <th scope="col" className="text-center">Total</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -700,24 +745,26 @@ export default function ResultsView() {
                             );
                             return (
                               <tr key={standing.contingent_id}>
-                                <td>{String(standing.rank).padStart(2, "0")}</td>
+                                <td className="text-center tabular-nums">
+                                  {String(standing.rank).padStart(2, "0")}
+                                </td>
                                 <th scope="row">
-                                  <span className="inline-flex items-center gap-2.5">
+                                  <span className="inline-flex items-center gap-1.5 sm:gap-2.5 leading-snug">
                                     {logoUrl && (
                                       <img
                                         src={logoUrl}
                                         alt={`Logo ${standing.contingent_name}`}
-                                        className="h-6 w-6 xl:h-7 xl:w-7 2xl:h-9 2xl:w-9 min-[2560px]:h-11 min-[2560px]:w-11 min-[3400px]:h-14 min-[3400px]:w-14 shrink-0 object-contain"
+                                        className="h-5 w-5 sm:h-6 sm:w-6 xl:h-7 xl:w-7 2xl:h-9 2xl:w-9 min-[2560px]:h-11 min-[2560px]:w-11 min-[3400px]:h-14 min-[3400px]:w-14 shrink-0 object-contain"
                                         loading="lazy"
                                       />
                                     )}
                                     <span>{standing.contingent_name}</span>
                                   </span>
                                 </th>
-                                <td>{standing.gold}</td>
-                                <td>{standing.silver}</td>
-                                <td>{standing.bronze}</td>
-                                <td>{standing.total}</td>
+                                <td className="text-center tabular-nums">{standing.gold}</td>
+                                <td className="text-center tabular-nums">{standing.silver}</td>
+                                <td className="text-center tabular-nums">{standing.bronze}</td>
+                                <td className="text-center font-bold tabular-nums">{standing.total}</td>
                               </tr>
                             );
                           })}
@@ -731,7 +778,7 @@ export default function ResultsView() {
               <TabsContent
                 value="sports"
                 id="results-panel-sports"
-                className="medals-panel"
+                className="medals-panel w-full min-w-0 overflow-hidden"
               >
                 <div className="medal-sport-summary">
                   <strong>{sportMedalStandings.length} cabang olahraga</strong>
@@ -745,51 +792,57 @@ export default function ResultsView() {
                       <thead>
                         <tr>
                           <th scope="col">Cabang olahraga</th>
-                          <th scope="col">
-                            <MedalIcon type="gold" />
+                          <th scope="col" className="text-center">
+                            <span className="inline-flex justify-center">
+                              <MedalIcon type="gold" />
+                            </span>
                           </th>
-                          <th scope="col">
-                            <MedalIcon type="silver" />
+                          <th scope="col" className="text-center">
+                            <span className="inline-flex justify-center">
+                              <MedalIcon type="silver" />
+                            </span>
                           </th>
-                          <th scope="col">
-                            <MedalIcon type="bronze" />
+                          <th scope="col" className="text-center">
+                            <span className="inline-flex justify-center">
+                              <MedalIcon type="bronze" />
+                            </span>
                           </th>
-                          <th scope="col">Total</th>
+                          <th scope="col" className="text-center">Total</th>
                         </tr>
                       </thead>
                       <tbody>
                         {sportMedalStandings.map((standing) => (
                           <tr key={standing.sport_id}>
                             <th scope="row">{standing.sport}</th>
-                            <td>{standing.gold}</td>
-                            <td>{standing.silver}</td>
-                            <td>{standing.bronze}</td>
-                            <td>{standing.total}</td>
+                            <td className="text-center tabular-nums">{standing.gold}</td>
+                            <td className="text-center tabular-nums">{standing.silver}</td>
+                            <td className="text-center tabular-nums">{standing.bronze}</td>
+                            <td className="text-center font-bold tabular-nums">{standing.total}</td>
                           </tr>
                         ))}
                       </tbody>
                       <tfoot>
                         <tr>
                           <th scope="row">Total</th>
-                          <td>
+                          <td className="text-center tabular-nums">
                             {sportMedalStandings.reduce(
                               (total, standing) => total + standing.gold,
                               0,
                             )}
                           </td>
-                          <td>
+                          <td className="text-center tabular-nums">
                             {sportMedalStandings.reduce(
                               (total, standing) => total + standing.silver,
                               0,
                             )}
                           </td>
-                          <td>
+                          <td className="text-center tabular-nums">
                             {sportMedalStandings.reduce(
                               (total, standing) => total + standing.bronze,
                               0,
                             )}
                           </td>
-                          <td>
+                          <td className="text-center tabular-nums">
                             {sportMedalStandings.reduce(
                               (total, standing) => total + standing.total,
                               0,

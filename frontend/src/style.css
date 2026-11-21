@@ -438,13 +438,11 @@ body {
 }
 
 .berita-gradient {
-  background: linear-gradient(
-    204deg,
-    rgb(2 21 23 / 5%) 29%,
-    rgb(3 21 23 / 34%) 56%,
-    rgb(17 42 55 / 74%) 75%,
-    rgb(1 30 45 / 82%) 104%
-  );
+  background: linear-gradient(204deg,
+      rgb(2 21 23 / 5%) 29%,
+      rgb(3 21 23 / 34%) 56%,
+      rgb(17 42 55 / 74%) 75%,
+      rgb(1 30 45 / 82%) 104%);
 }
 
 .home-hero-photo {
@@ -672,8 +670,9 @@ body {
   }
 
   .home-stadium-heading {
-    align-items: end;
-    gap: 10px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px 16px;
   }
 
   .home-stadium-description {
@@ -1158,6 +1157,20 @@ body {
     padding-inline: 5%;
   }
 
+  .brand {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .brand-logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .brand-copy strong {
+    font-size: 11px;
+  }
+
   .brand-mark {
     width: 38px;
     height: 38px;
@@ -1211,9 +1224,10 @@ body {
   }
 
   .highlight-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-    margin-top: 30px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    margin-top: 24px;
   }
 
   .highlight-card {
@@ -2765,6 +2779,7 @@ body {
 }
 
 .medal-table-wrap {
+  width: 100%;
   overflow-x: auto;
 }
 
@@ -2772,7 +2787,6 @@ body {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  white-space: nowrap;
 }
 
 .medal-table th,
@@ -2780,6 +2794,10 @@ body {
   padding: calc(var(--table-body-pad) + 2px);
   border-bottom: 1px solid #e1e2da;
   font-size: var(--table-body-fs);
+}
+
+.medal-table td {
+  white-space: nowrap;
 }
 
 .medal-table thead th {
@@ -2792,6 +2810,8 @@ body {
 
 .medal-table tbody th {
   font-weight: 700;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .medal-table tbody td:first-child {
@@ -2978,7 +2998,7 @@ body {
 
 .schedule-event-card {
   display: grid;
-  grid-template-columns: 80px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(88px, auto) minmax(0, 1fr) auto;
   gap: 16px;
   padding: 18px 22px;
   border-bottom: 1px solid #e1e2da;
@@ -3111,26 +3131,26 @@ body {
   .schedule-hero-illustration {
     position: static;
     display: block;
-    width: min(210px, 56vw);
+    width: min(145px, 42vw);
     height: auto;
-    max-height: 185px;
-    margin: 18px auto 0;
+    max-height: 130px;
+    margin: 12px auto 0;
     opacity: 1;
     transform: none;
   }
 
   .results-hero {
-    padding-top: 27px;
-    padding-bottom: 24px;
+    padding-top: 20px;
+    padding-bottom: 16px;
   }
 
   .results-hero-illustration {
     position: static;
     display: block;
-    width: min(210px, 56vw);
+    width: min(145px, 42vw);
     height: auto;
-    max-height: 185px;
-    margin: 18px auto 0;
+    max-height: 130px;
+    margin: 12px auto 0;
     opacity: 1;
     transform: none;
   }
@@ -3195,8 +3215,32 @@ body {
 
   .medal-table th,
   .medal-table td {
-    padding: 11px 12px;
-    font-size: 9px;
+    padding: 8px 5px;
+    font-size: 11px;
+  }
+
+  .medal-table th:first-child,
+  .medal-table td:first-child {
+    padding-left: 8px;
+  }
+
+  .medal-table th:last-child,
+  .medal-table td:last-child {
+    padding-right: 8px;
+  }
+
+  .medal-table thead th {
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
+
+  .medal-table .medal-circle {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    font-size: 10px;
+    margin: 0 auto;
   }
 
   .schedule-content {
@@ -3268,23 +3312,30 @@ body {
   }
 
   .schedule-event-card {
-    grid-template-columns: 58px minmax(0, 1fr);
-    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
     padding: 14px;
   }
 
-  .schedule-event-card>div {
-    min-width: 0;
-    overflow-wrap: anywhere;
+  .schedule-event-card time {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    font-size: 13px;
   }
 
   .schedule-event-card .schedule-event-badge {
     grid-column: 2;
-    justify-self: start;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
   }
 
-  .schedule-event-card time {
-    font-size: 15px;
+  .schedule-event-card>div {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   .cabor-hero {
@@ -3320,7 +3371,7 @@ body {
 
   .cabor-hero-content {
     padding-top: 48px;
-    padding-bottom: 64px;
+    padding-bottom: 16px;
   }
 
   .cabor-hero h1 {
@@ -3340,10 +3391,14 @@ body {
   }
 
   .cabor-hero-footer {
-    right: 6%;
-    left: 6%;
-    height: 42px;
-    font-size: 6px;
+    position: static;
+    height: auto;
+    min-height: 42px;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    margin: 20px 6% 0;
+    padding-block: 10px;
+    font-size: 7px;
   }
 
   .cabor-content {
@@ -3413,70 +3468,21 @@ body {
     text-align: right;
   }
 
-  .cabor-grid {
-    gap: 8px;
+  .cabor-grid,
+  .venue-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
   }
 
   .cabor-card {
-    min-height: 195px;
-    padding: 13px 12px 11px;
-  }
-
-  .cabor-card-badges {
-    gap: 6px;
-  }
-
-  .cabor-card-pictogram-badge {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-  }
-
-  .cabor-card-pictogram-img {
-    width: 21px;
-    height: 21px;
-  }
-
-  .cabor-card-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 11px;
-  }
-
-  .cabor-card-emblem-img {
-    width: 32px;
-    height: 32px;
-  }
-
-  .cabor-card h3 {
-    font-size: 16px;
-  }
-
-  .cabor-card-info p {
-    font-size: 9px;
+    min-height: 205px;
+    padding: 18px 18px 15px;
   }
 
   .venue-card {
     min-height: 195px;
-    padding: 14px 12px 12px;
-  }
-
-  .venue-card h3 {
-    font-size: 16px;
-  }
-
-  .venue-card-info p {
-    font-size: 9px;
-  }
-
-  .cabor-card-bottom {
-    font-size: 6px;
-    letter-spacing: 0.06em;
-  }
-
-  .venue-card-bottom {
-    font-size: 6px;
-    letter-spacing: 0.06em;
+    padding: 17px 18px 14px;
   }
 
   .cabor-disclaimer {
@@ -3498,6 +3504,7 @@ body {
 
 .news-page {
   min-height: 65vh;
+  overflow-x: hidden;
   padding-bottom: 80px;
   background: var(--paper);
 }
@@ -3551,8 +3558,13 @@ body {
 
 .news-content {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   padding-bottom: 30px;
+}
+
+.news-content>* {
+  min-width: 0;
 }
 
 .news-toolbar {
@@ -3766,24 +3778,49 @@ body {
   }
 
   .news-intro h1 {
-    font-size: clamp(36px, 10.5vw, 54px);
+    font-size: clamp(28px, 8.5vw, 44px);
+    line-height: 1.06;
   }
 
   .news-toolbar {
+    flex-direction: column;
     align-items: stretch;
+    gap: 10px;
   }
 
   .news-search {
     width: 100%;
   }
 
+  .news-categories {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+    overflow: visible;
+    gap: 6px;
+    padding-bottom: 0;
+  }
+
+  .news-categories button {
+    flex: 0 1 auto;
+    max-width: 100%;
+    height: auto;
+    min-height: 34px;
+    padding: 6px 12px;
+    font-size: 12px;
+    line-height: 1.25;
+    white-space: normal;
+  }
+
   .news-grid,
   .news-gallery-grid {
+    display: grid;
     grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
   }
 
   .news-gallery-card {
-    min-height: 220px;
+    min-height: 240px;
   }
 }
 
@@ -4245,10 +4282,6 @@ a:focus-visible {
 .medal-table tfoot th,
 .medal-table tfoot td {
   background: var(--ui-subtle);
-}
-
-.news-toolbar {
-  align-items: center;
 }
 
 .news-card {
@@ -4810,6 +4843,39 @@ body {
   }
 }
 
+@media (max-width: 860px) {
+
+  .schedule-hero-illustration,
+  .results-hero-illustration,
+  .news-hero-illustration,
+  .cabor-page-hero-illustration,
+  .venue-hero-illustration,
+  .bagan-page-hero-illustration {
+    position: static;
+    display: block;
+    width: min(160px, 42vw);
+    height: auto;
+    max-height: 135px;
+    margin: 12px auto 0;
+    opacity: 1;
+    transform: none;
+  }
+
+  .cabor-hero-content {
+    padding-bottom: 18px;
+  }
+
+  .cabor-hero-footer {
+    position: static;
+    height: auto;
+    min-height: 44px;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    margin: 20px 5% 0;
+    padding-block: 10px;
+  }
+}
+
 @media (max-width: 620px) {
   .bagan-page-hero {
     padding: 42px 0 38px;
@@ -4847,6 +4913,11 @@ body {
 
   .bagan-count span:last-child {
     text-align: left;
+  }
+
+  .bagan-event-list {
+    display: grid;
+    gap: 14px;
   }
 
   .bagan-event-card {

@@ -16,10 +16,11 @@ import SiteHeader from "../components/SiteHeader";
 import { useCompetitionStore } from "../stores/competitionStore";
 import { isGroupPhaseNonHeadToHeadMatch } from "../utils/sportScoringConfig";
 import { formatParticipantName } from "../utils/participantDisplay";
+import { resolveAutoMatchStatus, useCurrentTimeMs } from "../utils/matchStatus";
 import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 
 const AGENDA_EVENT_PATTERN =
-  /upacara|pembukaan|penutupan|kepulangan|technical\s*meeting|manager\s*meeting|penyegaran\s*wasit|\bopening\b|\bclosing\b/i;
+  /upacara|pembukaan|penutupan|kepulangan|technical\s*meeting|manager\s*meeting|penyegaran\s*wasit|uji\s*coba|ujicoba|\bopening\b|\bclosing\b/i;
 
 const CEREMONY_EVENT_PATTERN =
   /upacara|pembukaan|penutupan|kepulangan|\bopening\b|\bclosing\b/i;
@@ -95,6 +96,8 @@ export default function ScheduleView() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(10);
+  const nowMs = useCurrentTimeMs();
   const dayStripRef = useRef<HTMLDivElement>(null);
 
   const scrollDayStrip = (direction: -1 | 1) => {
@@ -143,12 +146,12 @@ export default function ScheduleView() {
           roundName: match.round_name,
           venue: match.venue_name,
           title: match.title,
-          status: match.status,
+          status: resolveAutoMatchStatus(match, nowMs),
           liveStreamUrl: match.live_stream_url,
           participantsSummary,
         };
       }),
-    [matches],
+    [matches, nowMs],
   );
   const scheduleDates = useMemo(
     () => getScheduleDates(scheduleEvents),
@@ -186,6 +189,10 @@ export default function ScheduleView() {
       block: "nearest",
     });
   }, [selectedDate, scheduleDates.length]);
+
+  useEffect(() => {
+    setVisibleCount(10);
+  }, [selectedDate, selectedSport, selectedVenue, query]);
 
   const visibleEvents = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("id");
@@ -244,7 +251,7 @@ export default function ScheduleView() {
           </p>
           <img
             className="schedule-hero-illustration"
-            src="/keraWak.png"
+            src="/keraWak.webp"
             alt="Maskot PORPROV memegang stopwatch"
           />
 
@@ -460,8 +467,9 @@ export default function ScheduleView() {
               </span>
             </div>
             {visibleEvents.length > 0 ? (
-              <div className="schedule-event-list">
-                {visibleEvents.map((event) => {
+              <>
+                <div className="schedule-event-list">
+                  {visibleEvents.slice(0, visibleCount).map((event) => {
                   const isOngoing = event.status === "ONGOING";
                   const isAgenda = isAgendaOnlyEvent(event);
                   const isCeremony =
@@ -548,7 +556,19 @@ export default function ScheduleView() {
                     </article>
                   );
                 })}
-              </div>
+                </div>
+                {visibleEvents.length > visibleCount && (
+                  <div className="flex justify-center border-t border-[#e1e2da] p-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setVisibleCount((prev) => prev + 10)}
+                    >
+                      Tampilkan lebih banyak ({visibleEvents.length - visibleCount} lagi)
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               <ScheduleEmptyState />
             )}
@@ -562,7 +582,7 @@ export default function ScheduleView() {
 }
 
 function statusLabel(status: string) {
-  if (status === "ONGOING") return "ONGOING";
+  if (status === "ONGOING") return "LIVE";
   if (status === "FINISHED") return "Finished";
   if (status === "SCHEDULED") return "Terjadwal";
   if (status === "POSTPONED") return "Ditunda";

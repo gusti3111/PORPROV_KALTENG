@@ -5,9 +5,11 @@ import SiteHeader from "../components/SiteHeader";
 import SportBracket from "../components/SportBracket";
 import { getAPIData, getAPIErrorMessage } from "../api/client";
 import type { SportTournament, SportTournamentStanding } from "../api/types";
+import { useCompetitionStore } from "../stores/competitionStore";
 import { getContingentLogoUrl } from "../utils/contingentLogo";
 import { formatParticipantName } from "../utils/participantDisplay";
 import { getSportEmblemInfo } from "../utils/sportEmblem";
+import { normalizeTournamentData } from "../utils/tournamentNormalizer";
 import {
   formatGroupDisplayName,
   formatStandingPrimaryMetric,
@@ -138,14 +140,22 @@ function standingsTable(
 
 export default function SportDetailView() {
   const { sportId } = useParams();
+  const matches = useCompetitionStore((state) => state.matches);
+  const fetchMatches = useCompetitionStore((state) => state.fetchMatches);
   const [tournament, setTournament] = useState<SportTournament | null>(null);
+  const [selectedDivision, setSelectedDivision] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    void fetchMatches();
+  }, [fetchMatches]);
 
   useEffect(() => {
     let active = true;
     const id = Number(sportId);
     setTournament(null);
+    setSelectedDivision("");
     setError("");
 
     if (!Number.isInteger(id) || id < 1) {
@@ -200,14 +210,38 @@ export default function SportDetailView() {
         ) : (
           <div className="sport-detail-wrap">
             {(() => {
+              const normalizedTournament = normalizeTournamentData(
+                tournament,
+                matches,
+              );
               const rule = getSportScoringRule(
-                tournament.sport_id,
-                tournament.sport_name,
+                normalizedTournament.sport_id,
+                normalizedTournament.sport_name,
               );
               const emblem = getSportEmblemInfo(
-                tournament.sport_id,
-                tournament.sport_name,
+                normalizedTournament.sport_id,
+                normalizedTournament.sport_name,
               );
+              const divisions = normalizedTournament.divisions ?? [];
+              const activeDivision =
+                divisions.length > 0
+                  ? divisions.find((d) => d.division === selectedDivision) ??
+                    divisions[0]
+                  : null;
+              const displayGroups = activeDivision
+                ? activeDivision.groups
+                : normalizedTournament.groups;
+              const bracketTournament: SportTournament = activeDivision
+                ? {
+                    ...normalizedTournament,
+                    groups: activeDivision.groups,
+                    quarterfinals: activeDivision.quarterfinals,
+                    semifinals: activeDivision.semifinals,
+                    final: activeDivision.final,
+                    bronze: activeDivision.bronze,
+                    third_place: activeDivision.third_place,
+                  }
+                : normalizedTournament;
               return (
                 <>
                   <Link className="sport-detail-back" to="/cabor">
@@ -260,6 +294,36 @@ export default function SportDetailView() {
                     </p>
                   </header>
 
+                  {divisions.length > 0 && (
+                    <div
+                      className="mt-6 flex flex-wrap items-center gap-2"
+                      role="tablist"
+                      aria-label="Pilih divisi Putra atau Putri"
+                    >
+                      {divisions.map((div) => {
+                        const isActive = activeDivision?.division === div.division;
+                        const label =
+                          div.label || (div.division === "Men" ? "Putra" : "Putri");
+                        return (
+                          <button
+                            key={div.division}
+                            type="button"
+                            role="tab"
+                            aria-selected={isActive}
+                            onClick={() => setSelectedDivision(div.division)}
+                            className={`rounded-full px-4 py-2 text-xs font-extrabold tracking-wide transition-colors ${
+                              isActive
+                                ? "bg-[var(--green)] text-white shadow-sm"
+                                : "border border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-foreground)] hover:border-[var(--green)]"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
                   {rule.tableType !== "KNOCKOUT_ONLY" && (
                     <section
                       className="sport-detail-section"
@@ -273,6 +337,9 @@ export default function SportDetailView() {
                               : rule.tableType === "SCORE_LEADERBOARD"
                                 ? "BABAK KUALIFIKASI / PENILAIAN JURI"
                                 : "FASE GRUP"}
+                            {activeDivision
+                              ? ` · ${(activeDivision.label || (activeDivision.division === "Men" ? "Putra" : "Putri")).toUpperCase()}`
+                              : ""}
                           </p>
                           <h2 id="sport-standings-title">
                             {rule.tableType === "TIME_LEADERBOARD" ? (
@@ -291,25 +358,33 @@ export default function SportDetailView() {
                           </h2>
                         </div>
                         <span className="sport-detail-meta">
-                          {tournament.groups.length} {rule.groupLabel.toUpperCase()} ·{" "}
-                          {tournament.groups.reduce(
+                          {displayGroups.length} {rule.groupLabel.toUpperCase()} ·{" "}
+                          {displayGroups.reduce(
                             (total, group) => total + group.standings.length,
                             0,
                           )}{" "}
                           KONTINGEN
                         </span>
                       </div>
-                      <div className="sport-standings-grid">
-                        {tournament.groups.map((group, _, allGroups) =>
-                          standingsTable(
-                            group.name,
-                            group.standings,
-                            rule,
-                            allGroups.filter((g) => g.standings.length > 0).length ||
-                              allGroups.length,
-                          ),
-                        )}
-                      </div>
+                      {displayGroups.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-[var(--ui-border)] bg-[var(--ui-surface)] p-6 text-center text-sm text-muted-foreground">
+                          {activeDivision
+                            ? `Belum ada data klasemen grup untuk divisi ${activeDivision.label || (activeDivision.division === "Men" ? "Putra" : "Putri")}.`
+                            : "Belum ada data klasemen grup yang diinput oleh Admin."}
+                        </div>
+                      ) : (
+                        <div className="sport-standings-grid">
+                          {displayGroups.map((group, _, allGroups) =>
+                            standingsTable(
+                              group.name,
+                              group.standings,
+                              rule,
+                              allGroups.filter((g) => g.standings.length > 0).length ||
+                                allGroups.length,
+                            ),
+                          )}
+                        </div>
+                      )}
                     </section>
                   )}
 
@@ -319,7 +394,12 @@ export default function SportDetailView() {
                   >
                     <div className="sport-detail-section-heading">
                       <div>
-                        <p>FASE GUGUR</p>
+                        <p>
+                          FASE GUGUR
+                          {activeDivision
+                            ? ` · ${(activeDivision.label || (activeDivision.division === "Men" ? "Putra" : "Putri")).toUpperCase()}`
+                            : ""}
+                        </p>
                         <h2 id="sport-bracket-title">
                           Bagan <span>penyisihan.</span>
                         </h2>
@@ -328,7 +408,7 @@ export default function SportDetailView() {
                         PEREMPAT FINAL · SEMIFINAL · FINAL · PERINGKAT 3
                       </span>
                     </div>
-                    <SportBracket tournament={tournament} />
+                    <SportBracket tournament={bracketTournament} />
                   </section>
                 </>
               );

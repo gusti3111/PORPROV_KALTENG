@@ -1,9 +1,16 @@
+import { apiClient, getAPIErrorMessage } from "../api/client";
+
 /**
- * Data Resmi Direktori 63 Tempat Makan, Kuliner & Cafe Pangkalan Bun - PORPROV XIII Kalteng
- * Menggunakan foto asli lokasi di folder /kuliner-real/
+ * Direktori Tempat Makan, Kuliner & Cafe Pangkalan Bun - PORPROV XIII Kalteng
+ * Data diambil secara dinamis dari backend API `/api/v1/umkm`.
  */
 
-export type KobarUMKMType = 'warung' | 'cafe' | 'rumah_makan' | 'restoran' | 'lainnya';
+export type KobarUMKMType =
+  | "warung"
+  | "cafe"
+  | "rumah_makan"
+  | "restoran"
+  | "lainnya";
 
 export type KobarUMKMItem = {
   id: number;
@@ -34,1986 +41,233 @@ export type KobarUMKMItem = {
   priceRange: string;
 };
 
-export const kobarUMKMData: KobarUMKMItem[] = [
-  {
-    "id": 1,
-    "nama": "Kahawa Coffee Roastery",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Coffee shop lokal bernuansa rumahan dengan area rooftop/lantai atas yang tenang. Cocok untuk menikmati kopi, membaca, atau berbincang santai.",
-    "signatureDish": "Kopi lokal termasuk Liberika dan Robusta; pilihan espresso-based dan biji kopi untuk dibawa pulang. Cheesecake juga disebut dalam ulasan.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Pancasila, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74181",
-    "rating_google": 4.8,
-    "jumlah_ulasan": 128,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Setiap hari: 07.00 - 22.00",
-    "instagram": "@kahawa.kopi",
-    "reservasi": "Belum ditemukan kanal reservasi khusus; hubungi akun resmi bila tersedia.",
-    "situs_web": "https://www.instagram.com/kahawa.kopi/",
-    "koordinat": {
-      "lat": -2.6997753,
-      "lng": 111.6478011
-    },
-    "place_id": "0xe9d2392fa751eead",
-    "google_maps_url": "https://www.google.com/maps/place/Kahawa+Coffee+Roastery/data=!4m7!3m6!1s0x2e08efbdbf902de7:0xe9d2392fa751eead!8m2!3d-2.6997753!4d111.6478011!16s%2Fg%2F11f66rcqh4!19sChIJ5y2Qv73vCC4Rre5Rpy850uk",
-    "image": "/kuliner-real/kahawaCafe.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 2,
-    "nama": "Nyamn Eatery n’ Bakeshop",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Bakery",
-    "kategori_google": "Kafe & Bakery",
-    "culinaryTheme": "Kafe, Kopi & Bakery",
-    "culinaryThemeKey": "bakery",
-    "deskripsi": "Cafe modern yang menggabungkan eatery dan bakery. Cocok untuk ngopi, makan siang/malam, atau menikmati dessert bersama teman dan keluarga.",
-    "signatureDish": "Aneka baked goods, roti, dessert, es krim, kopi, dan makanan berat.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Sukma Aria Ningrat No. 19, Kel. Baru, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74113",
-    "rating_google": 4.9,
-    "jumlah_ulasan": 175,
-    "ada_rating": true,
-    "telepon": "+62 823-5149-6266",
-    "jam_buka": "Senin-Kamis: 11.00-22.00, Jumat-Minggu: 11.00-22.30",
-    "instagram": "@nyamn.eatery",
-    "reservasi": "Telepon/WhatsApp ke nomor yang tercantum; konfirmasi ketersediaan meja terlebih dahulu.",
-    "situs_web": "https://www.instagram.com/nyamn.eatery/",
-    "koordinat": {
-      "lat": -2.6697572,
-      "lng": 111.6393968
-    },
-    "place_id": "0x3ab493e099497ab0",
-    "google_maps_url": "https://www.google.com/maps/place/Nyamn+Eatery+n%E2%80%99+Bakeshop/data=!4m7!3m6!1s0x2e08ef1f03f522f1:0x3ab493e099497ab0!8m2!3d-2.6697572!4d111.6393968!16s%2Fg%2F11xyntyh_s!19sChIJ8SL1Ax_vCC4RsHpJmeCTtDo",
-    "image": "/kuliner-real/NyamnEatry.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 3,
-    "nama": "Ninety Degrees Coffee & Sourdough Bakery",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Bakery",
-    "kategori_google": "Kafe & Bakery",
-    "culinaryTheme": "Kafe, Kopi & Bakery",
-    "culinaryThemeKey": "bakery",
-    "deskripsi": "Cafe sekaligus bakery dengan konsep kopi dan roti artisan. Pilihan menarik untuk menikmati kopi, roti, atau makan ringan.",
-    "signatureDish": "Sourdough bread, kopi, dan pizza; menu ini paling menonjol dalam deskripsi listing dan ulasan.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Ahmad Wongso, RT 019/RW 003, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74112",
-    "rating_google": 4.9,
-    "jumlah_ulasan": 30,
-    "ada_rating": true,
-    "telepon": "+62 813-4441-244",
-    "jam_buka": "Setiap hari: 07.00 - 24.00",
-    "instagram": null,
-    "reservasi": "Hubungi nomor telepon/WhatsApp untuk menanyakan reservasi dan ketersediaan tempat.",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.7006321,
-      "lng": 111.6310906
-    },
-    "place_id": "0x6ec67e5d18f11cba",
-    "google_maps_url": "https://www.google.com/maps/place/Ninety+Degrees+Coffee+%26+Sourdough+Bakery/data=!4m7!3m6!1s0x2e08ef1f47da7a77:0x6ec67e5d18f11cba!8m2!3d-2.7006321!4d111.6310906!16s%2Fg%2F11nc8lq3l0!19sChIJd3raRx_vCC4RuhzxGF1-xm4",
-    "image": "/kuliner-real/nineDegree.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 4,
-    "nama": "Tepi Arut Coffee & Eatery",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Eatery",
-    "kategori_google": "Kafe & Eatery",
-    "culinaryTheme": "Kafe & Eatery",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe-resto di tepi Sungai Arut. Daya tarik utamanya adalah suasana bantaran sungai, terutama untuk kunjungan sore hingga malam.",
-    "signatureDish": "Menu ikan bakar dan hidangan seafood/sungai seperti ikan lais, patin, nila, baung, udang galah; tersedia juga kopi dan minuman.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Gg. Remaja, Kel. Raja, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74112",
-    "rating_google": 4.3,
-    "jumlah_ulasan": 643,
-    "ada_rating": true,
-    "telepon": "+62 821-5456-6589",
-    "jam_buka": "Setiap hari: 15.00 - 23.00",
-    "instagram": "@tepi_arutpbun",
-    "reservasi": "Hubungi nomor telepon/WhatsApp; reservasi disarankan untuk rombongan.",
-    "situs_web": "https://www.instagram.com/tepi_arutpbun/",
-    "koordinat": {
-      "lat": -2.6740313,
-      "lng": 111.6312006
-    },
-    "place_id": "0x6eb3a696c90c1475",
-    "google_maps_url": "https://www.google.com/maps/place/Tepi+Arut+Coffee+%26+Eatery/data=!4m7!3m6!1s0x2e08efa8bc7e3265:0x6eb3a696c90c1475!8m2!3d-2.6740313!4d111.6312006!16s%2Fg%2F11j7vjlvvh!19sChIJZTJ-vKjvCC4RdRQMyZams24",
-    "image": "/kuliner-real/TepiArut.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 5,
-    "nama": "Queen.Co",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Coffee shop dengan suasana hijau, area terbuka, dan ruang indoor. Cocok untuk nongkrong santai, berkumpul, atau menikmati suasana luar ruang.",
-    "signatureDish": "Kopi dan minuman cafe; nilai unggul yang paling terlihat adalah ambience outdoor dengan pepohonan dan suasana santai.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Ahmad Wongso, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74181",
-    "rating_google": 4.4,
-    "jumlah_ulasan": 106,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Menunggu konfirmasi lapangan",
-    "instagram": "@_queen_co",
-    "reservasi": "Belum ditemukan nomor/kanal reservasi terverifikasi.",
-    "situs_web": "https://www.instagram.com/_queen_co/",
-    "koordinat": {
-      "lat": -2.7102065,
-      "lng": 111.6402099
-    },
-    "place_id": "0x602d47d61be758dc",
-    "google_maps_url": "https://www.google.com/maps/place/Queen.Co/data=!4m7!3m6!1s0x2e08ef0031eb4879:0x602d47d61be758dc!8m2!3d-2.7102065!4d111.6402099!16s%2Fg%2F11ylw51pm7!19sChIJeUjrMQDvCC4R3FjnG9ZHLWA",
-    "image": "/kuliner-real/queenco.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 6,
-    "nama": "IKC (Itut Kadut Company)",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Coffee shop yang dikenal sebagai tempat berkumpul dan menikmati kopi. Cocok untuk pertemuan santai, diskusi, atau menikmati kopi manual brew.",
-    "signatureDish": "Kopi espresso dan manual brew seperti V60; juga tersedia makanan ringan dan menu cafe.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Malijo No. 22, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74181",
-    "rating_google": 4.6,
-    "jumlah_ulasan": 966,
-    "ada_rating": true,
-    "telepon": "+62 852-9229-2007",
-    "jam_buka": "Setiap hari: 09.00 - 23.00",
-    "instagram": "@itutkadutcompany",
-    "reservasi": "Konfirmasi nomor sebelum digunakan.",
-    "situs_web": "https://www.instagram.com/itutkadutcompany/",
-    "koordinat": {
-      "lat": -2.7062207,
-      "lng": 111.6490667
-    },
-    "place_id": "0xf3f0491e9073c52d",
-    "google_maps_url": "https://www.google.com/maps/place/IKC+%28Itut+Kadut+Company%29/data=!4m7!3m6!1s0x2e08efc1545384c3:0xf3f0491e9073c52d!8m2!3d-2.7062207!4d111.6490667!16s%2Fg%2F11clt5wxsr!19sChIJw4RTVMHvCC4RLcVzkB5J8PM",
-    "image": "/kuliner-real/IKC.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 7,
-    "nama": "Teras Kopi Pangkalan Bun",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe dan coffee shop bergaya modern minimalis dengan tempat duduk nyaman. Cocok untuk nongkrong, diskusi, atau makan santai.",
-    "signatureDish": "Kopi susu, cappuccino, caramel latte, rice bowl, dan mi.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Delima No. 32, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74117",
-    "rating_google": 4.2,
-    "jumlah_ulasan": 483,
-    "ada_rating": true,
-    "telepon": "+62 812-5422-8282",
-    "jam_buka": "Jumat: 13.00-24.00, Hari lain: 08.00-24.00",
-    "instagram": "@teraskopi_pangkalanbun",
-    "reservasi": "Hubungi nomor telepon/WhatsApp untuk menanyakan reservasi.",
-    "situs_web": "https://www.instagram.com/teraskopi_pangkalanbun/",
-    "koordinat": {
-      "lat": -2.6966283,
-      "lng": 111.6382354
-    },
-    "place_id": "0x7182968ccae2d626",
-    "google_maps_url": "https://www.google.com/maps/place/Teras+Kopi+Pangkalan+Bun/data=!4m7!3m6!1s0x2e08ef06d70a4a7f:0x7182968ccae2d626!8m2!3d-2.6966283!4d111.6382354!16s%2Fg%2F11gxf9n05g!19sChIJf0oK1wbvCC4RJtbiyoyWgnE",
-    "image": "/kuliner-real/TerasKopi.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 8,
-    "nama": "Kopi A’long",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Tempat ngopi kasual dengan suasana warung kopi yang akrab. Cocok untuk nongkrong santai dan pertemuan informal; layanan 24 jam.",
-    "signatureDish": "Kopi racikan bergaya Pontianak dan roti srikaya disebut dalam liputan media; pilihan menu kedai kopi.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Malijo, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah (7JWW+GQG)",
-    "rating_google": 4.8,
-    "jumlah_ulasan": 29,
-    "ada_rating": true,
-    "telepon": "+62 822-5045-4652",
-    "jam_buka": "Buka 24 Jam",
-    "instagram": "@kopialong",
-    "reservasi": "Hubungi nomor telepon/WhatsApp.",
-    "situs_web": "https://www.instagram.com/kopialong/",
-    "koordinat": {
-      "lat": -2.7052778,
-      "lng": 111.6474454
-    },
-    "place_id": "0x7482458f5f34d1f1",
-    "google_maps_url": "https://www.google.com/maps/place/Kopi+Abang+Coffee+%26+Steak+in+Garasi+Bintang/data=!4m7!3m6!1s0x2e08ef63e54d882f:0x7482458f5f34d1f1!8m2!3d-2.7052778!4d111.6474454!16s%2Fg%2F11t9km11vz!19sChIJL4hN5WPvCC4R8dE0X49FgnQ",
-    "image": "/kuliner-real/KopiAlong.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 9,
-    "nama": "Five Per Day",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Coffee shop kecil dengan suasana santai dan cocok untuk ngopi pagi hingga sore. Pilihan bagi pengunjung yang ingin memulai hari dengan kopi.",
-    "signatureDish": "Kopi; dikenal karena jam buka pagi dan suasana kedai lokal yang sederhana.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Ratu Mangku, Kel. Raja, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74111",
-    "rating_google": 4.9,
-    "jumlah_ulasan": 51,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Jumat: 05.30-11.00 & 12.30-17.30, Hari lain: 05.30-17.30",
-    "instagram": null,
-    "reservasi": "Belum ditemukan kanal reservasi terverifikasi.",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.6791588,
-      "lng": 111.6374935
-    },
-    "place_id": "0xc3795ef0cbcf9eb4",
-    "google_maps_url": "https://www.google.com/maps/place/Five+Per+Day/data=!4m7!3m6!1s0x2e08ef287595fb13:0xc3795ef0cbcf9eb4!8m2!3d-2.6791588!4d111.6374935!16s%2Fg%2F11v9_xdch5!19sChIJE_uVdSjvCC4RtJ7Py_BeecM",
-    "image": "/kuliner-real/fiveperday.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 10,
-    "nama": "Kupi Cafe & Eatery",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Eatery",
-    "kategori_google": "Kafe & Eatery",
-    "culinaryTheme": "Kafe & Eatery",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe-resto dengan area cukup luas dan pilihan tempat duduk indoor. Cocok untuk berkumpul bersama teman atau keluarga.",
-    "signatureDish": "Menu makanan berat dan ringan, pilihan kopi dan milkshake, roti, serta cake. Ragam menu bergaya Western dan Jepang.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Utama Pasir Panjang, Pasir Panjang, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74181",
-    "rating_google": 4.4,
-    "jumlah_ulasan": 229,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Menunggu konfirmasi lapangan",
-    "instagram": "@kupikafe",
-    "reservasi": "Situs/menu Kupi menyediakan kanal WhatsApp dan tombol Maps.",
-    "situs_web": "https://www.instagram.com/kupikafe/",
-    "koordinat": {
-      "lat": -2.7114651,
-      "lng": 111.6511181
-    },
-    "place_id": "0x1669dacf8fa98c07",
-    "google_maps_url": "https://www.google.com/maps/place/Kupi+Cafe+%26+Eatery/data=!4m7!3m6!1s0x2e08ef82c0ddab19:0x1669dacf8fa98c07!8m2!3d-2.7114651!4d111.6511181!16s%2Fg%2F11kr7zh08t!19sChIJGavdwILvCC4RB4ypj8_aaRY",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 11,
-    "nama": "Sudut Kota Kopitiam",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Kopitiam bergaya santai untuk menikmati kopi dan berbincang. Cocok untuk pertemuan ringan dan nongkrong bersama teman.",
-    "signatureDish": "Kopi dan menu kopitiam; tempatnya dinilai nyaman untuk duduk dan mengobrol.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Utama Pasir Panjang No. 8, Pasir Panjang, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74181",
-    "rating_google": 4.9,
-    "jumlah_ulasan": 31,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Setiap hari: 08.00 - 24.00",
-    "instagram": null,
-    "reservasi": "Belum ditemukan kanal reservasi terverifikasi.",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.7158643,
-      "lng": 111.6524352
-    },
-    "place_id": "0xe3d3eadd0f19a43d",
-    "google_maps_url": "https://www.google.com/maps/place/Sudut+Kota+Kopitiam/data=!4m7!3m6!1s0x2e08ef0002d1b73d:0xe3d3eadd0f19a43d!8m2!3d-2.7158643!4d111.6524352!16s%2Fg%2F11zfs2jtc6!19sChIJPbfRAgDvCC4RPaQZD93q0-M",
-    "image": "/kuliner-real/sudutKopitiam.png",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 12,
-    "nama": "Oikos Cafe",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe dengan pilihan kopi, minuman non-kopi, dan menu makanan. Cocok untuk nongkrong sekaligus makan siang atau malam.",
-    "signatureDish": "Hot mochaccino, matcha yakult, kopi, rice bowl, chicken cordon bleu, dan beef blackpepper rice bowl.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Malijo, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74112",
-    "rating_google": 4.8,
-    "jumlah_ulasan": 11,
-    "ada_rating": true,
-    "telepon": "+62 812-9882-2111",
-    "jam_buka": "Menunggu konfirmasi lapangan",
-    "instagram": "@oikos.cafe",
-    "reservasi": "Tersedia fasilitas booking; hubungi WhatsApp/telepon untuk konfirmasi.",
-    "situs_web": "https://www.instagram.com/oikos.cafe/",
-    "koordinat": {
-      "lat": -2.7048742,
-      "lng": 111.6475631
-    },
-    "place_id": "0xc2388131f080062",
-    "google_maps_url": "https://www.google.com/maps/place/OIKOS/data=!4m7!3m6!1s0x2e08ef003cd4adad:0xc2388131f080062!8m2!3d-2.7048742!4d111.6475631!16s%2Fg%2F11ntcsqct9!19sChIJra3UPADvCC4RYgAIHxOIIww",
-    "image": "/kuliner-real/oikos-cafe.png",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 13,
-    "nama": "Renée Cafe and Eatery",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Eatery",
-    "kategori_google": "Kafe & Eatery",
-    "culinaryTheme": "Kafe & Eatery",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe modern dan kasual di kawasan Sidorejo. Cocok untuk menikmati kopi, makanan utama, camilan, atau dessert.",
-    "signatureDish": "Waffle, menu rice/noodle, serta hidangan bergaya Jepang seperti yakiniku.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Pangeran Diponegoro, Sidorejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74112",
-    "rating_google": 4.4,
-    "jumlah_ulasan": 99,
-    "ada_rating": true,
-    "telepon": "+62 812-5860-2726",
-    "jam_buka": "Setiap hari: 09.00 - 22.00",
-    "instagram": "@reneeeatery",
-    "reservasi": "Tersedia fasilitas booking; hubungi WhatsApp/telepon untuk reservasi.",
-    "situs_web": "https://www.instagram.com/reneeeatery/",
-    "koordinat": {
-      "lat": -2.6823943,
-      "lng": 111.6309153
-    },
-    "place_id": "0x28d33bfe1460f82d",
-    "google_maps_url": "https://www.google.com/maps/place/Ren%C3%A9e+Cafe+And+Eatery+Pangkalan+Bun/data=!4m7!3m6!1s0x2e08ef378335fc7d:0x28d33bfe1460f82d!8m2!3d-2.6823943!4d111.6309153!16s%2Fg%2F11l6wd9cq7!19sChIJffw1gzfvCC4RLfhgFP470yg",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 25.000 - Rp 50.000"
-  },
-  {
-    "id": 14,
-    "nama": "Ukiyo Coffee",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe dengan pilihan kopi, minuman non-kopi, dan menu makanan. Cocok untuk nongkrong sekaligus makan siang atau malam.",
-    "signatureDish": "Kopi susu, cappuccino, caramel latte hingga manual brew dan berbagai menu makanan ringan dan berat.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Ahmad Yani, Baru, Kec. Arut Sel., Kabupaten Kotawaringin Barat, Kalimantan Tengah 74112",
-    "rating_google": 4.7,
-    "jumlah_ulasan": 106,
-    "ada_rating": true,
-    "telepon": "+62 821-5175-6648",
-    "jam_buka": "Setiap hari: 07.00 - 22.00",
-    "instagram": "@ukiyo_coffee",
-    "reservasi": "Tersedia fasilitas booking; hubungi WhatsApp/telepon untuk reservasi.",
-    "situs_web": "https://www.instagram.com/ukiyo_coffee/",
-    "koordinat": {
-      "lat": -2.672718,
-      "lng": 111.6429042
-    },
-    "place_id": "0x362eb579223414ec",
-    "google_maps_url": "https://www.google.com/maps/place/Ukiyo+Coffee+Pangkalan+Bun/data=!4m7!3m6!1s0x2e08ef4a48635073:0x362eb579223414ec!8m2!3d-2.672718!4d111.6429042!16s%2Fg%2F11qg57s2qv!19sChIJc1BjSErvCC4R7BQ0Inm1LjY",
-    "image": "/kuliner-real/ukiyo.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 15,
-    "nama": "Titik Kumpul Coffee",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe dengan pilihan kopi, minuman non-kopi, dan menu makanan. Cocok untuk nongkrong sekaligus makan siang atau malam.",
-    "signatureDish": "Kopi susu, cappuccino, caramel latte dan berbagai menu makanan ringan dan berat.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Iskandar No.43, Madurejo, Kec. Arut Sel., Kabupaten Kotawaringin Barat, Kalimantan Tengah 74181",
-    "rating_google": 4.1,
-    "jumlah_ulasan": 37,
-    "ada_rating": true,
-    "telepon": "+62 822-5404-9779",
-    "jam_buka": "Setiap hari: 09.00 - 24.00",
-    "instagram": "@tkcoffee.id",
-    "reservasi": "Tersedia fasilitas booking; hubungi WhatsApp/telepon untuk reservasi.",
-    "situs_web": "https://www.instagram.com/tkcoffee.id/",
-    "koordinat": {
-      "lat": -2.6917564,
-      "lng": 111.6364239
-    },
-    "place_id": "0x6a64a2146ab3fae2",
-    "google_maps_url": "https://www.google.com/maps/place/TITIK+KUMPUL+COFFEE/data=!4m7!3m6!1s0x2e08ef0053952813:0x6a64a2146ab3fae2!8m2!3d-2.6917564!4d111.6364239!16s%2Fg%2F11wn0r3975!19sChIJEyiVUwDvCC4R4vqzahSiZGo",
-    "image": "/kuliner-real/titikkumpul.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 16,
-    "nama": "Kedai Kopi DPR",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Coffee shop bergaya modern minimalis dengan suasana skena khas Gen-Z. Cocok untuk nongkrong, diskusi, atau makan santai.",
-    "signatureDish": "Kopi susu, cappuccino, caramel latte dan berbagai menu makanan ringan dan berat.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Ahmad Wongso (8J3H+7QV), Sidorejo, Kec. Arut Sel., Kabupaten Kotawaringin Barat, Kalimantan Tengah 74112",
-    "rating_google": 4.7,
-    "jumlah_ulasan": 25,
-    "ada_rating": false,
-    "telepon": null,
-    "jam_buka": "Setiap hari: 00.00 - 24.00 (24 Jam)",
-    "instagram": "@kedaikopi_dpr",
-    "reservasi": "Belum ditemukan kanal reservasi terverifikasi.",
-    "situs_web": "https://www.instagram.com/kedaikopi_dpr/",
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "cafe_16",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Kedai+Kopi+DPR+Pangkalan+Bun",
-    "image": "/kuliner-real/kedaikopidpr.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 17,
-    "nama": "Onnuri Kitchen n coffe",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Eatery",
-    "kategori_google": "Kafe & Eatery",
-    "culinaryTheme": "Kafe & Eatery",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Mengusung konsep coffee shop dan casual dining, menawarkan minuman kopi, beragam makanan dan minuman untuk makan santai maupun bersama keluarga.",
-    "signatureDish": "Menu main course, aneka mie, snack, dessert, coffee, non coffee, tea dan mocktail.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Deretan RM UMAKU, Jl. Utama Pasir Panjang, Pasir Panjang, Kec. Arut Sel., Kabupaten Kotawaringin Barat, Kalimantan Tengah 74181",
-    "rating_google": 4.3,
-    "jumlah_ulasan": 82,
-    "ada_rating": true,
-    "telepon": "+62 822-5389-0382",
-    "jam_buka": "Setiap hari: 09.00 - 22.00",
-    "instagram": "@onnurikitcen.coffee",
-    "reservasi": "Tersedia fasilitas booking; hubungi WhatsApp/telepon untuk konfirmasi.",
-    "situs_web": "https://www.instagram.com/onnurikitcen.coffee/",
-    "koordinat": {
-      "lat": -2.7138261,
-      "lng": 111.6513688
-    },
-    "place_id": "0x12bd7b58b6816992",
-    "google_maps_url": "https://maps.app.goo.gl/VHyAQfHWRMPvHDkJ8",
-    "image": "/kuliner-real/onnuri-kitchen-coffee.png",
-    "recommended": true,
-    "priceRange": "Rp 30.000 - Rp 60.000"
-  },
-  {
-    "id": 18,
-    "nama": "Pandawa Coffee & Resto",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Eatery",
-    "kategori_google": "Kafe & Eatery",
-    "culinaryTheme": "Kafe & Eatery",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe dengan pilihan kopi, minuman non-kopi, dan menu makanan. Cocok untuk nongkrong sekaligus makan siang atau malam.",
-    "signatureDish": "Kopi susu, cappuccino, caramel latte dan berbagai menu makanan ringan dan berat.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Iskandar, Bundaran Pancasila, Seberang CityMall, Kabupaten Kotawaringin Barat, Kalimantan Tengah 74181",
-    "rating_google": 4.7,
-    "jumlah_ulasan": 340,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Setiap hari: 10.00 - 22.00",
-    "instagram": "@pandawa_coffee",
-    "reservasi": "Belum ditemukan kanal reservasi terverifikasi.",
-    "situs_web": "https://www.instagram.com/pandawa_coffee/",
-    "koordinat": {
-      "lat": -2.6848,
-      "lng": 111.627
-    },
-    "place_id": "pandawa_coffee_resto_01",
-    "google_maps_url": "https://maps.app.goo.gl/uz9SqmnFY8NVEUdTA",
-    "image": "/kuliner-real/pandawa.jpg",
-    "recommended": true,
-    "priceRange": "Rp 30.000 - Rp 50.000"
-  },
-  {
-    "id": 19,
-    "nama": "Abara Coffee & Eatery",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Eatery",
-    "kategori_google": "Kafe & Eatery",
-    "culinaryTheme": "Kafe & Eatery",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe dengan pilihan kopi, minuman non-kopi, dan menu makanan. Cocok untuk nongkrong sekaligus makan siang atau malam.",
-    "signatureDish": "Kopi susu, cappuccino, caramel latte dan berbagai menu makanan ringan dan berat.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Utama Pasir Panjang (7MQ2+4J7), Pasir Panjang, Kec. Arut Sel., Kabupaten Kotawaringin Barat, Kalimantan Tengah 74181",
-    "rating_google": 4.9,
-    "jumlah_ulasan": 9,
-    "ada_rating": true,
-    "telepon": "082255331007",
-    "jam_buka": "Setiap hari: 10.30 - 22.00",
-    "instagram": "@Abara_Coffee_Eatery",
-    "reservasi": "Tersedia fasilitas booking; hubungi WhatsApp/telepon untuk konfirmasi.",
-    "situs_web": "https://www.instagram.com/Abara_Coffee_Eatery/",
-    "koordinat": {
-      "lat": -2.7122096,
-      "lng": 111.6515365
-    },
-    "place_id": "0xe39cd2f097d5838a",
-    "google_maps_url": "https://maps.app.goo.gl/bjxgLachSU81Ft4J9",
-    "image": "/kuliner-real/abara.jpg",
-    "recommended": true,
-    "priceRange": "Rp 25.000 - Rp 150.000"
-  },
-  {
-    "id": 20,
-    "nama": "Sumbara Cafe & Eatery",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Eatery",
-    "kategori_google": "Kafe & Eatery",
-    "culinaryTheme": "Kafe & Eatery",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe dengan pilihan kopi, minuman non-kopi, dan menu makanan. Cocok untuk nongkrong sekaligus makan siang atau malam.",
-    "signatureDish": "Espresso based, coffee milk, mocktail, non coffee, tea, snack, main course.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Pasanah, Madurejo, Kec. Arut Sel., Kabupaten Kotawaringin Barat, Kalimantan Tengah 74112",
-    "rating_google": 4.4,
-    "jumlah_ulasan": 39,
-    "ada_rating": true,
-    "telepon": "085117370378",
-    "jam_buka": "Setiap hari: 09.00 - 23.00",
-    "instagram": "@sumbara.cafe",
-    "reservasi": "Tersedia fasilitas booking; hubungi WhatsApp/telepon untuk konfirmasi.",
-    "situs_web": "https://www.instagram.com/sumbara.cafe/",
-    "koordinat": {
-      "lat": -2.6943605,
-      "lng": 111.6454255
-    },
-    "place_id": "0xefc00d7c51bbcaf1",
-    "google_maps_url": "https://maps.app.goo.gl/kBaqxgdrKAXUTkHm8",
-    "image": "/kuliner-real/sumbaracafe.jpg",
-    "recommended": true,
-    "priceRange": "Rp 25.000 - Rp 50.000"
-  },
-  {
-    "id": 21,
-    "nama": "Haum Common Space",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe dengan pilihan kopi, minuman non-kopi, dan menu makanan. Cocok untuk nongkrong.",
-    "signatureDish": "Kopi susu, cappuccino, caramel latte dan berbagai menu makanan ringan dan berat.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Pasanah, Madurejo, Kec. Arut Sel., Kabupaten Kotawaringin Barat, Kalimantan Tengah 74112",
-    "rating_google": 4.4,
-    "jumlah_ulasan": 79,
-    "ada_rating": true,
-    "telepon": "085126626327",
-    "jam_buka": "Setiap hari: 09.00 - 22.00",
-    "instagram": "@haumcommonspace",
-    "reservasi": "Tersedia fasilitas booking; hubungi WhatsApp/telepon untuk konfirmasi.",
-    "situs_web": "https://www.instagram.com/haumcommonspace/",
-    "koordinat": {
-      "lat": -2.6931721,
-      "lng": 111.6463378
-    },
-    "place_id": "0x96a279b9d57311f3",
-    "google_maps_url": "https://maps.app.goo.gl/UNyF1foxXEpoJei58",
-    "image": "/kuliner-real/haumcommon.jpg",
-    "recommended": true,
-    "priceRange": "Rp 25.000 - Rp 50.000"
-  },
-  {
-    "id": 22,
-    "nama": "Garden Hart",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe dengan pilihan kopi, minuman non-kopi, dan menu makanan. Cocok untuk nongkrong.",
-    "signatureDish": "Kopi susu, cappuccino, caramel latte dan berbagai menu makanan ringan dan berat.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Gg. Matoa, Madurejo, Kec. Arut Sel., Kabupaten Kotawaringin Barat, Kalimantan Tengah 74117",
-    "rating_google": 4.8,
-    "jumlah_ulasan": 220,
-    "ada_rating": true,
-    "telepon": "089529963085",
-    "jam_buka": "Setiap hari: 09.00 - 22.00",
-    "instagram": "@gardenhart",
-    "reservasi": "Tersedia fasilitas booking; hubungi WhatsApp/telepon untuk konfirmasi.",
-    "situs_web": "https://www.instagram.com/gardenhart/",
-    "koordinat": {
-      "lat": -2.688,
-      "lng": 111.636
-    },
-    "place_id": "garden_hart_01",
-    "google_maps_url": "https://maps.app.goo.gl/SAMYygNtPVxQGYyM6",
-    "image": "/kuliner-real/gardenhart.jpg",
-    "recommended": true,
-    "priceRange": "Rp 25.000 - Rp 50.000"
-  },
-  {
-    "id": 23,
-    "nama": "Kopi Petik Cafe",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe dengan pilihan kopi, minuman non-kopi, dan menu makanan. Cocok untuk nongkrong.",
-    "signatureDish": "Kopi susu, cappuccino, caramel latte dan berbagai menu makanan ringan dan berat.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Pasanah (8J5X+HM4), Madurejo, Kec. Arut Sel., Kabupaten Kotawaringin Barat, Kalimantan Tengah 74117",
-    "rating_google": 4.4,
-    "jumlah_ulasan": 156,
-    "ada_rating": true,
-    "telepon": "082256129897",
-    "jam_buka": "Setiap hari: 11.00 - 22.30",
-    "instagram": "@kopipetik.cafe",
-    "reservasi": "Tersedia fasilitas booking; hubungi WhatsApp/telepon untuk konfirmasi.",
-    "situs_web": "https://www.instagram.com/kopipetik.cafe/",
-    "koordinat": {
-      "lat": -2.691116,
-      "lng": 111.649207
-    },
-    "place_id": "0xbc83c8e521817801",
-    "google_maps_url": "https://maps.app.goo.gl/iY1RfajpHouSvLXEA",
-    "image": "/kuliner-real/kopipetik.jpg",
-    "recommended": true,
-    "priceRange": "Rp 50.000 - Rp 75.000"
-  },
-  {
-    "id": 24,
-    "nama": "Sabisam Koffie & Place",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Coffee shop bergaya minimalis dengan area indoor dan outdoor yang luas. Cocok untuk nongkrong sore hingga malam, terutama bersama teman.",
-    "signatureDish": "Kopi, minuman cafe, snack, dan menu pendamping; suasana malam dan live music menjadi daya tarik.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Delima, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74117",
-    "rating_google": 4.3,
-    "jumlah_ulasan": 112,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Setiap hari: 15.00 - 23.30",
-    "instagram": null,
-    "reservasi": "Hubungi akun/kanal resmi untuk reservasi dan konfirmasi jadwal live music.",
-    "situs_web": "https://www.instagram.com/sabisam.koffie?igsh=dHVkNXNzdm5tMGtr",
-    "koordinat": {
-      "lat": -2.6978985,
-      "lng": 111.6369855
-    },
-    "place_id": "0xc67248b2649a3345",
-    "google_maps_url": "https://www.google.com/maps/place/Sabisam+Koffie+%26+Space+Pangkalan+Bun/data=!4m7!3m6!1s0x2e08ef5185beffd7:0xc67248b2649a3345!8m2!3d-2.6978985!4d111.6369855!16s%2Fg%2F11tcg_3ym4!19sChIJ1_--hVHvCC4RRTOaZLJIcsY",
-    "image": "/kuliner-real/sabisam.jpg",
-    "recommended": true,
-    "priceRange": "Rp 25.000 - Rp 75.000"
-  },
-  {
-    "id": 25,
-    "nama": "Kopi Dari Hati & Toast Pangkalan Bun",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe/coffee shop yang nyaman untuk nongkrong dengan pilihan kopi, toast, makanan ringan, dan makanan berat. Memiliki area rooftop.",
-    "signatureDish": "Kopi, toast, makanan berat, snack; rooftop, live music, dan karaoke menjadi daya tarik untuk nongkrong malam.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Samping Gorillaz, Jl. Iskandar, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74112",
-    "rating_google": 4.5,
-    "jumlah_ulasan": 85,
-    "ada_rating": true,
-    "telepon": "+62 851-2973-2211",
-    "jam_buka": "Setiap hari: 10.00 - 23.00",
-    "instagram": null,
-    "reservasi": "Hubungi WhatsApp/telepon untuk reservasi, khususnya jika datang berkelompok.",
-    "situs_web": "https://www.instagram.com/kopidarihati_kobar?igsh=NjI2dml3NWFvN2Jj",
-    "koordinat": {
-      "lat": -2.7059308,
-      "lng": 111.6456774
-    },
-    "place_id": "0x3db1ec3828da8e5",
-    "google_maps_url": "https://www.google.com/maps/place/Kopi+Dari+Hati+%26+Toast+Pangkalan+Bun/data=!4m7!3m6!1s0x2e08ef2eb3e9a3ab:0x3db1ec3828da8e5!8m2!3d-2.7059308!4d111.6456774!16s%2Fg%2F11rtmyp2mt!19sChIJq6Ppsy7vCC4R5aiNgsMe2wM",
-    "image": "/kuliner-real/kopidarihati.jpg",
-    "recommended": true,
-    "priceRange": "Rp 25.000 - Rp 50.000"
-  },
-  {
-    "id": 26,
-    "nama": "IMAJI",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Coffee shop bernuansa nyaman di kawasan Mendawai, cocok untuk menikmati kopi sambil berbincang atau mengerjakan aktivitas santai.",
-    "signatureDish": "Kopi susu, manual brew, dan menu cafe; barista ramah serta suasana nyaman menjadi nilai tambah.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Depan Hotel Andika, Jl. Hasanudin No.27, RT.16, Mendawai, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74115",
-    "rating_google": 4.6,
-    "jumlah_ulasan": 65,
-    "ada_rating": true,
-    "telepon": "+62 821-3832-5987",
-    "jam_buka": "Senin-Jumat: 07.00-22.00; Sabtu-Minggu: 10.00-22.00",
-    "instagram": null,
-    "reservasi": "Hubungi nomor telepon untuk konfirmasi meja/reservasi.",
-    "situs_web": "https://instagram.com/imaji.coffee?utm_medium=copy_link",
-    "koordinat": {
-      "lat": -2.6830589,
-      "lng": 111.6267004
-    },
-    "place_id": "0xebb976c9b164b222",
-    "google_maps_url": "https://www.google.com/maps/place/IMAJI/data=!4m7!3m6!1s0x2e08ef145fe304e9:0xebb976c9b164b222!8m2!3d-2.6830589!4d111.6267004!16s%2Fg%2F11slqhn107!19sChIJ6QTjXxTvCC4RIrJkscl2ues",
-    "image": "/kuliner-real/imaji.jpg",
-    "recommended": true,
-    "priceRange": "Rp 20.000 - Rp 50.000"
-  },
-  {
-    "id": 27,
-    "nama": "PAPADAVE COFFEE & BAKERY",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe sekaligus bakery di area Varcube Foodcourt dekat Bundaran Pancasila. Cocok untuk ngopi, sarapan, menikmati roti, atau makan santai.",
-    "signatureDish": "Kopi, aneka roti/bakery, serta menu makanan seperti Coto Makassar.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Varcube Foodcourt, Jl. Malijo Bundaran Pancasila, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74112",
-    "rating_google": 5,
-    "jumlah_ulasan": 37,
-    "ada_rating": true,
-    "telepon": "+62 813-4914-5610",
-    "jam_buka": "Setiap hari: 08.00 - 21.30",
-    "instagram": null,
-    "reservasi": "Hubungi nomor telepon/WhatsApp untuk konfirmasi reservasi.",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.7078719,
-      "lng": 111.6486795
-    },
-    "place_id": "0xe5192f45b86b00e5",
-    "google_maps_url": "https://www.google.com/maps/place/PAPADAVE+COFFEE+%26+BAKERY/data=!4m7!3m6!1s0x2e08ef792df4ae13:0xe5192f45b86b00e5!8m2!3d-2.7078719!4d111.6486795!16s%2Fg%2F11lc_j0s8f!19sChIJE670LXnvCC4R5QBruEUvGeU",
-    "image": "/kuliner-real/papadave.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 28,
-    "nama": "Cafe Bang Huda",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe lokal di Madurejo dengan suasana santai dan informal. Cocok untuk bertemu teman, ngopi, dan nongkrong hingga malam.",
-    "signatureDish": "Kopi dan menu cafe; suasana santai, pelayanan cepat/ramah menurut ulasan yang tersedia.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "7JVF+2Q6, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74181",
-    "rating_google": 4.6,
-    "jumlah_ulasan": 185,
-    "ada_rating": true,
-    "telepon": "+62 822-5044-5905",
-    "jam_buka": "Setiap hari: 06.34 - 00.00",
-    "instagram": null,
-    "reservasi": "Hubungi nomor telepon untuk konfirmasi reservasi.",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.689,
-      "lng": 111.6355
-    },
-    "place_id": "cafe_bang_huda_01",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Cafe+Bang+Huda+Madurejo+Pangkalan+Bun",
-    "image": "/kuliner-real/cafebanghuda.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 50.000"
-  },
-  {
-    "id": 29,
-    "nama": "Varcube Cafe & Lounge",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Cafe dan lounge dengan konsep kontainer yang khas di sekitar Bundaran Pancasila. Menarik untuk nongkrong, foto, dan menikmati suasana malam.",
-    "signatureDish": "Manual brew, kopi dan minuman lainnya, makanan, Wi-Fi, serta hiburan seperti live music/karaoke pada waktu tertentu.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Malijo, Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74181",
-    "rating_google": 4.7,
-    "jumlah_ulasan": 680,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Setiap hari: 11.00 - 00.00",
-    "instagram": null,
-    "reservasi": "Konfirmasi melalui kanal resmi sebelum datang, terutama untuk jadwal hiburan.",
-    "situs_web": "https://instagram.com/varcube",
-    "koordinat": {
-      "lat": -2.687,
-      "lng": 111.634
-    },
-    "place_id": "varcube_cafe_lounge_01",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Varcube+Cafe+Lounge+Pangkalan+Bun",
-    "image": "/kuliner-real/varcube.jpg",
-    "recommended": true,
-    "priceRange": "Rp 25.000 - Rp 75.000"
-  },
-  {
-    "id": 30,
-    "nama": "Huma Coffee & Gallery",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Coffee house sekaligus ruang galeri dengan suasana tenang dan sentuhan karya seni lokal. Cocok untuk nongkrong santai, quality time, atau menikmati kopi.",
-    "signatureDish": "Iced coffee, kopi, menu cafe, serta artwork lokal yang memberi karakter berbeda.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Pangeran Antasari, RT.18/RW.05, Mendawai, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74112",
-    "rating_google": 4.6,
-    "jumlah_ulasan": 27,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Setiap hari: 10.00 - 23.00",
-    "instagram": null,
-    "reservasi": "Hubungi kanal resmi untuk konfirmasi meja/reservasi.",
-    "situs_web": "https://instagram.com/humacoffeegallery?igshid=YmMyMTA2M2Y=",
-    "koordinat": {
-      "lat": -2.6803292,
-      "lng": 111.6241862
-    },
-    "place_id": "0x8fe47f91d9987f20",
-    "google_maps_url": "https://www.google.com/maps/place/Huma+Coffee+%26+Gallery/data=!4m7!3m6!1s0x2e08efe3577a547d:0x8fe47f91d9987f20!8m2!3d-2.6803292!4d111.6241862!16s%2Fg%2F11tg7m9p0t!19sChIJfVR6V-PvCC4RIH-Y2ZF_5I8",
-    "image": "/kuliner-real/hummacafe.jpg",
-    "recommended": true,
-    "priceRange": "Rp 25.000 - Rp 75.000"
-  },
-  {
-    "id": 31,
-    "nama": "Teratai Coffee",
-    "tipe": "cafe",
-    "categoryLabel": "Kafe & Kopi",
-    "kategori_google": "Kafe & Kopi",
-    "culinaryTheme": "Kedai Kopi & Kafe",
-    "culinaryThemeKey": "coffee_cafe",
-    "deskripsi": "Coffee shop lokal yang berfokus pada kopi dan suasana yang lebih tenang. Cocok untuk pecinta specialty coffee maupun pengunjung yang ingin nongkrong santai.",
-    "signatureDish": "Espresso dan specialty coffee; peralatan seduh dan kualitas kopi menjadi daya tarik utama.",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Sidorejo, Kec. Arut Selatan, Kab. Kotawaringin Barat, Kalimantan Tengah 74112",
-    "rating_google": 4.9,
-    "jumlah_ulasan": 103,
-    "ada_rating": true,
-    "telepon": "+62 821-3262-9232",
-    "jam_buka": "Setiap hari: 07.30 - 22.00",
-    "instagram": null,
-    "reservasi": "Hubungi nomor telepon/WhatsApp untuk konfirmasi reservasi.",
-    "situs_web": "https://www.instagram.com/teratai.coffee?igsh=cWN0NGxrN3ZodGdx",
-    "koordinat": {
-      "lat": -2.6809582,
-      "lng": 111.6264554
-    },
-    "place_id": "0xf9d5ebd48bcf4716",
-    "google_maps_url": "https://www.google.com/maps/place/Teratai+Coffee/data=!4m7!3m6!1s0x2e08ef6503d4eea7:0xf9d5ebd48bcf4716!8m2!3d-2.6809582!4d111.6264554!16s%2Fg%2F11fsm7zxbf!19sChIJp-7UA2XvCC4RFkfPi9Tr1fk",
-    "image": "/kuliner-real/terataicoffe.jpg",
-    "recommended": true,
-    "priceRange": "Rp 20.000 - Rp 50.000"
-  },
-  {
-    "id": 32,
-    "nama": "Rumah Bakar Semangat 47",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Seafood & Ikan Bakar",
-    "kategori_google": "Spesialis Lokal & Olahan Sungai",
-    "culinaryTheme": "Seafood & Ikan Bakar",
-    "culinaryThemeKey": "seafood",
-    "deskripsi": "Spesialis Lokal & Olahan Sungai di Kawasan Baru, Kec. Arut Selatan, Kab. Kotawaringin Barat. Menyajikan ikan lais bakar, ikan baung goreng, baung kuah asam.",
-    "signatureDish": "Ikan lais bakar, ikan baung goreng, baung kuah asam",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Kawasan Baru, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.5,
-    "jumlah_ulasan": 1762,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Hingga 21.00",
-    "instagram": null,
-    "reservasi": "Menunggu konfirmasi lapangan",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_32",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Rumah+Bakar+Semangat+47+Pangkalan+Bun",
-    "image": "/kuliner-real/semangat47.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 33,
-    "nama": "Warung Kuning / War Ning",
-    "tipe": "warung",
-    "categoryLabel": "Warung Makan",
-    "kategori_google": "Spesialis Lokal & Olahan Sungai",
-    "culinaryTheme": "Masakan Lokal & Sungai",
-    "culinaryThemeKey": "warung_tradisional",
-    "deskripsi": "Spesialis Lokal & Olahan Sungai di Jl. Ahmad Yani, Kawasan Baru, Kec. Arut Selatan. Menyajikan ikan jelawat tradisional.",
-    "signatureDish": "Ikan Jelawat tradisional",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Ahmad Yani, Kawasan Baru, Kec. Arut Selatan",
-    "rating_google": 4.6,
-    "jumlah_ulasan": 85,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Siang (Minggu tutup 16.00)",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_33",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Warung+Kuning+Pangkalan+Bun",
-    "image": "/kuliner-real/warungkuning.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 34,
-    "nama": "Rumah Makan Khas Pangkalan Bun",
-    "tipe": "rumah_makan",
-    "categoryLabel": "Rumah Makan",
-    "kategori_google": "Spesialis Lokal & Olahan Sungai",
-    "culinaryTheme": "Rumah Makan",
-    "culinaryThemeKey": "rumah_makan",
-    "deskripsi": "Spesialis Lokal & Olahan Sungai di Pasir Panjang, Kec. Arut Selatan, Kab. Kotawaringin Barat. Menyajikan lauk pauk lokal prasmanan rumahan.",
-    "signatureDish": "Lauk pauk lokal prasmanan rumahan",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Pasir Panjang, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.5,
-    "jumlah_ulasan": 140,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "09.00 - 19.00",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_34",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Rumah+Makan+Khas+Pangkalan+Bun",
-    "image": "/kuliner-real/rumahmakankhaspangkalanbun.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 35,
-    "nama": "Warung MAMA DEWI",
-    "tipe": "warung",
-    "categoryLabel": "Warung Makan",
-    "kategori_google": "Spesialis Lokal & Olahan Sungai",
-    "culinaryTheme": "Warung Nasi & Rumahan",
-    "culinaryThemeKey": "warung_tradisional",
-    "deskripsi": "Spesialis Lokal & Olahan Sungai di Mendawai, Kec. Arut Selatan, Kab. Kotawaringin Barat. Menyajikan sarapan masakan rumahan lokal.",
-    "signatureDish": "Sarapan masakan rumahan lokal",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Mendawai, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.6,
-    "jumlah_ulasan": 42,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "06.30 - Sore",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_35",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Warung+Mama+Dewi+Mendawai+Pangkalan+Bun",
-    "image": "/kuliner-real/mamadewi.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 36,
-    "nama": "Dapur Nyonya Ika",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Keluarga",
-    "kategori_google": "Restoran Keluarga",
-    "culinaryTheme": "Restoran Nusantara",
-    "culinaryThemeKey": "restoran_nusantara",
-    "deskripsi": "Restoran Keluarga di Sidorejo, Kec. Arut Selatan, Kab. Kotawaringin Barat. Menyajikan masakan nusantara bersih & higienis.",
-    "signatureDish": "Masakan Nusantara bersih & higienis",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Sidorejo, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.7,
-    "jumlah_ulasan": 68,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Reguler",
-    "instagram": null,
-    "reservasi": "Menunggu konfirmasi lapangan",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_36",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Dapur+Nyonya+Ika+Pangkalan+Bun",
-    "image": "/kuliner-real/nyonyaika.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 37,
-    "nama": "RESTO KEBUN BAMBU RKB",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Keluarga",
-    "kategori_google": "Restoran Keluarga & Lesehan",
-    "culinaryTheme": "Restoran Nusantara",
-    "culinaryThemeKey": "restoran_nusantara",
-    "deskripsi": "Restoran Keluarga & Lesehan di Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat. Menyajikan lesehan saung bambu, suasana alam.",
-    "signatureDish": "Lesehan saung bambu, suasana alam",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Madurejo, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.5,
-    "jumlah_ulasan": 95,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Reguler",
-    "instagram": null,
-    "reservasi": "Menunggu konfirmasi lapangan",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_37",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Resto+Kebun+Bambu+RKB+Pangkalan+Bun",
-    "image": "/kuliner-real/kebunbambu.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 38,
-    "nama": "Saung Gumilang",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Keluarga",
-    "kategori_google": "Restoran Keluarga & Lesehan",
-    "culinaryTheme": "Seafood & Ikan Bakar",
-    "culinaryThemeKey": "seafood",
-    "deskripsi": "Restoran Keluarga & Lesehan di Pangkalan Bun, Kec. Arut Selatan, Kab. Kotawaringin Barat. Menyajikan boga bahari, saung jerami rumbia.",
-    "signatureDish": "Boga bahari, saung jerami rumbia",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Pangkalan Bun, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.5,
-    "jumlah_ulasan": 156,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Reguler (Jumat Libur)",
-    "instagram": null,
-    "reservasi": "Menunggu konfirmasi lapangan",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_38",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Saung+Gumilang+Pangkalan+Bun",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 39,
-    "nama": "Saung Indah Resto",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Keluarga",
-    "kategori_google": "Restoran Keluarga",
-    "culinaryTheme": "Restoran Nusantara",
-    "culinaryThemeKey": "restoran_nusantara",
-    "deskripsi": "Restoran Keluarga di Kawasan Baru, Kec. Arut Selatan, Kab. Kotawaringin Barat. Menyajikan bumbu restoran klasik, ramah anak.",
-    "signatureDish": "Bumbu restoran klasik, ramah anak",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Kawasan Baru, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.5,
-    "jumlah_ulasan": 74,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Hingga 21.00",
-    "instagram": null,
-    "reservasi": "Menunggu konfirmasi lapangan",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_39",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Saung+Indah+Resto+Pangkalan+Bun",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 40,
-    "nama": "Ikan Bakar Cak Mus",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Ikan Bakar",
-    "kategori_google": "Spesial Bakaran",
-    "culinaryTheme": "Seafood & Ikan Bakar",
-    "culinaryThemeKey": "seafood",
-    "deskripsi": "Spesial Bakaran di Jl. Iskandar, Kec. Arut Selatan, Kab. Kotawaringin Barat. Menyajikan ikan bakar & seafood bumbu pekat jawa timur.",
-    "signatureDish": "Ikan bakar & seafood bumbu pekat Jawa Timur",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Iskandar, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.5,
-    "jumlah_ulasan": 190,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Malam (Minggu 24 Jam)",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_40",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Ikan+Bakar+Cak+Mus+Pangkalan+Bun",
-    "image": "/kuliner-real/cakmus.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 41,
-    "nama": "Hoshi Niku",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Modern",
-    "kategori_google": "Restoran Modern",
-    "culinaryTheme": "Masakan Jepang & BBQ",
-    "culinaryThemeKey": "japanese",
-    "deskripsi": "Restoran Modern di Jl. Bhayangkara, Kec. Arut Selatan, Kab. Kotawaringin Barat. Menyajikan japanese bbq grill, daging iris.",
-    "signatureDish": "Japanese BBQ grill, daging iris",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Bhayangkara, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.7,
-    "jumlah_ulasan": 112,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Reguler",
-    "instagram": null,
-    "reservasi": "Cek IG: @hoshiniku.pbun",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_41",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Hoshi+Niku+Pangkalan+Bun",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 42,
-    "nama": "McDonald's Pangkalan Bun",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Cepat Saji",
-    "kategori_google": "Cepat Saji",
-    "culinaryTheme": "Cepat Saji & Ayam",
-    "culinaryThemeKey": "ayam_bebek",
-    "deskripsi": "Cepat Saji di Jl. Iskandar, Madurejo, Kec. Arut Selatan. Menyajikan burger, ayam, kentang goreng klasik.",
-    "signatureDish": "Burger, ayam, kentang goreng klasik",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Iskandar, Madurejo, Kec. Arut Selatan",
-    "rating_google": 4.8,
-    "jumlah_ulasan": 1420,
-    "ada_rating": true,
-    "telepon": "14045 (Call Center)",
-    "jam_buka": "24 Jam",
-    "instagram": null,
-    "reservasi": "14045 (Call Center)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_42",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=McDonald's+Pangkalan+Bun",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 43,
-    "nama": "Pizza Hut Restoran",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Keluarga",
-    "kategori_google": "Cepat Saji / Keluarga",
-    "culinaryTheme": "Restoran Nusantara",
-    "culinaryThemeKey": "restoran_nusantara",
-    "deskripsi": "Cepat Saji / Keluarga di Jl. Iskandar, Kec. Arut Selatan, Kab. Kotawaringin Barat. Menyajikan pizza aneka pinggiran, pasta.",
-    "signatureDish": "Pizza aneka pinggiran, pasta",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Iskandar, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.9,
-    "jumlah_ulasan": 2131,
-    "ada_rating": true,
-    "telepon": "1500600 (Call Center)",
-    "jam_buka": "10.00 - 22.00",
-    "instagram": null,
-    "reservasi": "1500600 (Call Center)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_43",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Pizza+Hut+Pangkalan+Bun",
-    "image": "/kuliner-real/pizzaHut.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 44,
-    "nama": "KFC Pangkalan Bun",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Cepat Saji",
-    "kategori_google": "Cepat Saji",
-    "culinaryTheme": "Cepat Saji & Ayam",
-    "culinaryThemeKey": "ayam_bebek",
-    "deskripsi": "Cepat Saji di Pasir Panjang, Kec. Arut Selatan, Kab. Kotawaringin Barat. Menyajikan ayam goreng original/crispy.",
-    "signatureDish": "Ayam goreng original/crispy",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Pasir Panjang, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.7,
-    "jumlah_ulasan": 890,
-    "ada_rating": true,
-    "telepon": "14022 (Call Center)",
-    "jam_buka": "10.00 - 22.00",
-    "instagram": null,
-    "reservasi": "14022 (Call Center)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_44",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=KFC+Pangkalan+Bun",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 45,
-    "nama": "Ichiban Sushi - Citimall Pangkalan Bun",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Jepang",
-    "kategori_google": "Restoran Modern",
-    "culinaryTheme": "Masakan Jepang & BBQ",
-    "culinaryThemeKey": "japanese",
-    "deskripsi": "Restoran Modern di Lantai Dasar (GF) Citimall Pangkalan Bun. Menyajikan sushi roll, ramen, rice bowl.",
-    "signatureDish": "Sushi roll, ramen, rice bowl",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Lantai Dasar (GF) Citimall Pangkalan Bun",
-    "rating_google": 4.7,
-    "jumlah_ulasan": 460,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "10.00 - 22.00",
-    "instagram": null,
-    "reservasi": "Langsung datang (Dalam Mall)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_45",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Ichiban+Sushi+Citimall+Pangkalan+Bun",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 46,
-    "nama": "Dapur Solo - Citimall Pangkalan Bun",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Keluarga",
-    "kategori_google": "Restoran Keluarga",
-    "culinaryTheme": "Restoran Nusantara",
-    "culinaryThemeKey": "restoran_nusantara",
-    "deskripsi": "Restoran Keluarga di Citimall Pangkalan Bun. Menyajikan kuliner jawa tengah, jajanan pasar.",
-    "signatureDish": "Kuliner Jawa Tengah, jajanan pasar",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Citimall Pangkalan Bun",
-    "rating_google": 4.6,
-    "jumlah_ulasan": 173,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "Mengikuti jam mall",
-    "instagram": null,
-    "reservasi": "Langsung datang (Dalam Mall)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_46",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Dapur+Solo+Citimall+Pangkalan+Bun",
-    "image": "/kuliner-real/dapurSolo.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 47,
-    "nama": "CFC Citimall Pangkalan Bun",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Cepat Saji",
-    "kategori_google": "Cepat Saji",
-    "culinaryTheme": "Cepat Saji & Ayam",
-    "culinaryThemeKey": "ayam_bebek",
-    "deskripsi": "Cepat Saji di Citimall Pangkalan Bun. Menyajikan ayam goreng lokal, nasi goreng.",
-    "signatureDish": "Ayam goreng lokal, nasi goreng",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Citimall Pangkalan Bun",
-    "rating_google": 4.5,
-    "jumlah_ulasan": 110,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "08.00 - 22.00",
-    "instagram": null,
-    "reservasi": "Langsung datang (Dalam Mall)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_47",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=CFC+Citimall+Pangkalan+Bun",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 48,
-    "nama": "Hotway's Chicken Pangkalan Bun",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Cepat Saji",
-    "kategori_google": "Cepat Saji",
-    "culinaryTheme": "Cepat Saji & Ayam",
-    "culinaryThemeKey": "ayam_bebek",
-    "deskripsi": "Cepat Saji di Jl. Iskandar, Kec. Arut Selatan, Kab. Kotawaringin Barat. Menyajikan ayam pedas viral.",
-    "signatureDish": "Ayam pedas viral",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Iskandar, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.9,
-    "jumlah_ulasan": 1198,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "10.00 - 22.00",
-    "instagram": null,
-    "reservasi": "Cek IG: @hotwayschicken.id",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_48",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Hotways+Chicken+Pangkalan+Bun",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 49,
-    "nama": "Ayam Bakar Wong Solo",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Keluarga",
-    "kategori_google": "Restoran Keluarga",
-    "culinaryTheme": "Cepat Saji & Ayam",
-    "culinaryThemeKey": "ayam_bebek",
-    "deskripsi": "Restoran Keluarga di Jl. Pangeran Diponegoro, Sidorejo, Kec. Arut Selatan. Menyajikan ayam bakar kalasan, ayam penyet.",
-    "signatureDish": "Ayam bakar kalasan, ayam penyet",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Pangeran Diponegoro, Sidorejo, Kec. Arut Selatan",
-    "rating_google": 4.2,
-    "jumlah_ulasan": 1060,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "09.00 - 21.30",
-    "instagram": null,
-    "reservasi": "Menunggu konfirmasi lapangan",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_49",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Ayam+Bakar+Wong+Solo+Pangkalan+Bun",
-    "image": "/kuliner-real/wongSolo.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 50,
-    "nama": "Rilex Resto Indonesia",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Keluarga",
-    "kategori_google": "Restoran Keluarga",
-    "culinaryTheme": "Restoran Nusantara",
-    "culinaryThemeKey": "restoran_nusantara",
-    "deskripsi": "Restoran Keluarga di Jl. Pancasila, Kec. Arut Selatan, Kab. Kotawaringin Barat. Menyajikan masakan nusantara nyaman & luas.",
-    "signatureDish": "Masakan nusantara nyaman & luas",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Pancasila, Kec. Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.4,
-    "jumlah_ulasan": 1274,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "10.00 - 21.00 (Jumat mulai 13.00)",
-    "instagram": null,
-    "reservasi": "Menunggu konfirmasi lapangan",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_50",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Rilex+Resto+Indonesia+Pangkalan+Bun",
-    "image": "/kuliner-real/rilex.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 51,
-    "nama": "Coto Manggala \"Mama Fany & Arni\"",
-    "tipe": "warung",
-    "categoryLabel": "Kuliner Tradisional",
-    "kategori_google": "Tradisional Otentik",
-    "culinaryTheme": "Bakso, Soto & Mie",
-    "culinaryThemeKey": "bakso_soto",
-    "deskripsi": "Tradisional Otentik di Kampung Sega, Mendawai, Kec. Arut Selatan. Menyajikan soto singkong (coto manggala) khas kotawaringin.",
-    "signatureDish": "Soto singkong (coto manggala) khas Kotawaringin",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Kampung Sega, Mendawai, Kec. Arut Selatan",
-    "rating_google": 4.8,
-    "jumlah_ulasan": 130,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "07.00 - 12.00 (Minggu libur)",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_51",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Coto+Manggala+Mama+Fany+Arni+Pangkalan+Bun",
-    "image": "/kuliner-real/mamaFannycoto.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 52,
-    "nama": "Coto Manggala Warung Gardu",
-    "tipe": "warung",
-    "categoryLabel": "Kuliner Tradisional",
-    "kategori_google": "Tradisional Otentik",
-    "culinaryTheme": "Bakso, Soto & Mie",
-    "culinaryThemeKey": "bakso_soto",
-    "deskripsi": "Tradisional Otentik di Jl. Barame, Mendawai, Kec. Arut Selatan. Menyajikan soto singkong kuah gurih.",
-    "signatureDish": "Soto singkong kuah gurih",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Barame, Mendawai, Kec. Arut Selatan",
-    "rating_google": 4.7,
-    "jumlah_ulasan": 219,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "06.00 - 15.00",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_52",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Coto+Manggala+Warung+Gardu+Pangkalan+Bun",
-    "image": "/kuliner-real/warungGardu.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 53,
-    "nama": "Nasi Tiwul Kumpai Batu Atas",
-    "tipe": "warung",
-    "categoryLabel": "Kuliner Tradisional",
-    "kategori_google": "Tradisional Pedesaan",
-    "culinaryTheme": "Warung Nasi & Rumahan",
-    "culinaryThemeKey": "warung_tradisional",
-    "deskripsi": "Tradisional Pedesaan di Kumpai Batu Atas, Kec. Arut Selatan. Menyajikan nasi tiwul dengan sayur ndeso.",
-    "signatureDish": "Nasi tiwul dengan sayur ndeso",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Kumpai Batu Atas, Kec. Arut Selatan",
-    "rating_google": 4.6,
-    "jumlah_ulasan": 55,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "09.00 - 21.00",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_53",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Nasi+Tiwul+Kumpai+Batu+Atas+Pangkalan+Bun",
-    "image": "/kuliner-real/nasiTiwulKumpai.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 54,
-    "nama": "Rumah Makan Singgasana",
-    "tipe": "rumah_makan",
-    "categoryLabel": "Rumah Makan",
-    "kategori_google": "Spesialis Lokal",
-    "culinaryTheme": "Rumah Makan",
-    "culinaryThemeKey": "rumah_makan",
-    "deskripsi": "Spesialis Lokal di Raja Seberang, Kec. Arut Selatan. Menyajikan lauk pauk persinggahan pelintas.",
-    "signatureDish": "Lauk pauk persinggahan pelintas",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Raja Seberang, Kec. Arut Selatan",
-    "rating_google": 4.5,
-    "jumlah_ulasan": 48,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "09.00 - 19.00 / 21.00",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_54",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Rumah+Makan+Singgasana+Raja+Seberang+Pangkalan+Bun",
-    "image": "/kuliner-real/singgasana.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 55,
-    "nama": "Warung Sate Ayayan",
-    "tipe": "warung",
-    "categoryLabel": "Kuliner Sate",
-    "kategori_google": "Spesial Bakaran",
-    "culinaryTheme": "Aneka Sate",
-    "culinaryThemeKey": "sate",
-    "deskripsi": "Spesial Bakaran di Jl. Iskandar, Madurejo, Kec. Arut Selatan. Menyajikan sate ayam & sate kambing bumbu kacang pekat.",
-    "signatureDish": "Sate ayam & sate kambing bumbu kacang pekat",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Iskandar, Madurejo, Kec. Arut Selatan",
-    "rating_google": 4.4,
-    "jumlah_ulasan": 753,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "16.00 - 21.00",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_55",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Warung+Sate+Ayayan+Pangkalan+Bun",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 56,
-    "nama": "Mie Gacoan Pangkalan Bun",
-    "tipe": "restoran",
-    "categoryLabel": "Restoran Cepat Saji",
-    "kategori_google": "Cepat Saji / Mie",
-    "culinaryTheme": "Bakso, Soto & Mie",
-    "culinaryThemeKey": "bakso_soto",
-    "deskripsi": "Cepat Saji / Mie di Jl. Iskandar, Madurejo, Kec. Arut Selatan. Menyajikan mie pedas, dimsum, dan menu pendamping.",
-    "signatureDish": "Mie pedas, dimsum, dan menu pendamping",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Iskandar, Madurejo, Kec. Arut Selatan",
-    "rating_google": 4.8,
-    "jumlah_ulasan": 3349,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "08.00 - 23.00",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_56",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Mie+Gacoan+Pangkalan+Bun",
-    "image": "/kuliner-real/miegacoan.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 57,
-    "nama": "Rumah Makan Apin",
-    "tipe": "rumah_makan",
-    "categoryLabel": "Rumah Makan",
-    "kategori_google": "Restoran Keluarga",
-    "culinaryTheme": "Rumah Makan",
-    "culinaryThemeKey": "rumah_makan",
-    "deskripsi": "Restoran Keluarga di Kelurahan Baru, Arut Selatan, Kab. Kotawaringin Barat. Menyajikan masakan chinese/seafood dan menu keluarga.",
-    "signatureDish": "Masakan Chinese/seafood dan menu keluarga",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Kelurahan Baru, Arut Selatan, Kab. Kotawaringin Barat",
-    "rating_google": 4.6,
-    "jumlah_ulasan": 125,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "10.30 - 21.00",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_57",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Rumah+Makan+Apin+Pangkalan+Bun",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 58,
-    "nama": "Warung Cak Mber",
-    "tipe": "warung",
-    "categoryLabel": "Warung Makan",
-    "kategori_google": "Warung Makan",
-    "culinaryTheme": "Warung Nasi & Rumahan",
-    "culinaryThemeKey": "warung_tradisional",
-    "deskripsi": "Warung Makan di Jl. Pangeran Diponegoro, Sidorejo, Kec. Arut Selatan. Menyajikan masakan indonesia, seafood, dan menu rumahan.",
-    "signatureDish": "Masakan Indonesia, seafood, dan menu rumahan",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Pangeran Diponegoro, Sidorejo, Kec. Arut Selatan",
-    "rating_google": 4.4,
-    "jumlah_ulasan": 526,
-    "ada_rating": true,
-    "telepon": "+62 852-5790-5669",
-    "jam_buka": "06.00 - 23.59",
-    "instagram": null,
-    "reservasi": "+62 852-5790-5669",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_58",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Warung+Cak+Mber+Pangkalan+Bun",
-    "image": "/kuliner-real/cakmber.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 59,
-    "nama": "Pondok Arema Bakso dan Mie Ayam",
-    "tipe": "warung",
-    "categoryLabel": "Bakso & Mie",
-    "kategori_google": "Tradisional / Bakso & Mie",
-    "culinaryTheme": "Bakso, Soto & Mie",
-    "culinaryThemeKey": "bakso_soto",
-    "deskripsi": "Tradisional / Bakso & Mie di Jl. Bhayangkara, Pasir Panjang, Kec. Arut Selatan. Menyajikan bakso dan mie ayam.",
-    "signatureDish": "Bakso dan mie ayam",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Bhayangkara, Pasir Panjang, Kec. Arut Selatan",
-    "rating_google": 4.6,
-    "jumlah_ulasan": 145,
-    "ada_rating": true,
-    "telepon": "+62 823-2203-1221",
-    "jam_buka": "08.00 - 21.00",
-    "instagram": null,
-    "reservasi": "+62 823-2203-1221",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_59",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=Pondok+Arema+Bakso+Pangkalan+Bun",
-    "image": "/kuliner-real/pondokarema.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 60,
-    "nama": "RM. Wisma Rasa",
-    "tipe": "rumah_makan",
-    "categoryLabel": "Rumah Makan",
-    "kategori_google": "Rumah Makan / Bakso & Mie",
-    "culinaryTheme": "Bakso, Soto & Mie",
-    "culinaryThemeKey": "bakso_soto",
-    "deskripsi": "Rumah Makan / Bakso & Mie di Jl. HM. Rafi'i Gg. Kenanga 2, Madurejo, Kec. Arut Selatan. Menyajikan rawon, mie ayam, bakso, dan masakan indonesia.",
-    "signatureDish": "Rawon, mie ayam, bakso, dan masakan Indonesia",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. HM. Rafi'i Gg. Kenanga 2, Madurejo, Kec. Arut Selatan",
-    "rating_google": 4.6,
-    "jumlah_ulasan": 98,
-    "ada_rating": true,
-    "telepon": "+62 858-7777-9993",
-    "jam_buka": "09.00 - 20.30",
-    "instagram": null,
-    "reservasi": "+62 858-7777-9993",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_60",
-    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=RM+Wisma+Rasa+Pangkalan+Bun",
-    "image": "/kuliner-real/wismaRasa.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 61,
-    "nama": "Coto Manggala Acil Jiah",
-    "tipe": "warung",
-    "categoryLabel": "Kuliner Tradisional",
-    "kategori_google": "Tradisional Otentik",
-    "culinaryTheme": "Bakso, Soto & Mie",
-    "culinaryThemeKey": "bakso_soto",
-    "deskripsi": "Tradisional Otentik di Jl. Barame, Mendawai, Kec. Arut Selatan. Menyajikan soto singkong kuah gurih.",
-    "signatureDish": "Soto singkong kuah gurih",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Barame, Mendawai, Kec. Arut Selatan",
-    "rating_google": 4.8,
-    "jumlah_ulasan": 165,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "06.00 - 14.00",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_61",
-    "google_maps_url": "https://maps.app.goo.gl/sykaRHZMtoATBxR36",
-    "image": "/kuliner-real/acilJiah.jpg",
-    "recommended": true,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 62,
-    "nama": "Lapangan Tugu Food Court, Istana Kuning",
-    "tipe": "lainnya",
-    "categoryLabel": "Food Court & Street Food",
-    "kategori_google": "Aneka Kuliner UMKM",
-    "culinaryTheme": "Food Court & Street Food",
-    "culinaryThemeKey": "warung_tradisional",
-    "deskripsi": "Aneka Kuliner UMKM di Jl. Pangeran Antasari Samping Lapangan Tugu. Menyajikan berbagai makanan dan minuman street food.",
-    "signatureDish": "Berbagai makanan dan minuman street food",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Pangeran Antasari Samping Lapangan Tugu",
-    "rating_google": 4.8,
-    "jumlah_ulasan": 540,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "16.00 - 22.00",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_62",
-    "google_maps_url": "https://maps.app.goo.gl/99V7nJxyjvp3XXrw5",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 15.000 - Rp 75.000"
-  },
-  {
-    "id": 63,
-    "nama": "Sampuraga Food Corner",
-    "tipe": "lainnya",
-    "categoryLabel": "Food Court & Street Food",
-    "kategori_google": "Aneka Kuliner UMKM",
-    "culinaryTheme": "Food Court & Street Food",
-    "culinaryThemeKey": "warung_tradisional",
-    "deskripsi": "Aneka Kuliner UMKM di Jl. Sutan Syahrir, Kelurahan Sidorejo. Menyajikan berbagai makanan dan minuman street food.",
-    "signatureDish": "Berbagai makanan dan minuman street food",
-    "kecamatan": "Arut Selatan",
-    "kecamatanFull": "Arut Selatan (Pangkalan Bun)",
-    "alamat": "Jl. Sutan Syahrir, Kelurahan Sidorejo",
-    "rating_google": 4.7,
-    "jumlah_ulasan": 210,
-    "ada_rating": true,
-    "telepon": null,
-    "jam_buka": "16.00 - 22.00",
-    "instagram": null,
-    "reservasi": "Langsung datang (Walk-in)",
-    "situs_web": null,
-    "koordinat": {
-      "lat": -2.685,
-      "lng": 111.635
-    },
-    "place_id": "kuliner_63",
-    "google_maps_url": "https://maps.app.goo.gl/dNdWWX9f2H1DZ3wW8",
-    "image": "",
-    "recommended": false,
-    "priceRange": "Rp 15.000 - Rp 75.000"
+export type UMKMPayload = {
+  nama: string;
+  tipe: KobarUMKMType;
+  categoryLabel: string;
+  kategori_google: string;
+  culinaryTheme: string;
+  culinaryThemeKey: string;
+  deskripsi?: string;
+  signatureDish: string;
+  kecamatan: string;
+  kecamatanFull: string;
+  alamat: string;
+  rating_google: number;
+  jumlah_ulasan: number;
+  ada_rating: boolean;
+  telepon: string | null;
+  jam_buka: string | null;
+  instagram?: string | null;
+  reservasi?: string;
+  situs_web: string | null;
+  koordinat: { lat: number; lng: number } | null;
+  place_id: string;
+  google_maps_url: string;
+  image: string;
+  recommended: boolean;
+  priceRange: string;
+};
+
+export type UMKMFilterParams = {
+  tipe?: string;
+  culinary_theme_key?: string;
+  kecamatan?: string;
+  recommended?: boolean;
+  search?: string;
+};
+
+type UMKMAPIResponse<T> = {
+  success: boolean;
+  data?: T;
+  error?: string | { message?: string };
+};
+
+function extractAPIError(err: unknown, fallback: string): string {
+  if (typeof err === "string" && err.trim()) return err.trim();
+  if (err && typeof err === "object") {
+    const msg = (err as { message?: unknown }).message;
+    if (typeof msg === "string" && msg.trim()) return msg.trim();
   }
-];
+  return fallback;
+}
+
+function normalizeUMKMType(raw?: string): KobarUMKMType {
+  if (
+    raw === "warung" ||
+    raw === "cafe" ||
+    raw === "rumah_makan" ||
+    raw === "restoran" ||
+    raw === "lainnya"
+  ) {
+    return raw;
+  }
+  return "lainnya";
+}
+
+function normalizeUMKMItem(raw: Partial<KobarUMKMItem>, idx = 0): KobarUMKMItem {
+  const rating = Number(raw.rating_google ?? 0);
+  const reviews = Number(raw.jumlah_ulasan ?? 0);
+  const hasValidRating =
+    typeof raw.ada_rating === "boolean"
+      ? raw.ada_rating
+      : Number.isFinite(rating) && rating > 0;
+
+  return {
+    id: Number(raw.id ?? idx + 1),
+    nama: (raw.nama ?? "").trim(),
+    tipe: normalizeUMKMType(raw.tipe),
+    categoryLabel: (raw.categoryLabel ?? "").trim(),
+    kategori_google: (raw.kategori_google ?? "").trim(),
+    culinaryTheme: (raw.culinaryTheme ?? "").trim(),
+    culinaryThemeKey: (raw.culinaryThemeKey ?? "").trim(),
+    deskripsi: raw.deskripsi ?? "",
+    signatureDish: (raw.signatureDish ?? "").trim(),
+    kecamatan: (raw.kecamatan ?? "Arut Selatan").trim(),
+    kecamatanFull: (
+      raw.kecamatanFull ??
+      raw.kecamatan ??
+      "Arut Selatan (Pangkalan Bun)"
+    ).trim(),
+    alamat: (raw.alamat ?? "").trim(),
+    rating_google: Number.isFinite(rating) ? rating : 0,
+    jumlah_ulasan: Number.isFinite(reviews) ? reviews : 0,
+    ada_rating: hasValidRating,
+    telepon: raw.telepon ?? null,
+    jam_buka: raw.jam_buka ?? null,
+    instagram: raw.instagram ?? null,
+    reservasi: raw.reservasi ?? "",
+    situs_web: raw.situs_web ?? null,
+    koordinat:
+      raw.koordinat &&
+      typeof raw.koordinat.lat === "number" &&
+      typeof raw.koordinat.lng === "number"
+        ? raw.koordinat
+        : null,
+    place_id: raw.place_id ?? "",
+    google_maps_url: (raw.google_maps_url ?? "").trim(),
+    image: (raw.image ?? "").trim(),
+    recommended: Boolean(raw.recommended),
+    priceRange: (raw.priceRange ?? "").trim(),
+  };
+}
+
+export async function fetchUMKM(
+  filters?: UMKMFilterParams,
+): Promise<KobarUMKMItem[]> {
+  const params: Record<string, string> = {};
+  if (filters?.tipe && filters.tipe !== "Semua") {
+    params.tipe = filters.tipe;
+  }
+  if (filters?.culinary_theme_key && filters.culinary_theme_key !== "Semua") {
+    params.culinary_theme_key = filters.culinary_theme_key;
+  }
+  if (filters?.kecamatan && filters.kecamatan !== "Semua Kecamatan") {
+    params.kecamatan = filters.kecamatan.replace(/\s*\([^)]*\)\s*$/, "").trim();
+  }
+  if (filters?.recommended) {
+    params.recommended = "true";
+  }
+  if (filters?.search && filters.search.trim()) {
+    params.search = filters.search.trim();
+  }
+
+  try {
+    const response = await apiClient.get<UMKMAPIResponse<Partial<KobarUMKMItem>[]>>(
+      "/umkm",
+      { params },
+    );
+    if (!response.data?.success) {
+      throw new Error(
+        extractAPIError(response.data?.error, "Gagal memuat data kuliner & UMKM."),
+      );
+    }
+    const rows = Array.isArray(response.data.data) ? response.data.data : [];
+    return rows.map((row, idx) => normalizeUMKMItem(row, idx));
+  } catch (err) {
+    throw new Error(getAPIErrorMessage(err));
+  }
+}
+
+export async function createUMKM(payload: UMKMPayload): Promise<KobarUMKMItem> {
+  try {
+    const response = await apiClient.post<UMKMAPIResponse<Partial<KobarUMKMItem>>>(
+      "/umkm",
+      payload,
+    );
+    if (!response.data?.success) {
+      throw new Error(
+        extractAPIError(response.data?.error, "Gagal menambahkan data UMKM."),
+      );
+    }
+    return normalizeUMKMItem(response.data.data ?? payload);
+  } catch (err) {
+    throw new Error(getAPIErrorMessage(err));
+  }
+}
+
+export async function updateUMKM(
+  id: number,
+  payload: UMKMPayload,
+): Promise<KobarUMKMItem> {
+  try {
+    const response = await apiClient.put<UMKMAPIResponse<Partial<KobarUMKMItem>>>(
+      `/umkm/${id}`,
+      payload,
+    );
+    if (!response.data?.success) {
+      throw new Error(
+        extractAPIError(response.data?.error, "Gagal memperbarui data UMKM."),
+      );
+    }
+    return normalizeUMKMItem(response.data.data ?? { ...payload, id });
+  } catch (err) {
+    throw new Error(getAPIErrorMessage(err));
+  }
+}
+
+export async function deleteUMKM(id: number): Promise<void> {
+  try {
+    const response = await apiClient.delete<UMKMAPIResponse<unknown>>(
+      `/umkm/${id}`,
+    );
+    if (!response.data?.success) {
+      throw new Error(
+        extractAPIError(response.data?.error, "Gagal menghapus data UMKM."),
+      );
+    }
+  } catch (err) {
+    throw new Error(getAPIErrorMessage(err));
+  }
+}
 
 export const kobarDistricts: string[] = [
-  'Semua Kecamatan',
-  'Arut Selatan (Pangkalan Bun)'
+  "Semua Kecamatan",
+  "Arut Selatan (Pangkalan Bun)",
 ];
 
-export const kobarCategories: { label: string; value: 'Semua' | KobarUMKMType }[] = [
-  { label: 'Semua Kategori', value: 'Semua' },
-  { label: 'Kafe & Kopi', value: 'cafe' },
-  { label: 'Restoran', value: 'restoran' },
-  { label: 'Rumah Makan', value: 'rumah_makan' },
-  { label: 'Warung Makan', value: 'warung' },
-  { label: 'Food Court & UMKM', value: 'lainnya' }
+export const kobarCategories: {
+  label: string;
+  value: "Semua" | KobarUMKMType;
+}[] = [
+  { label: "Semua Kategori", value: "Semua" },
+  { label: "Kafe & Kopi", value: "cafe" },
+  { label: "Restoran", value: "restoran" },
+  { label: "Rumah Makan", value: "rumah_makan" },
+  { label: "Warung Makan", value: "warung" },
+  { label: "Food Court & UMKM", value: "lainnya" },
 ];
 
 export const kobarCulinaryThemes: { label: string; key: string; icon: string }[] = [
-  { label: 'Semua Sajian', key: 'Semua', icon: 'Utensils' },
-  { label: 'Kedai Kopi & Kafe', key: 'coffee_cafe', icon: 'Coffee' },
-  { label: 'Kafe, Kopi & Bakery', key: 'bakery', icon: 'Cake' },
-  { label: 'Restoran Nusantara', key: 'restoran_nusantara', icon: 'Store' },
-  { label: 'Seafood & Ikan Bakar', key: 'seafood', icon: 'Fish' },
-  { label: 'Rumah Makan', key: 'rumah_makan', icon: 'Utensils' },
-  { label: 'Bakso, Soto & Mie', key: 'bakso_soto', icon: 'Soup' },
-  { label: 'Cepat Saji & Ayam', key: 'ayam_bebek', icon: 'Drumstick' },
-  { label: 'Warung & Food Court', key: 'warung_tradisional', icon: 'Flame' },
-  { label: 'Masakan Jepang & BBQ', key: 'japanese', icon: 'Sparkles' },
-  { label: 'Aneka Sate', key: 'sate', icon: 'Flame' }
+  { label: "Semua Sajian", key: "Semua", icon: "Utensils" },
+  { label: "Kedai Kopi & Kafe", key: "coffee_cafe", icon: "Coffee" },
+  { label: "Kafe, Kopi & Bakery", key: "bakery", icon: "Cake" },
+  { label: "Restoran Nusantara", key: "restoran_nusantara", icon: "Store" },
+  { label: "Seafood & Ikan Bakar", key: "seafood", icon: "Fish" },
+  { label: "Rumah Makan", key: "rumah_makan", icon: "Utensils" },
+  { label: "Bakso, Soto & Mie", key: "bakso_soto", icon: "Soup" },
+  { label: "Cepat Saji & Ayam", key: "ayam_bebek", icon: "Drumstick" },
+  { label: "Warung & Food Court", key: "warung_tradisional", icon: "Flame" },
+  { label: "Masakan Jepang & BBQ", key: "japanese", icon: "Sparkles" },
+  { label: "Aneka Sate", key: "sate", icon: "Flame" },
 ];

@@ -19,6 +19,12 @@ import MatchUpdateForm from "./views/admin/MatchUpdateForm";
 import JadwalPage from "./views/admin/JadwalPage";
 import HasilPage from "./views/admin/HasilPage";
 import BaganPage from "./views/admin/BaganPage";
+import HotelsPage from "./views/admin/HotelsPage";
+import UMKMPage from "./views/admin/UMKMPage";
+import WisataPage from "./views/admin/WisataPage";
+import GaleriPage from "./views/admin/GaleriPage";
+import VenuesPage from "./views/admin/VenuesPage";
+import KesehatanPage from "./views/admin/KesehatanPage";
 import AdminLoginPage from "./views/admin/AdminLoginPage";
 import AdminRegisterPage from "./views/admin/AdminRegisterPage";
 import ResetPasswordPage from "./views/admin/ResetPasswordPage";
@@ -106,6 +112,12 @@ export default function App() {
           <Route path="/admin/jadwal" element={<JadwalPage />} />
           <Route path="/admin/hasil" element={<HasilPage />} />
           <Route path="/admin/bagan" element={<BaganPage />} />
+          <Route path="/admin/hotels" element={<HotelsPage />} />
+          <Route path="/admin/umkm" element={<UMKMPage />} />
+          <Route path="/admin/wisata" element={<WisataPage />} />
+          <Route path="/admin/galeri" element={<GaleriPage />} />
+          <Route path="/admin/venues" element={<VenuesPage />} />
+          <Route path="/admin/kesehatan" element={<KesehatanPage />} />
           <Route path="/admin/update/:id" element={<MatchUpdateForm />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -108,10 +108,12 @@ export default function VenueMap({
             <Popup autoPanPadding={[32, 32]}>
               <div style={{ maxWidth: 220 }}>
                 {(() => {
-                  const photoUrl = getVenuePhotoUrl(
-                    venue.name,
-                    `${venue.category} ${venue.note || ""}`,
-                  );
+                  const photoUrl =
+                    venue.image_url?.trim() ||
+                    getVenuePhotoUrl(
+                      venue.name,
+                      `${venue.category} ${venue.note || ""}`,
+                    );
                   if (!photoUrl) return null;
                   return (
                     <img

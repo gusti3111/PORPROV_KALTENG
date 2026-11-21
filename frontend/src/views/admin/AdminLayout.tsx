@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Calendar, Trophy, Hash, LogOut } from "lucide-react";
+import { LayoutDashboard, Calendar, Trophy, Hash, Building2, Utensils, Compass, Camera, MapPin, HeartPulse, LogOut } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 
 const navItems = [
@@ -7,6 +7,12 @@ const navItems = [
   { label: "Jadwal", to: "/admin/jadwal", icon: Calendar },
   { label: "Hasil", to: "/admin/hasil", icon: Trophy },
   { label: "Bagan", to: "/admin/bagan", icon: Hash },
+  { label: "Hotel", to: "/admin/hotels", icon: Building2 },
+  { label: "Kuliner & UMKM", to: "/admin/umkm", icon: Utensils },
+  { label: "Wisata", to: "/admin/wisata", icon: Compass },
+  { label: "Galeri", to: "/admin/galeri", icon: Camera },
+  { label: "Venue", to: "/admin/venues", icon: MapPin },
+  { label: "Kesehatan", to: "/admin/kesehatan", icon: HeartPulse },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

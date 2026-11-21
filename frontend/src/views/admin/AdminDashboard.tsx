@@ -80,6 +80,36 @@ export default function AdminDashboard() {
                 <GitBranch className="h-4 w-4" /> Kelola Klasemen &amp; Bagan
               </Button>
             </Link>
+            <Link to="/admin/hotels">
+              <Button variant="outline" className="gap-2">
+                Kelola Hotel &amp; Penginapan
+              </Button>
+            </Link>
+            <Link to="/admin/umkm">
+              <Button variant="outline" className="gap-2">
+                Kelola Kuliner &amp; UMKM
+              </Button>
+            </Link>
+            <Link to="/admin/wisata">
+              <Button variant="outline" className="gap-2">
+                Kelola Destinasi Wisata
+              </Button>
+            </Link>
+            <Link to="/admin/galeri">
+              <Button variant="outline" className="gap-2">
+                Kelola Galeri Foto
+              </Button>
+            </Link>
+            <Link to="/admin/venues">
+              <Button variant="outline" className="gap-2">
+                Kelola Venue
+              </Button>
+            </Link>
+            <Link to="/admin/kesehatan">
+              <Button variant="outline" className="gap-2">
+                Kelola Layanan Kesehatan
+              </Button>
+            </Link>
           </div>
         </div>
 

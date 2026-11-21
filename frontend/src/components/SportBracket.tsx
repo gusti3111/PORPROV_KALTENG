@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import type { SportTournament, SportTournamentMatch } from "../api/types";
 import { getContingentLogoUrl } from "../utils/contingentLogo";
+import { dedupeTournamentMatches } from "../utils/tournamentNormalizer";
 
 function getOutcome(match: SportTournamentMatch) {
   const hasWinner =
@@ -25,7 +26,7 @@ function getOutcome(match: SportTournamentMatch) {
   };
 }
 
-function matchCard(match: SportTournamentMatch) {
+function matchCard(match: SportTournamentMatch, keySuffix?: string | number) {
   const homeWon =
     match.home_score !== null &&
     match.away_score !== null &&
@@ -47,7 +48,10 @@ function matchCard(match: SportTournamentMatch) {
   const awayLogo = getContingentLogoUrl(match.away);
 
   return (
-    <article className="sport-bracket-match" key={match.label}>
+    <article
+      className="sport-bracket-match"
+      key={keySuffix !== undefined ? `${match.label}-${keySuffix}` : match.label}
+    >
       <div className="sport-bracket-match-heading">
         <span>{match.label}</span>
         {match.status === "ONGOING" ? (
@@ -112,11 +116,12 @@ function matchCard(match: SportTournamentMatch) {
 }
 
 export default function SportBracket({ tournament }: { tournament: SportTournament }) {
-  const quarterfinals = tournament.quarterfinals ?? [];
+  const quarterfinals = dedupeTournamentMatches(tournament.quarterfinals);
+  const semifinals = dedupeTournamentMatches(tournament.semifinals);
   const thirdPlaceMatch = tournament.bronze ?? tournament.third_place;
   const hasKnockoutSlots =
     quarterfinals.length > 0 ||
-    tournament.semifinals.length > 0 ||
+    semifinals.length > 0 ||
     Boolean((tournament.final?.home || "").trim()) ||
     Boolean((tournament.final?.away || "").trim());
 
@@ -128,7 +133,7 @@ export default function SportBracket({ tournament }: { tournament: SportTourname
     );
   }
 
-  const outcomes = tournament.semifinals.map(getOutcome);
+  const outcomes = semifinals.map(getOutcome);
   const bracketHeight = 260;
   const sourceCenters = [
     outcomes[0]?.winnerIsHome ? 98 : 128,
@@ -156,7 +161,7 @@ export default function SportBracket({ tournament }: { tournament: SportTourname
               Babak Perempat Final (Penyisihan 8 Besar)
             </h3>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:gap-5 min-[2560px]:gap-6">
-              {quarterfinals.map((match) => matchCard(match))}
+              {quarterfinals.map((match, idx) => matchCard(match, `qf-${idx}`))}
             </div>
           </div>
         </section>
@@ -166,7 +171,7 @@ export default function SportBracket({ tournament }: { tournament: SportTourname
         <div className="sport-bracket-semifinals">
           <h3>Semifinal</h3>
           <div className="sport-bracket-semifinal-matches">
-            {tournament.semifinals.map((match) => matchCard(match))}
+            {semifinals.map((match, idx) => matchCard(match, `sf-${idx}`))}
           </div>
         </div>
 
@@ -206,8 +211,11 @@ export default function SportBracket({ tournament }: { tournament: SportTourname
 
         <div className="sport-bracket-mobile-flow" aria-label="Alur tim semifinal">
           {outcomes.map((outcome, index) => (
-            <div className="sport-bracket-mobile-flow-match" key={tournament.semifinals[index].label}>
-              <strong>{tournament.semifinals[index].label}</strong>
+            <div
+              className="sport-bracket-mobile-flow-match"
+              key={`${semifinals[index].label}-${index}`}
+            >
+              <strong>{semifinals[index].label}</strong>
               <span title={outcome.winner}>{outcome.winner}</span>
               <ArrowRight aria-hidden="true" />
               <b>Final</b>
